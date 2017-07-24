@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="ART,源码分析," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="迷途小书童" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="一．创建Activity对象ART在加载完dex文件后，会通过Instrumentation创建Activity对象123456789101112131415161718192021222324private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) &amp;#123;    ...    Ac">
+<meta name="keywords" content="ART,源码分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ART加载类">
+<meta property="og:url" content="https://wangyun137.github.io/2017/07/24/ART加载类/index.html">
+<meta property="og:site_name" content="迷途小书童">
+<meta property="og:description" content="一．创建Activity对象ART在加载完dex文件后，会通过Instrumentation创建Activity对象123456789101112131415161718192021222324private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) &amp;#123;    ...    Ac">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-07-24T06:22:48.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ART加载类">
+<meta name="twitter:description" content="一．创建Activity对象ART在加载完dex文件后，会通过Instrumentation创建Activity对象123456789101112131415161718192021222324private Activity performLaunchActivity(ActivityClientRecord r, Intent customIntent) &amp;#123;    ...    Ac">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://wangyun137.github.io/2017/07/24/ART加载类/"/>
+
+
+
+
+
+  <title>ART加载类 | 迷途小书童</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">迷途小书童</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">遇见一个人可能只要一秒，喜欢一个人可能需要一天，忘记一个人却需要一辈子</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-/"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://wangyun137.github.io/2017/07/24/ART加载类/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="王小宝">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="迷途小书童">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ART加载类</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-24T14:19:26+08:00">
+                2017-07-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ART/" itemprop="url" rel="index">
+                    <span itemprop="name">ART</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="一．创建Activity对象"><a href="#一．创建Activity对象" class="headerlink" title="一．创建Activity对象"></a>一．创建Activity对象</h2><p>ART在加载完dex文件后，会通过<code>Instrumentation</code>创建<code>Activity</code>对象<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> Activity <span class="title">performLaunchActivity</span><span class="params">(ActivityClientRecord r, Intent customIntent)</span> </span>&#123;</div><div class="line">    ...</div><div class="line">    Activity activity = <span class="keyword">null</span>;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        <span class="comment">//加载dex文件</span></div><div class="line">        java.lang.ClassLoader cl = r.packageInfo.getClassLoader();</div><div class="line">        <span class="comment">//创建Activity对象</span></div><div class="line">        activity = mInstrumentation.newActivity(</div><div class="line">                    cl, component.getClassName(), r.intent);</div><div class="line">        StrictMode.incrementExpectedActivityCount(activity.getClass());</div><div class="line">        r.intent.setExtrasClassLoader(cl);</div><div class="line">        r.intent.prepareToEnterProcess();</div><div class="line">        <span class="keyword">if</span> (r.state != <span class="keyword">null</span>) &#123;</div><div class="line">            r.state.setClassLoader(cl);</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">        <span class="keyword">if</span> (!mInstrumentation.onException(activity, e)) &#123;</div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(</div><div class="line">                    <span class="string">"Unable to instantiate activity "</span> + component</div><div class="line">                    + <span class="string">": "</span> + e.toString(), e);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    ...</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h3 id="1-Instrumentation-newActivity"><a href="#1-Instrumentation-newActivity" class="headerlink" title="1. Instrumentation.newActivity()"></a>1. Instrumentation.newActivity()</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> Activity <span class="title">newActivity</span><span class="params">(ClassLoader cl, String className,</span></span></div><div class="line">            Intent intent)</div><div class="line">            <span class="keyword">throws</span> InstantiationException, IllegalAccessException,</div><div class="line">            ClassNotFoundException &#123;</div><div class="line">    <span class="keyword">return</span> (Activity)cl.loadClass(className).newInstance();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>从之前的加载dex文件的过程中可以知道这里传入的<code>ClassLoader</code>是<code>PathClassLoader</code></p>
+<blockquote>
+<p>以我自己写的demo为例，PathClassLoader是:<br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">dalvik.system.PathClassLoader[DexPathList[[zip file <span class="string">"/data/app/com.singuloid.myapplication-1/base.apk"</span>],</div><div class="line">nativeLibraryDirectories=[/data/app/com.singuloid.myapplication-1/lib/arm, /system/lib, /vendor/lib]]]</div></pre></td></tr></table></figure></p>
+</blockquote>
+<p><code>PathClassLoader</code>继承自<code>BaseDexClassLoader</code>,而<code>BaseDexClassLoader</code>又是继承自<code>ClassLoader</code>,<code>PathClassLoader</code>和<code>BaseDexClassLoader</code>两个类都没有重写<code>loadClass()</code>，所以这里实际调用的基类<code>ClassLoader.loadClass</code></p>
+<h3 id="2-ClassLoader-loadClass"><a href="#2-ClassLoader-loadClass" class="headerlink" title="2. ClassLoader.loadClass()"></a>2. ClassLoader.loadClass()</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">protected</span> Class&lt;?&gt; loadClass(String className, <span class="keyword">boolean</span> resolve) <span class="keyword">throws</span> ClassNotFoundException &#123;</div><div class="line">    <span class="comment">//先查找之前是否已经过要加载的类, [2.1]</span></div><div class="line">    Class c = findLoadedClass(name);</div><div class="line">    <span class="keyword">if</span> (c == <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">long</span> t0 = System.nanoTime();</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            <span class="keyword">if</span> (parent != <span class="keyword">null</span>) &#123;</div><div class="line">                 <span class="comment">//在parent中查找类</span></div><div class="line">                 c = parent.loadClass(name, <span class="keyword">false</span>);</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                 <span class="comment">//如果parent为null，则代表当前ClassLoader是BootClassLoader</span></div><div class="line">                 c = findBootstrapClassOrNull(name);</div><div class="line">            &#125;</div><div class="line">         &#125; <span class="keyword">catch</span> (ClassNotFoundException e) &#123;</div><div class="line">                <span class="comment">// ClassNotFoundException thrown if class not found</span></div><div class="line">                <span class="comment">// from the non-null parent class loader</span></div><div class="line">         &#125;</div><div class="line"></div><div class="line">          <span class="keyword">if</span> (c == <span class="keyword">null</span>) &#123;         </div><div class="line">              <span class="keyword">long</span> t1 = System.nanoTime();</div><div class="line">              c = findClass(name);</div><div class="line">          &#125;</div><div class="line">      &#125;</div><div class="line">      <span class="keyword">return</span> c;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<blockquote>
+<p>从代码中可以看出，ART的类加载机制也同样采用双亲委派模式，即先由父<code>ClassLoader</code>进行加载，如果没有加载成功，再交由子<code>ClassLoader</code>加载，依照此顺序，依次向下进行．<br>如果查找的是应用自己的类，如果没有加载过，最后都会在应用自己的ClassLoader中查找</p>
+</blockquote>
+<p>如果父类加载器没有加载到类，则调用当前类加载器的<code>findClass</code>方法，在创建Activity对象这个场景下，当前的类加载器是<code>PathClassLoader</code>,而<code>PathClassLoader</code>并没有重写<code>findClass</code>,查看其父类<code>BaseDexClassLoader</code>，发现<code>BaseDexClassLoader</code>重写了<code>findClass</code>这个方法</p>
+<h4 id="2-1-ClassLoader-findLoadedClass"><a href="#2-1-ClassLoader-findLoadedClass" class="headerlink" title="2.1 ClassLoader.findLoadedClass"></a>2.1 ClassLoader.findLoadedClass</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">protected</span> <span class="keyword">final</span> Class&lt;?&gt; findLoadedClass(String name) &#123;</div><div class="line">    ClassLoader loader;</div><div class="line">    <span class="keyword">if</span> (<span class="keyword">this</span> == BootClassLoader.getInstance())</div><div class="line">        loader = <span class="keyword">null</span>;</div><div class="line">    <span class="keyword">else</span></div><div class="line">        loader = <span class="keyword">this</span>;</div><div class="line">    <span class="keyword">return</span> VMClassLoader.findLoadedClass(loader, name);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>VMClassLoader.findLoadedClass</code>是一个native方法，其实现在<code>art/runtime/native/lava_lang_VMClassLoader</code>：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">static jclass VMClassLoader_findLoadedClass(JNIEnv* env, jclass, jobject javaLoader,</div><div class="line">                                            jstring javaName) &#123;</div><div class="line">  ScopedFastNativeObjectAccess soa(env);</div><div class="line">  mirror::ClassLoader* loader = soa.Decode&lt;mirror::ClassLoader*&gt;(javaLoader);</div><div class="line">  ScopedUtfChars name(env, javaName);</div><div class="line">  if (name.c_str() == nullptr) &#123;</div><div class="line">    return nullptr;</div><div class="line">  &#125;</div><div class="line">  ClassLinker* cl = Runtime::Current()-&gt;GetClassLinker();</div><div class="line">  std::string descriptor(DotToDescriptor(name.c_str()));</div><div class="line">  const size_t descriptor_hash = ComputeModifiedUtf8Hash(descriptor.c_str());</div><div class="line">  //在传入的ClassLoader中查找类，每一个ClassLoader都有一个ClassTable，用来记录已经加载的类</div><div class="line">  mirror::Class* c = cl-&gt;LookupClass(soa.Self(), descriptor.c_str(), descriptor_hash, loader);</div><div class="line">  //如果找到类，且类已经被正确解析，则直接返回</div><div class="line">  if (c != nullptr &amp;&amp; c-&gt;IsResolved()) &#123;</div><div class="line">    return soa.AddLocalReference&lt;jclass&gt;(c);</div><div class="line">  &#125;</div><div class="line">  //如果类是错误的，则抛出相应异常</div><div class="line">  if (c != nullptr &amp;&amp; c-&gt;IsErroneous()) &#123;</div><div class="line">    ...</div><div class="line">    return nullptr;</div><div class="line">  &#125;</div><div class="line">  //执行到这里，意味着没有在缓存的ClassTable中找到类，需要进一步到dex文件中进行查找</div><div class="line">  if (loader != nullptr) &#123;</div><div class="line">    StackHandleScope&lt;1&gt; hs(soa.Self());</div><div class="line">    cl-&gt;FindClassInPathClassLoader(soa, soa.Self(), descriptor.c_str(), descriptor_hash,</div><div class="line">                                   hs.NewHandle(loader), &amp;c);</div><div class="line">    if (c != nullptr) &#123;</div><div class="line">      return soa.AddLocalReference&lt;jclass&gt;(c);</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">  // Class wasn't resolved so it may be erroneous or not yet ready, force the caller to go into</div><div class="line">  // the regular loadClass code.</div><div class="line">  return nullptr;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="3-BaseDexClassLoader-findClass"><a href="#3-BaseDexClassLoader-findClass" class="headerlink" title="3. BaseDexClassLoader.findClass()"></a>3. BaseDexClassLoader.findClass()</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="keyword">protected</span> Class&lt;?&gt; findClass(String name) <span class="keyword">throws</span> ClassNotFoundException &#123;</div><div class="line">    List&lt;Throwable&gt; suppressedExceptions = <span class="keyword">new</span> ArrayList&lt;Throwable&gt;();</div><div class="line">    Class c = pathList.findClass(name, suppressedExceptions);</div><div class="line">    <span class="keyword">if</span> (c == <span class="keyword">null</span>) &#123;</div><div class="line">        ClassNotFoundException cnfe = <span class="keyword">new</span> ClassNotFoundException(<span class="string">"Didn't find class \""</span> + name + <span class="string">"\" on path: "</span> + pathList);</div><div class="line">        <span class="keyword">for</span> (Throwable t : suppressedExceptions) &#123;</div><div class="line">                cnfe.addSuppressed(t);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">throw</span> cnfe;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> c;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>由之前的<a href="http://www.jianshu.com/p/f81242ad8cb7" target="_blank" rel="external">ART 加载dex文件</a>可知，<code>BaseDexClassLoader</code>的<code>pathList</code>变量指向的是一个<code>DexPathList</code>,而<code>DexPathList</code>是用来保存加载的dex文件列表，从这里我们知道<code>BaseDexClassLoader</code>又将加载类的过程委派给了<code>DexPathList</code></p>
+<h3 id="4-DexPathList-findClass"><a href="#4-DexPathList-findClass" class="headerlink" title="4. DexPathList.findClass()"></a>4. DexPathList.findClass()</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> Class <span class="title">findClass</span><span class="params">(String name, List&lt;Throwable&gt; suppressed)</span> </span>&#123;</div><div class="line">    <span class="comment">//迭代dexElements</span></div><div class="line">    <span class="keyword">for</span> (Element element : dexElements) &#123;</div><div class="line">        DexFile dex = element.dexFile;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (dex != <span class="keyword">null</span>) &#123;</div><div class="line">            Class clazz = dex.loadClassBinaryName(name, definingContext, suppressed);</div><div class="line">            <span class="keyword">if</span> (clazz != <span class="keyword">null</span>) &#123;</div><div class="line">                <span class="keyword">return</span> clazz;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> (dexElementsSuppressedExceptions != <span class="keyword">null</span>) &#123;</div><div class="line">        suppressed.addAll(Arrays.asList(dexElementsSuppressedExceptions));</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>从代码中可知,其主要逻辑是遍历之前加载过得dex文件列表，依次在每个dex文件中查找，直到加载到相应的类</p>
+<h3 id="5-DexFile-loadClassBinaryName"><a href="#5-DexFile-loadClassBinaryName" class="headerlink" title="5. DexFile.loadClassBinaryName()"></a>5. DexFile.loadClassBinaryName()</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> Class <span class="title">loadClassBinaryName</span><span class="params">(String name, ClassLoader loader, List&lt;Throwable&gt; suppressed)</span> </span>&#123;</div><div class="line">    <span class="comment">//mCookie保存的是加载的dex文件列表</span></div><div class="line">    <span class="keyword">return</span> defineClass(name, loader, mCookie, suppressed);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Class <span class="title">defineClass</span><span class="params">(String name, ClassLoader loader, Object cookie,</span></span></div><div class="line">                                     List&lt;Throwable&gt; suppressed) &#123;</div><div class="line">    Class result = <span class="keyword">null</span>;</div><div class="line">    <span class="keyword">try</span> &#123;</div><div class="line">        result = defineClassNative(name, loader, cookie);</div><div class="line">    &#125; <span class="keyword">catch</span> (NoClassDefFoundError e) &#123;</div><div class="line">        <span class="keyword">if</span> (suppressed != <span class="keyword">null</span>) &#123;</div><div class="line">            suppressed.add(e);</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">catch</span> (ClassNotFoundException e) &#123;</div><div class="line">        <span class="keyword">if</span> (suppressed != <span class="keyword">null</span>) &#123;</div><div class="line">            suppressed.add(e);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> result;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">native</span> Class <span class="title">defineClassNative</span><span class="params">(String name, ClassLoader loader, Object cookie)</span></span></div><div class="line">            <span class="keyword">throws</span> ClassNotFoundException, NoClassDefFoundError;</div></pre></td></tr></table></figure>
+<p><code>loadClassBinaryName</code>实际就是封装调用了<code>defineClass</code>（从代码中可以看出，传入的参数中有一个是<code>mCookie</code>，这个变量保存的正是之前加载的dex文件列表）,而<code>defineClass</code>实际调用的是native方法<code>defineClassNative</code>,只是额外做了异常处理．<code>defineClassNative</code>的实现在<code>art/runtime/native/dalvik_system_DexFile.cc</code></p>
+<h3 id="6-DexFile-defineClassNative"><a href="#6-DexFile-defineClassNative" class="headerlink" title="6. DexFile_defineClassNative()"></a>6. DexFile_defineClassNative()</h3><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line">static jclass DexFile_defineClassNative(JNIEnv* env, jclass, jstring javaName, jobject javaLoader,</div><div class="line">                                        jobject cookie) &#123;</div><div class="line">    //将Java层传入的mCookie变量转换为vector类型的dex文件列表</div><div class="line">    std::unique_ptr&lt;std::vector&lt;const DexFile*&gt;&gt; dex_files = ConvertJavaArrayToNative(env, cookie);</div><div class="line">    ...</div><div class="line"></div><div class="line">    ScopedUtfChars class_name(env, javaName);</div><div class="line">    ...</div><div class="line">    //将com.xx.xx转换为com/xx/xx</div><div class="line">    const std::string descriptor(DotToDescriptor(class_name.c_str()));</div><div class="line">    const size_t hash(ComputeModifiedUtf8Hash(descriptor.c_str()));</div><div class="line"></div><div class="line">    for (auto&amp; dex_file : *dex_files) &#123;</div><div class="line">        //首先获取ClassDef</div><div class="line">        const DexFile::ClassDef* dex_class_def = dex_file-&gt;FindClassDef(descriptor.c_str(), hash);</div><div class="line"></div><div class="line">        if (dex_class_def != nullptr) &#123;</div><div class="line">            ScopedObjectAccess soa(env);</div><div class="line"></div><div class="line">            ClassLinker* class_linker = Runtime::Current()-&gt;GetClassLinker();</div><div class="line">            StackHandleScope&lt;1&gt; hs(soa.Self());</div><div class="line">            Handle&lt;mirror::ClassLoader&gt; class_loader(</div><div class="line">                hs.NewHandle(soa.Decode&lt;mirror::ClassLoader*&gt;(javaLoader)));</div><div class="line"></div><div class="line">            //生成dex_cache，并放入缓存队列, [6.1]</div><div class="line">            class_linker-&gt;RegisterDexFile(*dex_file, class_loader.Get());</div><div class="line">            //加载类，[7]</div><div class="line">            mirror::Class* result = class_linker-&gt;DefineClass(soa.Self(), descriptor.c_str(), hash,</div><div class="line">                                                              class_loader, *dex_file, *dex_class_def);</div><div class="line">            // Add the used dex file. This only required for the DexFile.loadClass API since normal</div><div class="line">            // class loaders already keep their dex files live.</div><div class="line">            class_linker-&gt;InsertDexFileInToClassLoader(soa.Decode&lt;mirror::Object*&gt;(dexFile),</div><div class="line">                                                  class_loader.Get());</div><div class="line">            if (result != nullptr) &#123;</div><div class="line">                ...</div><div class="line">                return soa.AddLocalReference&lt;jclass&gt;(result);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    return nullptr;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li><code>defineClassNative</code>第一个关键步骤是将Java层传入的<code>mCookie</code>变量转换为Native的<code>vector</code>类型的dex文件列表</li>
+<li>在Native层,每个dex文件有一个对应的DexCache结构，该结构缓存了dex文件中一些基本的信息</li>
+<li>遍历dex文件列表时，首先从dex文件中获取<code>ClassDef</code>结构，之后再根据这个<code>ClassDef</code>来加载相应的类</li>
+</ol>
+<h4 id="6-1-ClassLinker-RegisterDexFile"><a href="#6-1-ClassLinker-RegisterDexFile" class="headerlink" title="6.1 ClassLinker::RegisterDexFile()"></a>6.1 ClassLinker::RegisterDexFile()</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line">mirror::DexCache* ClassLinker::RegisterDexFile(<span class="keyword">const</span> DexFile&amp; dex_file,</div><div class="line">                                               mirror::ClassLoader* class_loader) &#123;</div><div class="line">  Thread* self = Thread::Current();</div><div class="line">  &#123;</div><div class="line">      <span class="function">ReaderMutexLock <span class="title">mu</span><span class="params">(self, dex_lock_)</span></span>;</div><div class="line">      <span class="comment">//查找是由已经有对应的dex_cache，有则直接返回</span></div><div class="line">      mirror::DexCache* dex_cache = FindDexCacheLocked(self, dex_file, <span class="literal">true</span>);</div><div class="line">      <span class="keyword">if</span> (dex_cache != <span class="literal">nullptr</span>) &#123;</div><div class="line">          <span class="keyword">return</span> dex_cache;</div><div class="line">      &#125;</div><div class="line">  &#125;</div><div class="line">  <span class="comment">//获取ClassLoader对应的LinearAlloc</span></div><div class="line">  LinearAlloc* <span class="keyword">const</span> linear_alloc = GetOrCreateAllocatorForClassLoader(class_loader);</div><div class="line">  DCHECK(linear_alloc != <span class="literal">nullptr</span>);</div><div class="line">  ClassTable* table;</div><div class="line">  &#123;</div><div class="line">      <span class="function">WriterMutexLock <span class="title">mu</span><span class="params">(self, *Locks::classlinker_classes_lock_)</span></span>;</div><div class="line">      <span class="comment">//获取ClassLoader的ClassTable</span></div><div class="line">      table = InsertClassTableForClassLoader(class_loader);</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  StackHandleScope&lt;<span class="number">1</span>&gt; hs(self);</div><div class="line">  <span class="comment">//在LinearAlloc创建一个dex_cache结构，此时不要持有dex_lock_锁，因为分配时可能会挂起所有线程而且可能存在线程需要</span></div><div class="line">  <span class="comment">//dex_lock_</span></div><div class="line">  Handle&lt;mirror::DexCache&gt; h_dex_cache(hs.NewHandle(AllocDexCache(self, dex_file, linear_alloc)));</div><div class="line">  &#123;</div><div class="line">      <span class="function">WriterMutexLock <span class="title">mu</span><span class="params">(self, dex_lock_)</span></span>;</div><div class="line">      mirror::DexCache* dex_cache = FindDexCacheLocked(self, dex_file, <span class="literal">true</span>);</div><div class="line">      <span class="keyword">if</span> (dex_cache != <span class="literal">nullptr</span>) &#123;</div><div class="line">        <span class="keyword">return</span> dex_cache;</div><div class="line">      &#125;</div><div class="line">      <span class="comment">//如果分配dex_cache结构失败，则一定是发生了OOM</span></div><div class="line">      <span class="keyword">if</span> (h_dex_cache.Get() == <span class="literal">nullptr</span>) &#123;</div><div class="line">        self-&gt;AssertPendingOOMException();</div><div class="line">        <span class="keyword">return</span> <span class="literal">nullptr</span>;</div><div class="line">      &#125;</div><div class="line">      <span class="comment">//根据dex_file生成dex_cache,并注册dex_cache</span></div><div class="line">      RegisterDexFileLocked(dex_file, h_dex_cache);</div><div class="line">  &#125;</div><div class="line">  table-&gt;InsertStrongRoot(h_dex_cache.Get());</div><div class="line">  <span class="keyword">return</span> h_dex_cache.Get();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="7-ClassLinker-DefineClass"><a href="#7-ClassLinker-DefineClass" class="headerlink" title="7. ClassLinker::DefineClass"></a>7. ClassLinker::DefineClass</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div></pre></td><td class="code"><pre><div class="line">mirror::Class* ClassLinker::DefineClass(Thread* self, <span class="keyword">const</span> <span class="keyword">char</span>* descriptor, <span class="keyword">size_t</span> hash,</div><div class="line">                                        Handle&lt;mirror::ClassLoader&gt; class_loader,</div><div class="line">                                        <span class="keyword">const</span> DexFile&amp; dex_file,</div><div class="line">                                        <span class="keyword">const</span> DexFile::ClassDef&amp; dex_class_def) &#123;</div><div class="line"></div><div class="line">    StackHandleScope&lt;<span class="number">3</span>&gt; hs(self);</div><div class="line">    <span class="keyword">auto</span> klass = hs.NewHandle&lt;mirror::Class&gt;(<span class="literal">nullptr</span>);</div><div class="line"></div><div class="line">    <span class="comment">//如果ClassLinker还未初始化完成，且要加载的正好是几个指定的系统类，将kclass指向系统类</span></div><div class="line">    ...</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (klass.Get() == <span class="literal">nullptr</span>) &#123;</div><div class="line">        <span class="comment">//创建Class对象</span></div><div class="line">        klass.Assign(AllocClass(self, SizeOfClassWithoutEmbeddedTables(dex_file, dex_class_def)));</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    ...</div><div class="line">    <span class="comment">//获取dex_cache结构，如果未获取到则创建</span></div><div class="line">    mirror::DexCache* dex_cache = RegisterDexFile(dex_file, class_loader.Get());</div><div class="line">    <span class="keyword">if</span> (dex_cache == <span class="literal">nullptr</span>) &#123;</div><div class="line">        self-&gt;AssertPendingOOMException();</div><div class="line">        <span class="keyword">return</span> <span class="literal">nullptr</span>;</div><div class="line">    &#125;</div><div class="line">    klass-&gt;SetDexCache(dex_cache);</div><div class="line">    <span class="comment">//设置klass基本属性, [7.1]</span></div><div class="line">    SetupClass(dex_file, dex_class_def, klass, class_loader.Get());</div><div class="line"></div><div class="line">    ...</div><div class="line"></div><div class="line">    ObjectLock&lt;mirror::Class&gt; lock(self, klass);</div><div class="line">    klass-&gt;SetClinitThreadId(self-&gt;GetTid());</div><div class="line"></div><div class="line">    <span class="comment">// 将要加载的类添加到ClassLinker的已加载类列表</span></div><div class="line">    mirror::Class* existing = InsertClass(descriptor, klass.Get(), hash);</div><div class="line">    <span class="keyword">if</span> (existing != <span class="literal">nullptr</span>) &#123;</div><div class="line">        <span class="comment">//如果插入失败，则表明类已经被加载过</span></div><div class="line">        <span class="keyword">return</span> EnsureResolved(self, descriptor, existing);</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//加载类，[7.2]</span></div><div class="line">    LoadClass(self, dex_file, dex_class_def, klass);</div><div class="line">    ...</div><div class="line"></div><div class="line">    CHECK(!klass-&gt;IsLoaded());</div><div class="line">    <span class="keyword">if</span> (!LoadSuperAndInterfaces(klass, dex_file)) &#123;</div><div class="line">        ...</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//正常情况下,此时klass-&gt;IsLoaded　＝　true</span></div><div class="line">    CHECK(klass-&gt;IsLoaded());</div><div class="line">    <span class="comment">//正常情况下，此时klass-&gt;isResolved = false</span></div><div class="line">    CHECK(!klass-&gt;IsResolved());</div><div class="line">    <span class="keyword">auto</span> interfaces = hs.NewHandle&lt;mirror::ObjectArray&lt;mirror::Class&gt;&gt;(<span class="literal">nullptr</span>);</div><div class="line"></div><div class="line">    MutableHandle&lt;mirror::Class&gt; h_new_class = hs.NewHandle&lt;mirror::Class&gt;(<span class="literal">nullptr</span>);</div><div class="line">    <span class="comment">//对加载后的类进行链接解析，[7.3]</span></div><div class="line">    <span class="keyword">if</span> (!LinkClass(self, descriptor, klass, interfaces, &amp;h_new_class)) &#123;</div><div class="line">        ...</div><div class="line">    &#125;</div><div class="line">    ...</div><div class="line">    <span class="keyword">return</span> h_new_class.Get();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>DefineClass</code>中的关键步骤可以总结为:<code>SetupClass</code>–&gt;<code>InsertClass</code>–&gt;<code>LoadClass</code>–&gt;<code>LoadSuperAndInterfaces</code>–&gt;<code>LinkClass</code></p>
+<h4 id="7-1-ClassLinker-SetupClass"><a href="#7-1-ClassLinker-SetupClass" class="headerlink" title="7.1 ClassLinker::SetupClass"></a>7.1 ClassLinker::SetupClass</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">void</span> ClassLinker::SetupClass(<span class="keyword">const</span> DexFile&amp; dex_file,</div><div class="line">                             <span class="keyword">const</span> DexFile::ClassDef&amp; dex_class_def,</div><div class="line">                             Handle&lt;mirror::Class&gt; klass,</div><div class="line">                             mirror::ClassLoader* class_loader) &#123;</div><div class="line">  ... <span class="comment">//Check(...)</span></div><div class="line">  <span class="keyword">const</span> <span class="keyword">char</span>* descriptor = dex_file.GetClassDescriptor(dex_class_def);</div><div class="line">  ... <span class="comment">//Check(...)</span></div><div class="line"></div><div class="line">  klass-&gt;SetClass(GetClassRoot(kJavaLangClass));</div><div class="line">  <span class="keyword">uint32_t</span> access_flags = dex_class_def.GetJavaAccessFlags();</div><div class="line">  ... <span class="comment">//Check(...)</span></div><div class="line"></div><div class="line">  klass-&gt;SetAccessFlags(access_flags);</div><div class="line">  klass-&gt;SetClassLoader(class_loader);</div><div class="line">  ... <span class="comment">//Check(...)</span></div><div class="line"></div><div class="line">  mirror::Class::SetStatus(klass, mirror::Class::kStatusIdx, <span class="literal">nullptr</span>);</div><div class="line"></div><div class="line">  klass-&gt;SetDexClassDefIndex(dex_file.GetIndexForClassDef(dex_class_def));</div><div class="line">  klass-&gt;SetDexTypeIndex(dex_class_def.class_idx_);</div><div class="line">  ... <span class="comment">//Check(...)</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可以看到，<code>SetupClass</code>方法主要是给Class对象设置基本属性如<code>access_flags</code>,<code>ClassLoader</code></p>
+<h4 id="7-2-ClassLinker-LoadClass"><a href="#7-2-ClassLinker-LoadClass" class="headerlink" title="7.2 ClassLinker::LoadClass()"></a>7.2 ClassLinker::LoadClass()</h4><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">void</span> ClassLinker::LoadClass(Thread* self, <span class="keyword">const</span> DexFile&amp; dex_file,</div><div class="line">                            <span class="keyword">const</span> DexFile::ClassDef&amp; dex_class_def,</div><div class="line">                            Handle&lt;mirror::Class&gt; klass) &#123;</div><div class="line">    <span class="comment">//获取ClassData</span></div><div class="line">    <span class="keyword">const</span> <span class="keyword">uint8_t</span>* class_data = dex_file.GetClassData(dex_class_def);</div><div class="line">    <span class="keyword">if</span> (class_data == <span class="literal">nullptr</span>) &#123;</div><div class="line">        <span class="keyword">return</span>;  <span class="comment">// no fields or methods - for example a marker interface</span></div><div class="line">    &#125;</div><div class="line">    <span class="keyword">bool</span> has_oat_class = <span class="literal">false</span>;</div><div class="line">    <span class="keyword">if</span> (Runtime::Current()-&gt;IsStarted() &amp;&amp; !Runtime::Current()-&gt;IsAotCompiler()) &#123;</div><div class="line">        <span class="comment">//获取OatClass,通过OatClass可以获取类方法的本地机器指令</span></div><div class="line">        <span class="comment">//klass-&gt;GetDexClassDefIndex()获取相应ClassDef结构在dex文件内的索引号，这个索引号是在之前的</span></div><div class="line">        <span class="comment">//SetupClass()函数中获取并设置</span></div><div class="line">        OatFile::OatClass oat_class = FindOatClass(dex_file, klass-&gt;GetDexClassDefIndex(),</div><div class="line">                                                   &amp;has_oat_class);</div><div class="line">        <span class="keyword">if</span> (has_oat_class) &#123;</div><div class="line">            <span class="comment">//加载类成员, [7.2.1]</span></div><div class="line">            LoadClassMembers(self, dex_file, class_data, klass, &amp;oat_class);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> (!has_oat_class) &#123;</div><div class="line">        LoadClassMembers(self, dex_file, class_data, klass, <span class="literal">nullptr</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>从dex文件内部获取ClassData结构</li>
+<li>根据ClassDef的索引位置获取相应OatClass结构，通过OatClass结构可以获取类方法的本地机器指令</li>
+<li>如果找到OatClass则根据OatClass来加载类成员</li>
+</ol>
+<blockquote>
+<p>dex文件中每一个类在oat文件中都由一个对应的<code>OatClass</code>结构，根据<code>OatClass</code>可以找到每一个类方法的本地机器指令</p>
+</blockquote>
+<h5 id="7-2-1-ClassLinker-LoadClassMembers"><a href="#7-2-1-ClassLinker-LoadClassMembers" class="headerlink" title="7.2.1 ClassLinker::LoadClassMembers()"></a>7.2.1 ClassLinker::LoadClassMembers()</h5><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">void</span> ClassLinker::LoadClassMembers(Thread* self,</div><div class="line">                                   <span class="keyword">const</span> DexFile&amp; dex_file,</div><div class="line">                                   <span class="keyword">const</span> <span class="keyword">uint8_t</span>* class_data,</div><div class="line">                                   Handle&lt;mirror::Class&gt; klass,</div><div class="line">                                   <span class="keyword">const</span> OatFile::OatClass* oat_class) &#123;</div><div class="line">    &#123;</div><div class="line">      <span class="comment">//在没有加载完类成员之前，不允许当前线程挂起</span></div><div class="line">      <span class="function">ScopedAssertNoThreadSuspension <span class="title">nts</span><span class="params">(self, __FUNCTION__)</span></span>;</div><div class="line">      <span class="comment">//加载静态属性</span></div><div class="line">      LinearAlloc* <span class="keyword">const</span> allocator = GetAllocatorForClassLoader(klass-&gt;GetClassLoader());</div><div class="line">      <span class="function">ClassDataItemIterator <span class="title">it</span><span class="params">(dex_file, class_data)</span></span>;</div><div class="line">      LengthPrefixedArray&lt;ArtField&gt;* sfields = AllocArtFieldArray(self,</div><div class="line">                                                                  allocator,</div><div class="line">                                                                  it.NumStaticFields());</div><div class="line">      <span class="keyword">size_t</span> num_sfields = <span class="number">0</span>;</div><div class="line">      <span class="keyword">uint32_t</span> last_field_idx = <span class="number">0u</span>;</div><div class="line">      <span class="keyword">for</span> (; it.HasNextStaticField(); it.Next()) &#123;</div><div class="line">          <span class="keyword">uint32_t</span> field_idx = it.GetMemberIndex();</div><div class="line">          <span class="keyword">if</span> (num_sfields == <span class="number">0</span> || LIKELY(field_idx &gt; last_field_idx)) &#123;</div><div class="line">            <span class="comment">//加载属性,[7.2.1.1]</span></div><div class="line">            LoadField(it, klass, &amp;sfields-&gt;At(num_sfields));</div><div class="line">            ++num_sfields;</div><div class="line">            last_field_idx = field_idx;</div><div class="line">          &#125;</div><div class="line">      &#125;</div><div class="line"></div><div class="line"></div><div class="line">      <span class="comment">//加载实例属性</span></div><div class="line">      LengthPrefixedArray&lt;ArtField&gt;* ifields = AllocArtFieldArray(self,</div><div class="line">                                                                  allocator,</div><div class="line">                                                                  it.NumInstanceFields());</div><div class="line">      <span class="keyword">size_t</span> num_ifields = <span class="number">0u</span>;</div><div class="line">      last_field_idx = <span class="number">0u</span>;</div><div class="line">      <span class="keyword">for</span> (; it.HasNextInstanceField(); it.Next()) &#123;</div><div class="line">          <span class="keyword">uint32_t</span> field_idx = it.GetMemberIndex();</div><div class="line">          <span class="keyword">if</span> (num_ifields == <span class="number">0</span> || LIKELY(field_idx &gt; last_field_idx)) &#123;</div><div class="line">            LoadField(it, klass, &amp;ifields-&gt;At(num_ifields));</div><div class="line">            ++num_ifields;</div><div class="line">            last_field_idx = field_idx;</div><div class="line">          &#125;</div><div class="line">        &#125;</div><div class="line">      ....</div><div class="line">      <span class="comment">// Set the field arrays.</span></div><div class="line">      klass-&gt;SetSFieldsPtr(sfields);</div><div class="line">      klass-&gt;SetIFieldsPtr(ifields);</div><div class="line"></div><div class="line">      <span class="comment">// 加载方法</span></div><div class="line">      klass-&gt;SetMethodsPtr(</div><div class="line">          AllocArtMethodArray(self, allocator, it.NumDirectMethods() + it.NumVirtualMethods()),</div><div class="line">          it.NumDirectMethods(),</div><div class="line">          it.NumVirtualMethods());</div><div class="line">      <span class="keyword">size_t</span> class_def_method_index = <span class="number">0</span>;</div><div class="line">      <span class="keyword">uint32_t</span> last_dex_method_index = DexFile::kDexNoIndex;</div><div class="line">      <span class="keyword">size_t</span> last_class_def_method_index = <span class="number">0</span>;</div><div class="line">      <span class="comment">//首先加载直接方法</span></div><div class="line">      <span class="keyword">for</span> (<span class="keyword">size_t</span> i = <span class="number">0</span>; it.HasNextDirectMethod(); i++, it.Next()) &#123;</div><div class="line">          ArtMethod* method = klass-&gt;GetDirectMethodUnchecked(i, image_pointer_size_);</div><div class="line">          <span class="comment">//加载方法，[7.2.1.2]</span></div><div class="line">          LoadMethod(self, dex_file, it, klass, method);</div><div class="line">          <span class="comment">//将方法同对应的本地机器指令关联，这样在方法执行时就可以知道该如何执行, [7.2.1.3]</span></div><div class="line">          LinkCode(method, oat_class, class_def_method_index);</div><div class="line">          <span class="keyword">uint32_t</span> it_method_index = it.GetMemberIndex();</div><div class="line">          <span class="keyword">if</span> (last_dex_method_index == it_method_index) &#123;</div><div class="line">              method-&gt;SetMethodIndex(last_class_def_method_index);</div><div class="line">          &#125; <span class="keyword">else</span> &#123;</div><div class="line">              method-&gt;SetMethodIndex(class_def_method_index);</div><div class="line">              last_dex_method_index = it_method_index;</div><div class="line">              last_class_def_method_index = class_def_method_index;</div><div class="line">          &#125;</div><div class="line">          class_def_method_index++;</div><div class="line">      &#125;</div><div class="line">      <span class="comment">//加载虚拟方法</span></div><div class="line">      <span class="keyword">for</span> (<span class="keyword">size_t</span> i = <span class="number">0</span>; it.HasNextVirtualMethod(); i++, it.Next()) &#123;</div><div class="line">          ArtMethod* method = klass-&gt;GetVirtualMethodUnchecked(i, image_pointer_size_);</div><div class="line">          LoadMethod(self, dex_file, it, klass, method);</div><div class="line">          LinkCode(method, oat_class, class_def_method_index);</div><div class="line">          class_def_method_index++;</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="comment">// Ensure that the card is marked so that remembered sets pick up native roots.</span></div><div class="line">    Runtime::Current()-&gt;GetHeap()-&gt;WriteBarrierEveryFieldOf(klass.Get());</div><div class="line">    self-&gt;AllowThreadSuspension();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>首先便是设置当前线程在没有完成加载类成员工作之前不能被挂起</li>
+<li>之后依次加载Static Field，Instance Field,所有Field都用ArtField表示</li>
+<li>加载完Field后，再依次加载Direct Method和Virtual Method并关联Method对应的机器指令，所有Method都用ArtMethod表示</li>
+<li>当所有加载工作完成之后，告知线程加载工作完成，允许被挂起</li>
+</ol>
+<h6 id="7-2-1-1-ClassLinker-LoadField"><a href="#7-2-1-1-ClassLinker-LoadField" class="headerlink" title="7.2.1.1 ClassLinker::LoadField()"></a>7.2.1.1 ClassLinker::LoadField()</h6><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">void</span> ClassLinker::LoadField(<span class="keyword">const</span> ClassDataItemIterator&amp; it, Handle&lt;mirror::Class&gt; klass,</div><div class="line">                            ArtField* dst) &#123;</div><div class="line">    <span class="keyword">const</span> <span class="keyword">uint32_t</span> field_idx = it.GetMemberIndex();</div><div class="line">    dst-&gt;SetDexFieldIndex(field_idx);</div><div class="line">    dst-&gt;SetDeclaringClass(klass.Get());</div><div class="line">    dst-&gt;SetAccessFlags(it.GetFieldAccessFlags());</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h6 id="7-2-1-2-ClassLinker-LoadMethod"><a href="#7-2-1-2-ClassLinker-LoadMethod" class="headerlink" title="7.2.1.2 ClassLinker::LoadMethod()"></a>7.2.1.2 ClassLinker::LoadMethod()</h6><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">void</span> ClassLinker::LoadMethod(Thread* self, <span class="keyword">const</span> DexFile&amp; dex_file, <span class="keyword">const</span> ClassDataItemIterator&amp; it,</div><div class="line">                             Handle&lt;mirror::Class&gt; klass, ArtMethod* dst) &#123;</div><div class="line">    <span class="comment">//从dex文件的ClassData结构种获取对应Method的索引</span></div><div class="line">    <span class="keyword">uint32_t</span> dex_method_idx = it.GetMemberIndex();</div><div class="line">    <span class="comment">//获取MethodId结构</span></div><div class="line">    <span class="keyword">const</span> DexFile::MethodId&amp; method_id = dex_file.GetMethodId(dex_method_idx);</div><div class="line">    <span class="keyword">const</span> <span class="keyword">char</span>* method_name = dex_file.StringDataByIdx(method_id.name_idx_);</div><div class="line"></div><div class="line">    <span class="function">ScopedAssertNoThreadSuspension <span class="title">ants</span><span class="params">(self, <span class="string">"LoadMethod"</span>)</span></span>;</div><div class="line">    dst-&gt;SetDexMethodIndex(dex_method_idx);</div><div class="line">    dst-&gt;SetDeclaringClass(klass.Get());</div><div class="line">    dst-&gt;SetCodeItemOffset(it.GetMethodCodeItemOffset());</div><div class="line"></div><div class="line">    dst-&gt;SetDexCacheResolvedMethods(klass-&gt;GetDexCache()-&gt;GetResolvedMethods());</div><div class="line">    dst-&gt;SetDexCacheResolvedTypes(klass-&gt;GetDexCache()-&gt;GetResolvedTypes());</div><div class="line"></div><div class="line">    <span class="keyword">uint32_t</span> access_flags = it.GetMethodAccessFlags();</div><div class="line"></div><div class="line">    <span class="comment">//一般情况下，方法名不会是finalize</span></div><div class="line">    <span class="keyword">if</span> (UNLIKELY(<span class="built_in">strcmp</span>(<span class="string">"finalize"</span>, method_name) == <span class="number">0</span>)) &#123;</div><div class="line">        <span class="comment">// Set finalizable flag on declaring class.</span></div><div class="line">        <span class="keyword">if</span> (<span class="built_in">strcmp</span>(<span class="string">"V"</span>, dex_file.GetShorty(method_id.proto_idx_)) == <span class="number">0</span>) &#123;</div><div class="line">            <span class="comment">// Void return type.</span></div><div class="line">            <span class="keyword">if</span> (klass-&gt;GetClassLoader() != <span class="literal">nullptr</span>) &#123;  <span class="comment">// All non-boot finalizer methods are flagged.</span></div><div class="line">                klass-&gt;SetFinalizable();</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                <span class="built_in">std</span>::<span class="built_in">string</span> temp;</div><div class="line">                <span class="keyword">const</span> <span class="keyword">char</span>* klass_descriptor = klass-&gt;GetDescriptor(&amp;temp);</div><div class="line">                <span class="comment">//Enum枚举类不设置finalizable,因为枚举类已经声明了一个final finalize()</span></div><div class="line">                <span class="keyword">if</span> (<span class="built_in">strcmp</span>(klass_descriptor, <span class="string">"Ljava/lang/Object;"</span>) != <span class="number">0</span> &amp;&amp;</div><div class="line">                    <span class="built_in">strcmp</span>(klass_descriptor, <span class="string">"Ljava/lang/Enum;"</span>) != <span class="number">0</span>) &#123;</div><div class="line">                  klass-&gt;SetFinalizable();</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (method_name[<span class="number">0</span>] == <span class="string">'&lt;'</span>) &#123;</div><div class="line">        <span class="comment">//判断是不是实例化构造函数</span></div><div class="line">        <span class="keyword">bool</span> is_init = (<span class="built_in">strcmp</span>(<span class="string">"&lt;init&gt;"</span>, method_name) == <span class="number">0</span>);</div><div class="line">        <span class="comment">//判断是不是类初始化方法</span></div><div class="line">        <span class="keyword">bool</span> is_clinit = !is_init &amp;&amp; (<span class="built_in">strcmp</span>(<span class="string">"&lt;clinit&gt;"</span>, method_name) == <span class="number">0</span>);</div><div class="line">        <span class="keyword">if</span> (UNLIKELY(!is_init &amp;&amp; !is_clinit)) &#123;</div><div class="line">            ... <span class="comment">//LOG</span></div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">if</span> (UNLIKELY((access_flags &amp; kAccConstructor) == <span class="number">0</span>)) &#123;</div><div class="line">                access_flags |= kAccConstructor;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    dst-&gt;SetAccessFlags(access_flags);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h6 id="7-2-1-3-ClassLinker-LinkCode"><a href="#7-2-1-3-ClassLinker-LinkCode" class="headerlink" title="7.2.1.3 ClassLinker::LinkCode()"></a>7.2.1.3 ClassLinker::LinkCode()</h6><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">void</span> ClassLinker::LinkCode(ArtMethod* method, <span class="keyword">const</span> OatFile::OatClass* oat_class,</div><div class="line">                             <span class="keyword">uint32_t</span> class_def_method_index) &#123;</div><div class="line">    Runtime* <span class="keyword">const</span> runtime = Runtime::Current();</div><div class="line">    <span class="keyword">if</span> (runtime-&gt;IsAotCompiler()) &#123;</div><div class="line">        <span class="keyword">return</span>;</div><div class="line">    &#125;</div><div class="line">    ...</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (oat_class != <span class="literal">nullptr</span>) &#123;</div><div class="line">        <span class="comment">//从OatClass中获取对应的OatMethod,OatMethod中记录了方法的本地机器指令的偏移地址</span></div><div class="line">        <span class="comment">//通过OatMethod::LinkMethod将OatMethod中记录的信息设置到ArtMethod当中</span></div><div class="line">        <span class="keyword">const</span> OatFile::OatMethod oat_method = oat_class-&gt;GetOatMethod(class_def_method_index);</div><div class="line">        oat_method.LinkMethod(method);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">//之后设置方法执行的entry point</span></div><div class="line">    <span class="comment">//判断是否需要解释执行：</span></div><div class="line">    <span class="comment">//1.当没有本地机器指令</span></div><div class="line">    <span class="comment">//2.Runtime指定以Interpreter方式运行且方法不是native同时也不是proxy</span></div><div class="line">    <span class="comment">//JNI方法是没有对应的DEX字节码的，因此即使ART虚拟机运行在解释模式中，JNI方法也不能通过解释器来执行</span></div><div class="line">    <span class="keyword">bool</span> enter_interpreter = NeedsInterpreter(method, method-&gt;GetEntryPointFromQuickCompiledCode());</div><div class="line">    <span class="keyword">if</span> (enter_interpreter &amp;&amp; !method-&gt;IsNative()) &#123;</div><div class="line">        method-&gt;SetEntryPointFromInterpreter(artInterpreterToInterpreterBridge);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="comment">//有两种情况会进入这一分支</span></div><div class="line">        <span class="comment">//不需要解释执行的方法</span></div><div class="line">        <span class="comment">//没有本地机器指令或者Runtime以Interpreter方式运行，但该方法是native</span></div><div class="line">        method-&gt;SetEntryPointFromInterpreter(artInterpreterToCompiledCodeBridge);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (method-&gt;IsAbstract()) &#123;</div><div class="line">        <span class="comment">//抽象方法没有机器指令，当有机器指令的方法调用抽象方法时，需要设置一个桥接函数，从而转到</span></div><div class="line">        <span class="comment">//解释器，由解释器解释执行抽象方法</span></div><div class="line">        method-&gt;SetEntryPointFromQuickCompiledCode(GetQuickToInterpreterBridge());</div><div class="line">        <span class="keyword">return</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (method-&gt;IsStatic() &amp;&amp; !method-&gt;IsConstructor()) &#123;</div><div class="line">        method-&gt;SetEntryPointFromQuickCompiledCode(GetQuickResolutionStub());</div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (enter_interpreter) &#123;</div><div class="line">        <span class="keyword">if</span> (!method-&gt;IsNative()) &#123;</div><div class="line">            method-&gt;SetEntryPointFromQuickCompiledCode(GetQuickToInterpreterBridge());</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="comment">//只有当native方法没有本地机器指令时，会执行这一分支</span></div><div class="line">            method-&gt;SetEntryPointFromQuickCompiledCode(GetQuickGenericJniStub());</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (method-&gt;IsNative()) &#123;</div><div class="line">        <span class="comment">// Unregistering restores the dlsym lookup stub.</span></div><div class="line">        method-&gt;UnregisterNative();</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (enter_interpreter) &#123;</div><div class="line">          <span class="comment">//native方法且没有对应的机器指令，则该方法如果是non-static,则entry point是generic JNI trampoline</span></div><div class="line">          <span class="comment">//如果是static, 则entry point是resolution trampoline</span></div><div class="line">          <span class="keyword">const</span> <span class="keyword">void</span>* entry_point = method-&gt;GetEntryPointFromQuickCompiledCode();</div><div class="line">          DCHECK(IsQuickGenericJniStub(entry_point) || IsQuickResolutionStub(entry_point));</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>LinkCode</code>方法主要作用是根据方法属性来设置entry point</p>
+<ol>
+<li>对于需要解释的方法，该方法需要由解释器解释执行，当另一个解释方法调用了这个需要解释执行的方法时，该方法的入口函数是<code>artInterpreterToInterpreterBridge</code>,从而继续在解释器中解释执行；如果当前方法是执行本地机器指令，当另一个解释执行的方法调用了这个执行本地机器指令的方法，该方法的入口函数是<code>artInterpreterToCompiledCodeBridge</code>，<code>artInterpreterToCompiledCodeBridge</code>会去调用相应的机器指令</li>
+<li>抽象方法需要由被子类实现，所以抽象类是没有本地机器指令的，需要由解释器解释执行，当有机器指令的方法调用抽象方法时, 需要设置一个桥接函数，从而转到<br>解释器，由解释器解释执行抽象方法, 这个桥接函数是<code>GetQuickToInterpreterBridge()</code></li>
+<li>对于静态非构造函数，当有执行机器指令的方法调用这类函数时，入口函数是<code>GetQuickResolutionStub()</code>．因为静态方法不需要创建对象便可执行，着就有可能出现类还未初始化，方法就要执行，所以此时就需要现将类初始化，再执行静态方法，<code>GetQuickResolutionStub</code>完成的正是这项工作</li>
+<li>对于需要解释执行且不是native的方法，当执行本地机器指令的方法调用该方法时，入口函数是<code>GetQuickToInterpreterBridge()</code>,该函数会转到解释器，由解释器执行这个需要解释执行的方法；当一个执行本地机器指令的方法调用没有机器指令的native方法时，入口函数是<code>GetQuickGenericJniStub()</code></li>
+<li>如果一个方法是native方法，设置本地方法的入口是通过<code>GetJniDlsymLookupStub</code>获得的一个Stub<blockquote>
+<p>以上内容参考老罗的<a href="http://blog.csdn.net/luoshengyang/article/details/39533503" target="_blank" rel="external">Android运行时ART加载类和方法的过程分析</a></p>
+</blockquote>
+</li>
+</ol>
+<h3 id="8-ClassLinker-InsertDexFileInToClassLoader"><a href="#8-ClassLinker-InsertDexFileInToClassLoader" class="headerlink" title="8. ClassLinker::InsertDexFileInToClassLoader"></a>8. ClassLinker::InsertDexFileInToClassLoader</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">void</span> ClassLinker::InsertDexFileInToClassLoader(mirror::Object* dex_file,</div><div class="line">                                               mirror::ClassLoader* class_loader) &#123;</div><div class="line">    Thread* <span class="keyword">const</span> self = Thread::Current();</div><div class="line">    <span class="function">WriterMutexLock <span class="title">mu</span><span class="params">(self, *Locks::classlinker_classes_lock_)</span></span>;</div><div class="line">    ClassTable* <span class="keyword">const</span> table = ClassTableForClassLoader(class_loader);</div><div class="line">    <span class="comment">//InsertStrongRoot方法将dex_file对象放入ClassTable的strong_table_队列中</span></div><div class="line">    <span class="keyword">if</span> (table-&gt;InsertStrongRoot(dex_file) &amp;&amp; class_loader != <span class="literal">nullptr</span>) &#123;</div><div class="line">        <span class="comment">//执行write barrier从而让GC知道ClassLoader的ClassTable发生了改变</span></div><div class="line">        Runtime::Current()-&gt;GetHeap()-&gt;WriteBarrierEveryFieldOf(class_loader);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/images/wechat.jpg" alt="王小宝 WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/images/alipay.jpg" alt="王小宝 Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ART/" rel="tag"># ART</a>
+          
+            <a href="/tags/源码分析/" rel="tag"># 源码分析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/24/ART加载dex文件/" rel="next" title="ART加载dex文件">
+                <i class="fa fa-chevron-left"></i> ART加载dex文件
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/24/ART的反射调用-一-获取Class对象/" rel="prev" title="ART的反射调用(一)-获取Class对象">
+                ART的反射调用(一)-获取Class对象 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.jpg"
+               alt="王小宝" />
+          <p class="site-author-name" itemprop="name">王小宝</p>
+           
+              <p class="site-description motion-element" itemprop="description">90后迷途小书童</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/wangyun137" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.jianshu.com/u/73df471e39bb" target="_blank" title="简书">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  简书
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一．创建Activity对象"><span class="nav-number">1.</span> <span class="nav-text">一．创建Activity对象</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Instrumentation-newActivity"><span class="nav-number">1.1.</span> <span class="nav-text">1. Instrumentation.newActivity()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-ClassLoader-loadClass"><span class="nav-number">1.2.</span> <span class="nav-text">2. ClassLoader.loadClass()</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-ClassLoader-findLoadedClass"><span class="nav-number">1.2.1.</span> <span class="nav-text">2.1 ClassLoader.findLoadedClass</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-BaseDexClassLoader-findClass"><span class="nav-number">1.3.</span> <span class="nav-text">3. BaseDexClassLoader.findClass()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-DexPathList-findClass"><span class="nav-number">1.4.</span> <span class="nav-text">4. DexPathList.findClass()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-DexFile-loadClassBinaryName"><span class="nav-number">1.5.</span> <span class="nav-text">5. DexFile.loadClassBinaryName()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#6-DexFile-defineClassNative"><span class="nav-number">1.6.</span> <span class="nav-text">6. DexFile_defineClassNative()</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#6-1-ClassLinker-RegisterDexFile"><span class="nav-number">1.6.1.</span> <span class="nav-text">6.1 ClassLinker::RegisterDexFile()</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#7-ClassLinker-DefineClass"><span class="nav-number">1.7.</span> <span class="nav-text">7. ClassLinker::DefineClass</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#7-1-ClassLinker-SetupClass"><span class="nav-number">1.7.1.</span> <span class="nav-text">7.1 ClassLinker::SetupClass</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#7-2-ClassLinker-LoadClass"><span class="nav-number">1.7.2.</span> <span class="nav-text">7.2 ClassLinker::LoadClass()</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#7-2-1-ClassLinker-LoadClassMembers"><span class="nav-number">1.7.2.1.</span> <span class="nav-text">7.2.1 ClassLinker::LoadClassMembers()</span></a><ol class="nav-child"><li class="nav-item nav-level-6"><a class="nav-link" href="#7-2-1-1-ClassLinker-LoadField"><span class="nav-number">1.7.2.1.1.</span> <span class="nav-text">7.2.1.1 ClassLinker::LoadField()</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#7-2-1-2-ClassLinker-LoadMethod"><span class="nav-number">1.7.2.1.2.</span> <span class="nav-text">7.2.1.2 ClassLinker::LoadMethod()</span></a></li><li class="nav-item nav-level-6"><a class="nav-link" href="#7-2-1-3-ClassLinker-LinkCode"><span class="nav-number">1.7.2.1.3.</span> <span class="nav-text">7.2.1.3 ClassLinker::LinkCode()</span></a></li></ol></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#8-ClassLinker-InsertDexFileInToClassLoader"><span class="nav-number">1.8.</span> <span class="nav-text">8. ClassLinker::InsertDexFileInToClassLoader</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">王小宝</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

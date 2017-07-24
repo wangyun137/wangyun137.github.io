@@ -1,0 +1,866 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="ART,源码分析," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="迷途小书童" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="一. Zygote启动过程中的创建虚拟机过程Zygote的代码位于/framework/base/cmds/app_process/app_main.cpp 1234567891011121314151617181920int main(int argc, char* const argv[])&amp;#123;    ...    //[1.1]    AppRuntime runtime(argv[">
+<meta name="keywords" content="ART,源码分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ART Runtime创建(一)--整体流程">
+<meta property="og:url" content="https://wangyun137.github.io/2017/07/24/ART-Runtime创建-一-整体流程/index.html">
+<meta property="og:site_name" content="迷途小书童">
+<meta property="og:description" content="一. Zygote启动过程中的创建虚拟机过程Zygote的代码位于/framework/base/cmds/app_process/app_main.cpp 1234567891011121314151617181920int main(int argc, char* const argv[])&amp;#123;    ...    //[1.1]    AppRuntime runtime(argv[">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-07-24T06:52:24.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ART Runtime创建(一)--整体流程">
+<meta name="twitter:description" content="一. Zygote启动过程中的创建虚拟机过程Zygote的代码位于/framework/base/cmds/app_process/app_main.cpp 1234567891011121314151617181920int main(int argc, char* const argv[])&amp;#123;    ...    //[1.1]    AppRuntime runtime(argv[">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://wangyun137.github.io/2017/07/24/ART-Runtime创建-一-整体流程/"/>
+
+
+
+
+
+  <title>ART Runtime创建(一)--整体流程 | 迷途小书童</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">迷途小书童</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">遇见一个人可能只要一秒，喜欢一个人可能需要一天，忘记一个人却需要一辈子</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-/"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://wangyun137.github.io/2017/07/24/ART-Runtime创建-一-整体流程/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="王小宝">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="迷途小书童">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ART Runtime创建(一)--整体流程</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-24T14:44:11+08:00">
+                2017-07-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ART/" itemprop="url" rel="index">
+                    <span itemprop="name">ART</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="一-Zygote启动过程中的创建虚拟机过程"><a href="#一-Zygote启动过程中的创建虚拟机过程" class="headerlink" title="一. Zygote启动过程中的创建虚拟机过程"></a>一. Zygote启动过程中的创建虚拟机过程</h1><p>Zygote的代码位于<code>/framework/base/cmds/app_process/app_main.cpp</code></p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">int main(int argc, char* const argv[])</div><div class="line">&#123;</div><div class="line">    ...</div><div class="line">    //[1.1]</div><div class="line">    AppRuntime runtime(argv[0], computeArgBlockSize(argc, argv));</div><div class="line"></div><div class="line">    ... // handle args</div><div class="line"></div><div class="line">    if (zygote) &#123;</div><div class="line">        //[1.2]</div><div class="line">        runtime.start("com.android.internal.os.ZygoteInit", args, zygote);</div><div class="line">    &#125; else if (className) &#123;</div><div class="line">        runtime.start("com.android.internal.os.RuntimeInit", args, zygote);</div><div class="line">    &#125; else &#123;</div><div class="line">        fprintf(stderr, "Error: no class name or --zygote supplied.\n");</div><div class="line">        app_usage();</div><div class="line">        LOG_ALWAYS_FATAL("app_process: no class name or --zygote supplied.");</div><div class="line">        return 10;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>main</code>方法中省略的代码中主要在处理传入的参数, 从而确定当前是否要执行zygote的逻辑以及启动zygote时是否需要启动<code>system_server</code>, 这里主要两个关键调用:</p>
+<ol>
+<li><code>AppRuntime runtime(...)</code>这行代码创建了一个<code>AppRuntime</code>对象,AppRuntime继承自<code>AndroidRuntime</code></li>
+<li><code>runtime.start(...)</code>调用AppRuntime的<code>start</code>方法,由于AppRuntime并没有重写父类的start方法,所以这里实际调用的是<code>AndroidRuntime::start(...)</code></li>
+</ol>
+<h2 id="1-1-AndroidRuntime"><a href="#1-1-AndroidRuntime" class="headerlink" title="1.1 AndroidRuntime"></a>1.1 AndroidRuntime</h2><p><code>AppRuntime</code>的定义就在<code>app_main.cpp</code>中,其构造函数为:<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">AppRuntime(<span class="keyword">char</span>* argBlockStart, <span class="keyword">const</span> <span class="keyword">size_t</span> argBlockLength)</div><div class="line">        : AndroidRuntime(argBlockStart, argBlockLength)</div><div class="line">        , mClass(<span class="literal">NULL</span>)&#123;&#125;</div></pre></td></tr></table></figure></p>
+<p>可以看到AppRuntime的构造函数没做任何事,主要就是调用父类<code>AndroidRuntime</code>的构造函数, <code>AndroidRuntime</code>定义在<code>/framework/base/include/android_runtime/AndroidRuntime.h</code>,对应的源文件在<code>/framework/base/core/jni/AndroidRuntime.cpp</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//全局变量</span></div><div class="line"><span class="keyword">static</span> AndroidRuntime* gCurRuntime = <span class="literal">NULL</span>;</div><div class="line"></div><div class="line">AndroidRuntime::AndroidRuntime(<span class="keyword">char</span>* argBlockStart, <span class="keyword">const</span> <span class="keyword">size_t</span> argBlockLength) :</div><div class="line">        mExitWithoutCleanup(<span class="literal">false</span>),</div><div class="line">        mArgBlockStart(argBlockStart),</div><div class="line">        mArgBlockLength(argBlockLength)</div><div class="line">&#123;</div><div class="line">    SkGraphics::Init();</div><div class="line"></div><div class="line">    <span class="comment">// mOptions的类型是:Vector&lt;JavaVMOption&gt;</span></div><div class="line">    mOptions.setCapacity(<span class="number">20</span>);</div><div class="line"></div><div class="line">    assert(gCurRuntime == <span class="literal">NULL</span>);        <span class="comment">// one per process</span></div><div class="line">    gCurRuntime = <span class="keyword">this</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="1-2-AndroidRuntime-start"><a href="#1-2-AndroidRuntime-start" class="headerlink" title="1.2 AndroidRuntime::start"></a>1.2 AndroidRuntime::start</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">void</span> AndroidRuntime::start(<span class="keyword">const</span> <span class="keyword">char</span>* className, <span class="keyword">const</span> Vector&lt;String8&gt;&amp; options, <span class="keyword">bool</span> zygote)</div><div class="line">&#123;</div><div class="line">    ... <span class="comment">//设置ANDROID_ROOT</span></div><div class="line"></div><div class="line"></div><div class="line">    <span class="comment">/* 启动虚拟机 */</span></div><div class="line">    <span class="comment">//[1.3]</span></div><div class="line">    JniInvocation jni_invocation;</div><div class="line">    <span class="comment">//[1.4]</span></div><div class="line">    jni_invocation.Init(<span class="literal">NULL</span>);</div><div class="line">    JNIEnv* env;</div><div class="line">    <span class="comment">//[1.5], mJavaVM是AndroidRuntime的static变量,初始化为NULL</span></div><div class="line">    <span class="keyword">if</span> (startVm(&amp;mJavaVM, &amp;env, zygote) != <span class="number">0</span>) &#123;</div><div class="line">        <span class="keyword">return</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//[1.6]</span></div><div class="line">    onVmCreated(env);</div><div class="line"></div><div class="line">    <span class="comment">/* 注册android相关的jni方法 */</span></div><div class="line">    <span class="keyword">if</span> (startReg(env) &lt; <span class="number">0</span>) &#123;</div><div class="line">        ALOGE(<span class="string">"Unable to register all android natives\n"</span>);</div><div class="line">        <span class="keyword">return</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    ... <span class="comment">//调用com.android.internal.os.ZygoteInit或者RuntimeInit的main方法</span></div><div class="line"></div><div class="line">    <span class="keyword">if</span> (mJavaVM-&gt;DetachCurrentThread() != JNI_OK)</div><div class="line">        ALOGW(<span class="string">"Warning: unable to detach main thread\n"</span>);</div><div class="line">    <span class="keyword">if</span> (mJavaVM-&gt;DestroyJavaVM() != <span class="number">0</span>)</div><div class="line">        ALOGW(<span class="string">"Warning: VM did not shut down cleanly\n"</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="1-3-JniInvocation-JniInvocation"><a href="#1-3-JniInvocation-JniInvocation" class="headerlink" title="1.3 JniInvocation::JniInvocation"></a>1.3 JniInvocation::JniInvocation</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">JniInvocation::JniInvocation() :</div><div class="line">    handle_(<span class="literal">NULL</span>),</div><div class="line">    JNI_GetDefaultJavaVMInitArgs_(<span class="literal">NULL</span>),</div><div class="line">    JNI_CreateJavaVM_(<span class="literal">NULL</span>),</div><div class="line">    JNI_GetCreatedJavaVMs_(<span class="literal">NULL</span>) &#123;</div><div class="line"></div><div class="line">  LOG_ALWAYS_FATAL_IF(jni_invocation_ != <span class="literal">NULL</span>, <span class="string">"JniInvocation instance already initialized"</span>);</div><div class="line">  jni_invocation_ = <span class="keyword">this</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>JniInvocation</code>类的头文件和源文件分别在<code>/libnativehelper/include/nativehelper/JniInvocation.h</code>,<code>/libnativehelper/JniInvocation.cpp</code>.<br><code>JniInvocation</code>中有三个重要的变量:</p>
+<ul>
+<li><code>JNI_CreateJavaVM_</code>(创建虚拟机实例)</li>
+<li><code>JNI_GetCreatedJavaVMs_</code>(获取创建的虚拟机实例)</li>
+<li><code>JNI_GetDefaultJavaVMInitArgs_</code>(获取虚拟机的默认初始化参数)</li>
+</ul>
+<p>这三个变量是标准的Java虚拟机的接口,也就是说实现了这个三个接口,就可以实现一个Java虚拟机,具体可参考<a href="http://blog.csdn.net/luoshengyang/article/details/18006645" target="_blank" rel="external">罗升阳的博客</a>.<br><code>JniInvocation</code>的构造函数中初始化这三个变量为NULL</p>
+<h2 id="1-4-JniInvocation-Init"><a href="#1-4-JniInvocation-Init" class="headerlink" title="1.4 JniInvocation::Init"></a>1.4 JniInvocation::Init</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">bool</span> JniInvocation::Init(<span class="keyword">const</span> <span class="keyword">char</span>* library) &#123;</div><div class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> __ANDROID__</span></div><div class="line">  <span class="keyword">char</span> buffer[PROP_VALUE_MAX];</div><div class="line"><span class="meta">#<span class="meta-keyword">else</span></span></div><div class="line">  <span class="keyword">char</span>* buffer = <span class="literal">NULL</span>;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line">  <span class="comment">//由于传入的library是NULL,所以最后实际获取到的library是libart.so</span></div><div class="line">  library = GetLibrary(library, buffer);</div><div class="line">  <span class="keyword">const</span> <span class="keyword">int</span> kDlopenFlags = RTLD_NOW | RTLD_NODELETE;</div><div class="line">  handle_ = dlopen(library, kDlopenFlags);</div><div class="line">  <span class="keyword">if</span> (handle_ == <span class="literal">NULL</span>) &#123;</div><div class="line">    ... <span class="comment">//打开libart.so失败,直接返回;如果打开其他library失败,则尝试打开libart.so</span></div><div class="line">  &#125;</div><div class="line">  <span class="comment">//寻找并导出JNI_GetDefaultJavaVMInitArgs_</span></div><div class="line">  <span class="keyword">if</span> (!FindSymbol(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">void</span>**&gt;(&amp;JNI_GetDefaultJavaVMInitArgs_),</div><div class="line">                  <span class="string">"JNI_GetDefaultJavaVMInitArgs"</span>)) &#123;</div><div class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</div><div class="line">  &#125;</div><div class="line">  <span class="comment">//寻找并导出JNI_CreateJavaVM_</span></div><div class="line">  <span class="keyword">if</span> (!FindSymbol(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">void</span>**&gt;(&amp;JNI_CreateJavaVM_),</div><div class="line">                  <span class="string">"JNI_CreateJavaVM"</span>)) &#123;</div><div class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</div><div class="line">  &#125;</div><div class="line">  <span class="comment">//寻找并导出JNI_GetCreatedJavaVMs_</span></div><div class="line">  <span class="keyword">if</span> (!FindSymbol(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">void</span>**&gt;(&amp;JNI_GetCreatedJavaVMs_),</div><div class="line">                  <span class="string">"JNI_GetCreatedJavaVMs"</span>)) &#123;</div><div class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">return</span> <span class="literal">true</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">bool</span> JniInvocation::FindSymbol(<span class="keyword">void</span>** pointer, <span class="keyword">const</span> <span class="keyword">char</span>* symbol) &#123;</div><div class="line">  *pointer = dlsym(handle_, symbol);</div><div class="line">  ... <span class="comment">// handle error</span></div><div class="line">  <span class="keyword">return</span> <span class="literal">true</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>JniInvocation::Init</code>的主要工作就是通过<code>dlopen</code>函数打开<code>libart.so</code>,之后利用<code>dlsym</code>函数寻找并导出Java虚拟机的三个接口,这样就可以通过这三个接口创建并访问虚拟机</p>
+<h2 id="1-5-AndroidRuntime-startVm"><a href="#1-5-AndroidRuntime-startVm" class="headerlink" title="1.5 AndroidRuntime::startVm"></a>1.5 AndroidRuntime::startVm</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> AndroidRuntime::startVm(JavaVM** pJavaVM, JNIEnv** pEnv, <span class="keyword">bool</span> zygote)</div><div class="line">&#123;</div><div class="line">    ... <span class="comment">//解析启动参数</span></div><div class="line"></div><div class="line">    initArgs.version = JNI_VERSION_1_4;</div><div class="line">    initArgs.options = mOptions.editArray();</div><div class="line">    initArgs.nOptions = mOptions.size();</div><div class="line">    initArgs.ignoreUnrecognized = JNI_FALSE;</div><div class="line"></div><div class="line">     <span class="comment">/**</span></div><div class="line">     * 创建虚拟机, 每一个进程有一个JavaVM*, 每一个线程有一个JNIEnv*</div><div class="line">     */</div><div class="line">    <span class="comment">//[1.5.1]</span></div><div class="line">    <span class="keyword">if</span> (JNI_CreateJavaVM(pJavaVM, pEnv, &amp;initArgs) &lt; <span class="number">0</span>) &#123;</div><div class="line">        ALOGE(<span class="string">"JNI_CreateJavaVM failed\n"</span>);</div><div class="line">        <span class="keyword">return</span> <span class="number">-1</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">return</span> <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>Android::startVm</code>主要做了两项工作:</p>
+<ol>
+<li>解析虚拟机启动参数</li>
+<li>调用<code>JNI_CreateJavaVM</code>创建虚拟机.源码的注释中清楚地说明了创建虚拟机后<strong>每一个进程都应该具有一个JavaVM指针,而每一个线程都具有一个JNIEnv指针</strong>.<code>JNI_CreateJavaVM</code>实现在<code>/libnativehelper/JniInvocation.cpp</code>中,其主要逻辑就是返回之前从<code>libart.so</code>中导出的<code>JNI_CreateJavaVM_</code>接口,即<code>JNI_CreateJavaVM</code>的真正实现是由<code>libart.so</code>完成的</li>
+</ol>
+<h3 id="1-5-1-JniInvocation-JNI-CreateJavaVM"><a href="#1-5-1-JniInvocation-JNI-CreateJavaVM" class="headerlink" title="1.5.1 JniInvocation::JNI_CreateJavaVM"></a>1.5.1 JniInvocation::JNI_CreateJavaVM</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">extern</span> <span class="string">"C"</span> <span class="function">jint <span class="title">JNI_CreateJavaVM</span><span class="params">(JavaVM** p_vm, JNIEnv** p_env, <span class="keyword">void</span>* vm_args)</span> </span>&#123;</div><div class="line">  <span class="keyword">return</span> JniInvocation::GetJniInvocation().JNI_CreateJavaVM(p_vm, p_env, vm_args);</div><div class="line">&#125;</div><div class="line"></div><div class="line">jint JniInvocation::JNI_CreateJavaVM(JavaVM** p_vm, JNIEnv** p_env, <span class="keyword">void</span>* vm_args) &#123;</div><div class="line">  <span class="keyword">return</span> JNI_CreateJavaVM_(p_vm, p_env, vm_args);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>JNI_CreateJavaVM_</code>就是之前在<code>JniInvocation::Init</code>中导出的函数指针</p>
+<h2 id="1-6-AppRuntime-onVmCreated"><a href="#1-6-AppRuntime-onVmCreated" class="headerlink" title="1.6 AppRuntime::onVmCreated"></a>1.6 AppRuntime::onVmCreated</h2><p><code>AndroidRuntime::onVmCreated</code>是一个虚方法,AndroidRuntime类并没有实现这个方法,具体实现是由子类<code>AppRuntime</code>实现<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">virtual</span> <span class="keyword">void</span> <span class="title">onVmCreated</span><span class="params">(JNIEnv* env)</span></span>&#123;</div><div class="line">    <span class="keyword">if</span> (mClassName.isEmpty()) &#123;</div><div class="line">        <span class="keyword">return</span>; <span class="comment">// Zygote. Nothing to do here.</span></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">char</span>* slashClassName = toSlashClassName(mClassName.<span class="built_in">string</span>());</div><div class="line">    mClass = env-&gt;FindClass(slashClassName);</div><div class="line">    <span class="keyword">if</span> (mClass == <span class="literal">NULL</span>) &#123;</div><div class="line">        ALOGE(<span class="string">"ERROR: could not find class '%s'\n"</span>, mClassName.<span class="built_in">string</span>());</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">free</span>(slashClassName);</div><div class="line"></div><div class="line">    mClass = <span class="keyword">reinterpret_cast</span>&lt;jclass&gt;(env-&gt;NewGlobalRef(mClass));</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>从代码中可以看出,如果是Zygote的启动,则<code>onVmCreated</code>实际什么也没有做</p>
+<h1 id="二-libart-so中的JNI-CreateJavaVM"><a href="#二-libart-so中的JNI-CreateJavaVM" class="headerlink" title="二. libart.so中的JNI_CreateJavaVM"></a>二. libart.so中的JNI_CreateJavaVM</h1><p>libart.so的代码都位于<code>/art</code>目录下,而<code>JNI_CreateJavaVM</code>定义在<code>/art/runtime/java_vm_ext.cc</code>中:<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">extern</span> <span class="string">"C"</span> <span class="function">jint <span class="title">JNI_CreateJavaVM</span><span class="params">(JavaVM** p_vm, JNIEnv** p_env, <span class="keyword">void</span>* vm_args)</span> </span>&#123;</div><div class="line">  <span class="function">ScopedTrace <span class="title">trace</span><span class="params">(__FUNCTION__)</span></span>;</div><div class="line">  <span class="keyword">const</span> JavaVMInitArgs* args = <span class="keyword">static_cast</span>&lt;JavaVMInitArgs*&gt;(vm_args);</div><div class="line">  <span class="comment">//检查Jni版本号</span></div><div class="line">  <span class="keyword">if</span> (IsBadJniVersion(args-&gt;version)) &#123;</div><div class="line">    LOG(ERROR) &lt;&lt; <span class="string">"Bad JNI version passed to CreateJavaVM: "</span> &lt;&lt; args-&gt;version;</div><div class="line">    <span class="keyword">return</span> JNI_EVERSION;</div><div class="line">  &#125;</div><div class="line">  RuntimeOptions options;</div><div class="line">  <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; args-&gt;nOptions; ++i) &#123;</div><div class="line">    JavaVMOption* option = &amp;args-&gt;options[i];</div><div class="line">    options.push_back(<span class="built_in">std</span>::make_pair(<span class="built_in">std</span>::<span class="built_in">string</span>(option-&gt;optionString), option-&gt;extraInfo));</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">bool</span> ignore_unrecognized = args-&gt;ignoreUnrecognized;</div><div class="line">  <span class="comment">//[2.1] 创建Runtime</span></div><div class="line">  <span class="keyword">if</span> (!Runtime::Create(options, ignore_unrecognized)) &#123;</div><div class="line">    <span class="keyword">return</span> JNI_ERR;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  <span class="comment">//初始化native loader, 确保在使用JNI之前所需的环境都已经设置好</span></div><div class="line">  android::InitializeNativeLoader();</div><div class="line"></div><div class="line">  Runtime* runtime = Runtime::Current();</div><div class="line">  <span class="comment">//[2.2] 启动Runtime</span></div><div class="line">  <span class="keyword">bool</span> started = runtime-&gt;Start();</div><div class="line">  <span class="keyword">if</span> (!started) &#123;</div><div class="line">    <span class="keyword">delete</span> Thread::Current()-&gt;GetJniEnv();</div><div class="line">    <span class="keyword">delete</span> runtime-&gt;GetJavaVM();</div><div class="line">    LOG(WARNING) &lt;&lt; <span class="string">"CreateJavaVM failed"</span>;</div><div class="line">    <span class="keyword">return</span> JNI_ERR;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  <span class="comment">//获取JNIEnv和JavaVM,返回给上层</span></div><div class="line">  *p_env = Thread::Current()-&gt;GetJniEnv();</div><div class="line">  *p_vm = runtime-&gt;GetJavaVM();</div><div class="line">  <span class="keyword">return</span> JNI_OK;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="2-1-Runtime-Create"><a href="#2-1-Runtime-Create" class="headerlink" title="2.1 Runtime::Create"></a>2.1 Runtime::Create</h2><p>代码位于<code>/art/runtime/runtime.cc</code><br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">bool</span> Runtime::Create(<span class="keyword">const</span> RuntimeOptions&amp; raw_options, <span class="keyword">bool</span> ignore_unrecognized) &#123;</div><div class="line">  RuntimeArgumentMap runtime_options;</div><div class="line">  <span class="comment">//首先调用ParseOptions,之后再调用另一个重载版本的Create</span></div><div class="line">  <span class="keyword">return</span> ParseOptions(raw_options, ignore_unrecognized, &amp;runtime_options) &amp;&amp;</div><div class="line">      Create(<span class="built_in">std</span>::move(runtime_options));</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">bool</span> Runtime::Create(RuntimeArgumentMap&amp;&amp; runtime_options) &#123;</div><div class="line">  <span class="keyword">if</span> (Runtime::instance_ != <span class="literal">nullptr</span>) &#123;</div><div class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</div><div class="line">  &#125;</div><div class="line">  instance_ = <span class="keyword">new</span> Runtime;</div><div class="line">  <span class="comment">//调用Runtime::Init(), [2.1.1]</span></div><div class="line">  <span class="keyword">if</span> (!instance_-&gt;Init(<span class="built_in">std</span>::move(runtime_options))) &#123;</div><div class="line">    <span class="comment">// <span class="doctag">TODO:</span> Currently deleting the instance will abort the runtime on destruction. Now This will</span></div><div class="line">    <span class="comment">// leak memory, instead. Fix the destructor. b/19100793.</span></div><div class="line">    <span class="comment">// delete instance_;</span></div><div class="line">    instance_ = <span class="literal">nullptr</span>;</div><div class="line">    <span class="keyword">return</span> <span class="literal">false</span>;</div><div class="line">  &#125;</div><div class="line">  <span class="keyword">return</span> <span class="literal">true</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><code>ParseOptions()</code>最终会调用<code>ParsedOptions::DoParse</code>方法(<code>/art/runtime/parsed_options.cc</code>),主要就是用来解析传入的启动参数,这里暂时先不分析其主要逻辑.从代码中可以看到<code>Create</code>函数主要操作视调用<code>Runtime::Init</code>函数</p>
+<h3 id="2-1-1-Runtime-Init"><a href="#2-1-1-Runtime-Init" class="headerlink" title="2.1.1 Runtime::Init"></a>2.1.1 Runtime::Init</h3><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div></pre></td><td class="code"><pre><div class="line">bool Runtime::Init(RuntimeArgumentMap&amp;&amp; runtime_options_in) &#123;</div><div class="line">  RuntimeArgumentMap runtime_options(std::move(runtime_options_in));</div><div class="line">  ScopedTrace trace(__FUNCTION__);</div><div class="line"></div><div class="line">  MemMap::Init();</div><div class="line">  using Opt = RuntimeArgumentMap;</div><div class="line">  QuasiAtomic::Startup();</div><div class="line"></div><div class="line">  //创建OatFileManager, OatFileManager主要用来加载oat文件</div><div class="line">  oat_file_manager_ = new OatFileManager;</div><div class="line"></div><div class="line">  Thread::SetSensitiveThreadHook(runtime_options.GetOrDefault(Opt::HookIsSensitiveThread));</div><div class="line">  Monitor::Init(runtime_options.GetOrDefault(Opt::LockProfThreshold));</div><div class="line"></div><div class="line">  //从传入的参数中初始化boot_class_path_string_, class_path_string_, patchoat_executable_等变量</div><div class="line">  //创建monitor_list_, monitor_pool_, thread_list_, intern_table_</div><div class="line">  //继续获取一些基本变量</div><div class="line">  ...</div><div class="line"></div><div class="line">  //查看参数中是否指定了解释执行,如果指定,则告知虚拟机所有代码都是解释执行</div><div class="line">  if (runtime_options.GetOrDefault(Opt::Interpret)) &#123;</div><div class="line">    GetInstrumentation()-&gt;ForceInterpretOnly();</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  //仍然是从传入的参数中初始化一些基础变量, 并获取CompilerFilter</div><div class="line">  ...</div><div class="line"></div><div class="line">  //创建堆Heap</div><div class="line">  heap_ = new gc::Heap(...);</div><div class="line">  if (!heap_-&gt;HasBootImageSpace() &amp;&amp; !allow_dex_file_fallback_) &#123;</div><div class="line">    LOG(ERROR) &lt;&lt; "Dex file fallback disabled, cannot continue without image.";</div><div class="line">    return false;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  ... //获取dump_gc_performance_on_shutdown_, 配置Jdwp</div><div class="line"></div><div class="line">  //创建JIT选项,JIT是7.0中新增的,用来提升代码执行效率</div><div class="line">  jit_options_.reset(jit::JitOptions::CreateFromRuntimeArguments(runtime_options));</div><div class="line">  //如果此时是dex2oat程序,dex2oat执行时也会创建一个Runtime用来编译dex文件,此时不需要开启JIT选项</div><div class="line">  if (IsAotCompiler()) &#123;</div><div class="line">    jit_options_-&gt;SetUseJitCompilation(false);</div><div class="line">    jit_options_-&gt;SetSaveProfilingInfo(false);</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  //创建lamba_box_table, arena_pool_, jit_arena_pool_, 如果是64位架构且当前是dex2oat, 获取low_4gb_arena_pool_</div><div class="line">  ...</div><div class="line">  //创建线性分配器linear_alloc_,LinearAlloc创建时会用到上面创建的low_4gb_arena_pool_(64位架构且是dex2oat时)或者arena_pool_</div><div class="line">  linear_alloc_.reset(CreateLinearAlloc());</div><div class="line"></div><div class="line">  BlockSignals();</div><div class="line">  //初始化SIGSEGV信号处理函数为HandleUnexpectedSignal</div><div class="line">  InitPlatformSignalHandlers();</div><div class="line"></div><div class="line">  //arm, arm64, x86, mips, mips64, thumb2, x86_64架构下,</div><div class="line">  //implicit_null_checks_ = true</div><div class="line">  //implicit_so_checks_ !(RUNNING_ON_MEMORY_TOOL &amp;&amp; kMemoryToolIsValgrind)</div><div class="line">  ....</div><div class="line"></div><div class="line">  ... //处理no_sig_chain = false时的情况(no_sig_chain在之前根据传入的参数获取)</div><div class="line"></div><div class="line">  //创建JavaVMExt</div><div class="line">  java_vm_ = new JavaVMExt(this, runtime_options);</div><div class="line"></div><div class="line">  //创建线程TLS</div><div class="line">  Thread::Startup();</div><div class="line">  //attach线程, 创建Thread对象,初始化Thread对象</div><div class="line">  Thread* self = Thread::Attach("main", false, nullptr, false);</div><div class="line"></div><div class="line">  // Set us to runnable so tools using a runtime can allocate and GC by default</div><div class="line">  self-&gt;TransitionFromSuspendedToRunnable();</div><div class="line"></div><div class="line">  // 验证heap</div><div class="line">  GetHeap()-&gt;EnableObjectValidation();</div><div class="line"></div><div class="line">  //创建ClassLinker</div><div class="line">  class_linker_ = new ClassLinker(intern_table_);</div><div class="line">  if (GetHeap()-&gt;HasBootImageSpace()) &#123;</div><div class="line">    ...</div><div class="line">    bool result = class_linker_-&gt;InitFromBootImage(&amp;error_msg);</div><div class="line">    ...</div><div class="line">    if (boot_class_path_string_.empty()) &#123;</div><div class="line">      // 如果bootclasspath没有显示指定,则从加载的dex文件列表中进行构造,这里的dex文件列表是系统构建时已经创建好的众多预加载的文件</div><div class="line">      ...</div><div class="line">    &#125;</div><div class="line">    // 在intern_table_中添加boot image space;将boo image space添加到当前ClassLinker的ClassTable中</div><div class="line">    ...</div><div class="line">  &#125; else &#123;</div><div class="line">    ....</div><div class="line">    if (!class_linker_-&gt;InitWithoutImage(std::move(boot_class_path), &amp;error_msg)) &#123;</div><div class="line">      return false;</div><div class="line">    &#125;</div><div class="line">    ...</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  ... //MethodTrace, ProfilerOptions, Trace</div><div class="line"></div><div class="line">  //提前分配一个OutOfMemoryError</div><div class="line">  self-&gt;ThrowNewException("Ljava/lang/OutOfMemoryError;",</div><div class="line">                          "OutOfMemoryError thrown while trying to throw OutOfMemoryError; "</div><div class="line">                          "no stack trace available");</div><div class="line">  pre_allocated_OutOfMemoryError_ = GcRoot&lt;mirror::Throwable&gt;(self-&gt;GetException());</div><div class="line">  self-&gt;ClearException();</div><div class="line"></div><div class="line">  //提前分配一个NoClassDefFoundError</div><div class="line">  self-&gt;ThrowNewException("Ljava/lang/NoClassDefFoundError;",</div><div class="line">                          "Class not found using the boot class loader; no stack trace available");</div><div class="line">  pre_allocated_NoClassDefFoundError_ = GcRoot&lt;mirror::Throwable&gt;(self-&gt;GetException());</div><div class="line">  self-&gt;ClearException();</div><div class="line"></div><div class="line">  ... //从传入的参数中获取native_bridge_file_name</div><div class="line"></div><div class="line">  return true;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>Runtime::Init</code>方法代码量较大,整个过程中创建或者初始化了很多工具组件如<code>MemMap, QuasiAtomic</code>等,并且从传入的参数依次获取了一些基础变量如<code>boot_class_path_string_, class_path_string_</code>等,之后还设置信号处理函数等,不过整体来看<code>Init</code>方法的主要逻辑很清楚,分别做了以下几件事:</p>
+<ol>
+<li>创建<code>OatFileManager</code>对象,<code>OatFileManager</code>是在7.0中新增的工具类,Runtime在解析读取oat文件都是通过这个工具类完成</li>
+<li>创建了<code>Heap</code>(整个创建过程比较冗长,复杂)</li>
+<li>根据传入参数配置JIT选项,如果当前是dex2oat则不配置JIT</li>
+<li>创建<code>LinearAlloc</code></li>
+<li>创建<code>JavaVMExt</code></li>
+<li>创建一个线程,同时attach线程(attach的过程实际就是创建Thread对象并初始化Thread对象的过程)</li>
+<li>创建<code>ClassLinker</code>,如果有<code>BootImageSpace</code>则调用<code>ClassLinker::InitFromBootImage</code>完成ClassLinker的初始化;如果没有<code>BootImageSpace</code>,则调用<code>ClassLinker::InitWithoutImage</code>来完成初始化</li>
+<li>提前分配一个<code>OutOfMemoryError</code>和<code>NoClassDefFoundError</code></li>
+</ol>
+<blockquote>
+<p><code>Heap</code>的创建过程比较复杂,个人觉得需要单独整理一个篇幅来学习, <code>OatFileManager</code>和<code>LinearAlloc</code>的构造函数都很简单, 另外<code>ClassLinker</code>的初始化过程也较为繁琐,加上<code>ClassLinker</code>类比较重要,同样需要单独的篇幅来学习</p>
+</blockquote>
+<h3 id="2-1-2-JavaVMExt-JavaVMExt"><a href="#2-1-2-JavaVMExt-JavaVMExt" class="headerlink" title="2.1.2 JavaVMExt::JavaVMExt"></a>2.1.2 JavaVMExt::JavaVMExt</h3><p><code>JavaVMExt</code>的源文件是<code>/art/runtime/java_vm_ext.cc</code>,<code>JavaVMExt</code>继承自<code>JavaVM</code>:<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">JavaVMExt</span> :</span> <span class="keyword">public</span> JavaVM &#123;</div><div class="line">  ...</div><div class="line">&#125;;</div></pre></td></tr></table></figure></p>
+<blockquote>
+<p><code>JavaVM</code>定义在<code>/libnativehelper/include/nativehelper/jni.h</code>中</p>
+</blockquote>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">JavaVMExt::JavaVMExt(Runtime* runtime, <span class="keyword">const</span> RuntimeArgumentMap&amp; runtime_options)</div><div class="line">    : runtime_(runtime),</div><div class="line">      check_jni_abort_hook_(<span class="literal">nullptr</span>),</div><div class="line">      check_jni_abort_hook_data_(<span class="literal">nullptr</span>),</div><div class="line">      check_jni_(<span class="literal">false</span>),  <span class="comment">// Initialized properly in the constructor body below.</span></div><div class="line">      force_copy_(runtime_options.Exists(RuntimeArgumentMap::JniOptsForceCopy)),</div><div class="line">      tracing_enabled_(runtime_options.Exists(RuntimeArgumentMap::JniTrace)</div><div class="line">                       || VLOG_IS_ON(third_party_jni)),</div><div class="line">      trace_(runtime_options.GetOrDefault(RuntimeArgumentMap::JniTrace)),</div><div class="line">      globals_lock_(<span class="string">"JNI global reference table lock"</span>),</div><div class="line">      globals_(gGlobalsInitial, gGlobalsMax, kGlobal),</div><div class="line">      libraries_(<span class="keyword">new</span> Libraries),</div><div class="line">      unchecked_functions_(&amp;gJniInvokeInterface),</div><div class="line">      weak_globals_lock_(<span class="string">"JNI weak global reference table lock"</span>, kJniWeakGlobalsLock),</div><div class="line">      weak_globals_(kWeakGlobalsInitial, kWeakGlobalsMax, kWeakGlobal),</div><div class="line">      allow_accessing_weak_globals_(<span class="literal">true</span>),</div><div class="line">      weak_globals_add_condition_(<span class="string">"weak globals add condition"</span>, weak_globals_lock_) &#123;</div><div class="line">  functions = unchecked_functions_;</div><div class="line">  SetCheckJniEnabled(runtime_options.Exists(RuntimeArgumentMap::CheckJni));</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可以看到,<code>JavaVMExt</code>的构造函数存储了<code>Runtme</code>指针,之后初始化了自身变量</p>
+<h3 id="2-1-3-Thread-Startup"><a href="#2-1-3-Thread-Startup" class="headerlink" title="2.1.3 Thread::Startup"></a>2.1.3 Thread::Startup</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">void</span> Thread::Startup() &#123;</div><div class="line">  ...</div><div class="line">  <span class="comment">//调用pthread_key_create来创建线程私有数据TLS</span></div><div class="line">  CHECK_PTHREAD_CALL(pthread_key_create, (&amp;Thread::pthread_key_self_, Thread::ThreadExitCallback),</div><div class="line">                     <span class="string">"self key"</span>);</div><div class="line">  ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="2-1-4-Thread-Attach"><a href="#2-1-4-Thread-Attach" class="headerlink" title="2.1.4 Thread::Attach"></a>2.1.4 Thread::Attach</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">Thread* Thread::Attach(<span class="keyword">const</span> <span class="keyword">char</span>* thread_name, <span class="keyword">bool</span> as_daemon, jobject thread_group,</div><div class="line">                       <span class="keyword">bool</span> create_peer) &#123;</div><div class="line">  Runtime* runtime = Runtime::Current();</div><div class="line">  ...</div><div class="line">  Thread* self;</div><div class="line">  &#123;</div><div class="line">    <span class="function">MutexLock <span class="title">mu</span><span class="params">(<span class="literal">nullptr</span>, *Locks::runtime_shutdown_lock_)</span></span>;</div><div class="line">    <span class="keyword">if</span> (runtime-&gt;IsShuttingDownLocked()) &#123;</div><div class="line">      ...</div><div class="line">      <span class="keyword">return</span> <span class="literal">nullptr</span>;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">      Runtime::Current()-&gt;StartThreadBirth();</div><div class="line">      <span class="comment">//创建Thread对象</span></div><div class="line">      self = <span class="keyword">new</span> Thread(as_daemon);</div><div class="line">      <span class="comment">//初始化Thread对象</span></div><div class="line">      <span class="keyword">bool</span> init_success = self-&gt;Init(runtime-&gt;GetThreadList(), runtime-&gt;GetJavaVM());</div><div class="line">      Runtime::Current()-&gt;EndThreadBirth();</div><div class="line">      <span class="keyword">if</span> (!init_success) &#123;</div><div class="line">        <span class="keyword">delete</span> self;</div><div class="line">        <span class="keyword">return</span> <span class="literal">nullptr</span>;</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">  <span class="comment">//设置创建String对象的entry point为StringFactory</span></div><div class="line">  self-&gt;InitStringEntryPoints();  </div><div class="line">  self-&gt;SetState(kNative);</div><div class="line"></div><div class="line">  ... <span class="comment">//传入的create_peer为false</span></div><div class="line"></div><div class="line">  &#123;</div><div class="line">    <span class="function">ScopedObjectAccess <span class="title">soa</span><span class="params">(self)</span></span>;</div><div class="line">    Dbg::PostThreadStart(self);</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  <span class="keyword">return</span> self;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="2-2-Runtime-Start"><a href="#2-2-Runtime-Start" class="headerlink" title="2.2 Runtime::Start"></a>2.2 Runtime::Start</h2><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">bool</span> Runtime::Start() &#123;</div><div class="line"></div><div class="line">  ..</div><div class="line"></div><div class="line">  Thread* self = Thread::Current();</div><div class="line">  self-&gt;TransitionFromRunnableToSuspended(kNative);</div><div class="line">  started_ = <span class="literal">true</span>;</div><div class="line"></div><div class="line">  <span class="comment">// 创建JIT</span></div><div class="line">  <span class="keyword">if</span> (jit_options_-&gt;UseJitCompilation() || jit_options_-&gt;GetSaveProfilingInfo()) &#123;</div><div class="line">    <span class="built_in">std</span>::<span class="built_in">string</span> error_msg;</div><div class="line">    <span class="keyword">if</span> (!IsZygote()) &#123;</div><div class="line">      <span class="comment">// If we are the zygote then we need to wait until after forking to create the code cache</span></div><div class="line">      <span class="comment">// due to SELinux restrictions on r/w/x memory regions.</span></div><div class="line">      CreateJit();</div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (jit_options_-&gt;UseJitCompilation()) &#123;</div><div class="line">      <span class="keyword">if</span> (!jit::Jit::LoadCompilerLibrary(&amp;error_msg)) &#123;</div><div class="line">        <span class="comment">// Try to load compiler pre zygote to reduce PSS. b/27744947</span></div><div class="line">        LOG(WARNING) &lt;&lt; <span class="string">"Failed to load JIT compiler with error "</span> &lt;&lt; error_msg;</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  ...</div><div class="line"></div><div class="line">  &#123;</div><div class="line">    <span class="function">ScopedTrace <span class="title">trace2</span><span class="params">(<span class="string">"InitNativeMethods"</span>)</span></span>;</div><div class="line">    <span class="comment">//初始化JniConstants的常量,JniConstants定义在/libnativehelper/include/native/JniConstants.h</span></div><div class="line">    <span class="comment">//注册runtime中的native method,主要对应于Java层的java.lang,dalvik.system这些包下的类</span></div><div class="line">    InitNativeMethods();</div><div class="line">  &#125;</div><div class="line">  <span class="comment">//创建main_thread_group和system_thread_group</span></div><div class="line">  InitThreadGroups(self);</div><div class="line">  <span class="comment">//创建一个java.lang.Thread对象,并将Thread.nativePeer变量设为ART中的Thread对象self</span></div><div class="line">  Thread::FinishStartup();</div><div class="line">  <span class="comment">//调用ClassLoader.getSystemClassLoader创建系统ClassLoader</span></div><div class="line">  system_class_loader_ = CreateSystemClassLoader(<span class="keyword">this</span>);</div><div class="line"></div><div class="line">  <span class="comment">//如果当前处于Zygote模式, 利用unshare,以及mount的SLAVE模式创建外部存储文件系统</span></div><div class="line">  <span class="keyword">if</span> (is_zygote_) &#123;</div><div class="line">    <span class="keyword">if</span> (!InitZygote()) &#123;</div><div class="line">      <span class="keyword">return</span> <span class="literal">false</span>;</div><div class="line">    &#125;</div><div class="line">  &#125; <span class="keyword">else</span> &#123;</div><div class="line">    <span class="keyword">if</span> (is_native_bridge_loaded_) &#123;</div><div class="line">      PreInitializeNativeBridge(<span class="string">"."</span>);</div><div class="line">    &#125;</div><div class="line">    NativeBridgeAction action = force_native_bridge_</div><div class="line">        ? NativeBridgeAction::kInitialize</div><div class="line">        : NativeBridgeAction::kUnload;</div><div class="line">    InitNonZygoteOrPostFork(self-&gt;GetJniEnv(),</div><div class="line">                            <span class="comment">/* is_system_server */</span> <span class="literal">false</span>,</div><div class="line">                            action,</div><div class="line">                            GetInstructionSetString(kRuntimeISA));</div><div class="line">  &#125;</div><div class="line">  <span class="comment">//启动java.lang.Daemon中定义的后台线程</span></div><div class="line">  StartDaemonThreads();</div><div class="line"></div><div class="line">  &#123;</div><div class="line">    <span class="function">ScopedObjectAccess <span class="title">soa</span><span class="params">(self)</span></span>;</div><div class="line">    self-&gt;GetJniEnv()-&gt;locals.AssertEmpty();</div><div class="line">  &#125;</div><div class="line">  finished_starting_ = <span class="literal">true</span>;</div><div class="line"></div><div class="line">  <span class="comment">//如果ProfilerOptions开启且存在profile文件,打开profile文件</span></div><div class="line">  <span class="keyword">if</span> (profiler_options_.IsEnabled() &amp;&amp; !profile_output_filename_.empty()) &#123;</div><div class="line">    <span class="keyword">int</span> fd = open(profile_output_filename_.c_str(), O_RDWR|O_CREAT|O_EXCL, <span class="number">0660</span>);</div><div class="line">    <span class="keyword">if</span> (fd &gt;= <span class="number">0</span>) &#123;</div><div class="line">      close(fd);</div><div class="line">    &#125; <span class="keyword">else</span> <span class="keyword">if</span> (errno != EEXIST) &#123;</div><div class="line">      LOG(WARNING) &lt;&lt; <span class="string">"Failed to access the profile file. Profiler disabled."</span>;</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  ... <span class="comment">//Trace相关</span></div><div class="line"></div><div class="line">  <span class="keyword">return</span> <span class="literal">true</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>Runtime::Start</code>主要操作是:</p>
+<ol>
+<li>如果当前不是Zygote,则创建JIT</li>
+<li>初始化<code>libnativehelper.so</code>中定义的<code>JniConstants</code>,注册<code>java.lang</code>,<code>dalvik.system</code>包下的本地方法</li>
+<li>创建main_thread_group和system_thread_group</li>
+<li>创建一个java.lang.Thread对象,并将Thread.nativePeer变量设为ART中的Thread对象self</li>
+<li>调用ClassLoader.getSystemClassLoader创建系统ClassLoader</li>
+<li>如果当前处于Zygote模式, 利用unshare,以及mount的SLAVE模式创建外部存储文件系统;如果不是,则初始化native bridge</li>
+<li>启动java.lang.Daemon中定义的后台线程</li>
+<li>判断<code>ProfilerOptions</code>是否开启,如果开启且profile文件不为空,则打开profile文件(Profile文件是在7.0中跟JIT一起加入的, 主要为了提升运行效率)</li>
+<li>查看<code>Trace</code>相关配置,如果不为空,则开启Trace</li>
+</ol>
+<h1 id="三-总结"><a href="#三-总结" class="headerlink" title="三.总结"></a>三.总结</h1><p>Java虚拟机有三个标准接口,只要实现这三个接口,就可以实现一个自定义的虚拟机,这三个接口分别是:<code>JNI_CreateJavaVM_, JNI_GetCreatedJavaVMs_, JNI_GetDefaultJavaVMInitArgs_</code>,这三个接口的具体实现都位于<code>libart.so</code>动态库中,Zygote进程是通过<code>dlopen</code>打开<code>libart.so</code>,之后通过<code>dlsym</code>分别导出这三个接口,并调用<code>JNI_CreateJavaVM_</code>创建虚拟机Runtime实例,并将Runtime实例保存在<code>JavaVM</code>结构,<code>JavaVM</code>代表的就是虚拟机执行环境(在<code>libart.so</code>中实际返回的是其子类<code>JavaVMExt</code>).</p>
+<blockquote>
+<p>需要留意的是,源码的注释中写的很清楚,每一个进程都必须有一个<code>JavaVM</code>,而每一个线程都有一个<code>JNIEnv</code></p>
+</blockquote>
+<p><code>JNI_CreateJavaVM_</code>创建虚拟机Runtime的过程可以总结为:</p>
+<ol>
+<li>解析传入的参数,将参数以<code>key-value</code>的形式组合在一起</li>
+<li>调用<code>Runtime::Create</code>创建Runtime实例,创建的过程中还会依次创建<code>OatFileManager, Heap, LinearAlloc, JavaVMExt, Thread, ClassLinker</code>,同时初始化线程和ClassLinker</li>
+<li>调用<code>Runtime::Start</code>完成最后的初始化工作</li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/images/wechat.jpg" alt="王小宝 WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/images/alipay.jpg" alt="王小宝 Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ART/" rel="tag"># ART</a>
+          
+            <a href="/tags/源码分析/" rel="tag"># 源码分析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/24/ART的反射调用-二-创建对象实例/" rel="next" title="ART的反射调用(二)--创建对象实例">
+                <i class="fa fa-chevron-left"></i> ART的反射调用(二)--创建对象实例
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/24/ART-Runtime-创建-二-启动参数/" rel="prev" title="ART Runtime 创建(二)--启动参数">
+                ART Runtime 创建(二)--启动参数 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.jpg"
+               alt="王小宝" />
+          <p class="site-author-name" itemprop="name">王小宝</p>
+           
+              <p class="site-description motion-element" itemprop="description">90后迷途小书童</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/wangyun137" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.jianshu.com/u/73df471e39bb" target="_blank" title="简书">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  简书
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一-Zygote启动过程中的创建虚拟机过程"><span class="nav-number">1.</span> <span class="nav-text">一. Zygote启动过程中的创建虚拟机过程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-AndroidRuntime"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 AndroidRuntime</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-AndroidRuntime-start"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 AndroidRuntime::start</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-JniInvocation-JniInvocation"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 JniInvocation::JniInvocation</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-4-JniInvocation-Init"><span class="nav-number">1.4.</span> <span class="nav-text">1.4 JniInvocation::Init</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-5-AndroidRuntime-startVm"><span class="nav-number">1.5.</span> <span class="nav-text">1.5 AndroidRuntime::startVm</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-5-1-JniInvocation-JNI-CreateJavaVM"><span class="nav-number">1.5.1.</span> <span class="nav-text">1.5.1 JniInvocation::JNI_CreateJavaVM</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-6-AppRuntime-onVmCreated"><span class="nav-number">1.6.</span> <span class="nav-text">1.6 AppRuntime::onVmCreated</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二-libart-so中的JNI-CreateJavaVM"><span class="nav-number">2.</span> <span class="nav-text">二. libart.so中的JNI_CreateJavaVM</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#2-1-Runtime-Create"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 Runtime::Create</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-1-Runtime-Init"><span class="nav-number">2.1.1.</span> <span class="nav-text">2.1.1 Runtime::Init</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-2-JavaVMExt-JavaVMExt"><span class="nav-number">2.1.2.</span> <span class="nav-text">2.1.2 JavaVMExt::JavaVMExt</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-3-Thread-Startup"><span class="nav-number">2.1.3.</span> <span class="nav-text">2.1.3 Thread::Startup</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-4-Thread-Attach"><span class="nav-number">2.1.4.</span> <span class="nav-text">2.1.4 Thread::Attach</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-2-Runtime-Start"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 Runtime::Start</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三-总结"><span class="nav-number">3.</span> <span class="nav-text">三.总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">王小宝</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

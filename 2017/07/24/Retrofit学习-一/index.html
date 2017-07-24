@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Retrofit,开源项目学习," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="迷途小书童" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="一. 使用用例123456789101112131415161718//步骤【1】OkHttpclient client = new OkHttpClient.Builder().build();Retrofit retrofit = new Retrofit.Builder()	.client(client)       .baseUrl(&quot;http://localhost:4567/&quot;)">
+<meta name="keywords" content="Retrofit,开源项目学习">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Retrofit学习(一)">
+<meta property="og:url" content="https://wangyun137.github.io/2017/07/24/Retrofit学习-一/index.html">
+<meta property="og:site_name" content="迷途小书童">
+<meta property="og:description" content="一. 使用用例123456789101112131415161718//步骤【1】OkHttpclient client = new OkHttpClient.Builder().build();Retrofit retrofit = new Retrofit.Builder()	.client(client)       .baseUrl(&quot;http://localhost:4567/&quot;)">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-07-24T07:21:00.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Retrofit学习(一)">
+<meta name="twitter:description" content="一. 使用用例123456789101112131415161718//步骤【1】OkHttpclient client = new OkHttpClient.Builder().build();Retrofit retrofit = new Retrofit.Builder()	.client(client)       .baseUrl(&quot;http://localhost:4567/&quot;)">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://wangyun137.github.io/2017/07/24/Retrofit学习-一/"/>
+
+
+
+
+
+  <title>Retrofit学习(一) | 迷途小书童</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">迷途小书童</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">遇见一个人可能只要一秒，喜欢一个人可能需要一天，忘记一个人却需要一辈子</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-/"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://wangyun137.github.io/2017/07/24/Retrofit学习-一/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="王小宝">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="迷途小书童">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Retrofit学习(一)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-24T15:18:55+08:00">
+                2017-07-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Retrofit/" itemprop="url" rel="index">
+                    <span itemprop="name">Retrofit</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="一-使用用例"><a href="#一-使用用例" class="headerlink" title="一. 使用用例"></a>一. 使用用例</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//步骤【1】</span></div><div class="line">OkHttpclient client = <span class="keyword">new</span> OkHttpClient.Builder().build();</div><div class="line">Retrofit retrofit = <span class="keyword">new</span> Retrofit.Builder()</div><div class="line">	.client(client)</div><div class="line">       .baseUrl(<span class="string">"http://localhost:4567/"</span>)</div><div class="line">       .build();</div><div class="line">   </div><div class="line">   </div><div class="line">   <span class="meta">@GET</span>(<span class="string">"/getName"</span>)</div><div class="line">   <span class="function">Call&lt;ResponseBody&gt; <span class="title">request</span><span class="params">(@Query(<span class="string">"name"</span>)</span> String name)</span>;</div><div class="line">  	</div><div class="line">   <span class="comment">//步骤【2】</span></div><div class="line">   IService service = retrofit.create(IService.class); </div><div class="line">   Call&lt;ResponseBody&gt; call = service.request(<span class="string">"test"</span>);</div><div class="line">   <span class="comment">//步骤【3】</span></div><div class="line">   call.enqueue(<span class="keyword">new</span> Callable() &#123;</div><div class="line">   	...</div><div class="line">   )</div></pre></td></tr></table></figure>
+<h1 id="二-源码解析"><a href="#二-源码解析" class="headerlink" title="二. 源码解析"></a>二. 源码解析</h1><h2 id="1-Retrofit-Build"><a href="#1-Retrofit-Build" class="headerlink" title="1. Retrofit.Build"></a>1. Retrofit.Build</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">    <span class="comment">//一般情况下，Platform是Android</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Builder</span><span class="params">()</span> </span>&#123;</div><div class="line">       <span class="keyword">this</span>(Platform.get());</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    Builder(Platform platform) &#123;</div><div class="line">            <span class="keyword">this</span>.platform = platform;</div><div class="line">            converterFactories.add(<span class="keyword">new</span> BuiltInConverters());</div><div class="line">        &#125;</div><div class="line">    </div><div class="line">    <span class="function"><span class="keyword">public</span> Retrofit <span class="title">build</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (baseUrl == <span class="keyword">null</span>) &#123;</div><div class="line">             <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Base URL required."</span>);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        okhttp3.Call.Factory callFactory = <span class="keyword">this</span>.callFactory;</div><div class="line">        <span class="keyword">if</span> (callFactory == <span class="keyword">null</span>) &#123;</div><div class="line">             callFactory = <span class="keyword">new</span> OkHttpClient();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        Executor callbackExecutor = <span class="keyword">this</span>.callbackExecutor;</div><div class="line">        <span class="comment">//如果是Android平台，则Executor的实际逻辑就是在当前主线程中runnable</span></div><div class="line">        <span class="keyword">if</span> (callbackExecutor == <span class="keyword">null</span>) &#123;</div><div class="line">            callbackExecutor = platform.defaultCallbackExecutor();</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        List&lt;CallAdapter.Factory&gt; adapterFactories = <span class="keyword">new</span> ArrayList&lt;&gt;(<span class="keyword">this</span>.adapterFactories);</div><div class="line">        <span class="comment">//如果是Android平台，defaultCallAdapterFactory是ExecutorCallAdapterFactory</span></div><div class="line">            adapterFactories.add(platform.defaultCallAdapterFactory(callbackExecutor));</div><div class="line"></div><div class="line">       <span class="comment">//如果没设置，默认没有convert</span></div><div class="line">       List&lt;Converter.Factory&gt; converterFactories = <span class="keyword">new</span> ArrayList&lt;&gt;(<span class="keyword">this</span>.converterFactories);</div><div class="line"></div><div class="line">       <span class="comment">//validateEagerly默认为false</span></div><div class="line">       <span class="keyword">return</span> <span class="keyword">new</span> Retrofit(callFactory, baseUrl, converterFactories, adapterFactories,</div><div class="line">                    callbackExecutor, validateEagerly);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>如果没有设置<code>CallAdapter</code>,对于Android平台，默认使用<code>ExecutorCallAdapterFactory</code></li>
+<li>如果没有设置<code>ConvertFactory</code>, 默认使用<code>BuiltInConverters</code></li>
+</ol>
+<h2 id="2-Retrofit-create"><a href="#2-Retrofit-create" class="headerlink" title="2. Retrofit.create"></a>2. Retrofit.create</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">public</span> &lt;T&gt; <span class="function">T <span class="title">create</span><span class="params">(<span class="keyword">final</span> Class&lt;T&gt; service)</span> </span>&#123;</div><div class="line">	<span class="comment">//校验传入的Class是不是Interface,且定义了至少一个方法</span></div><div class="line">       Utils.validateServiceInterface(service);</div><div class="line">       <span class="keyword">if</span> (validateEagerly) &#123;</div><div class="line">       	<span class="comment">//如果是Android平台，isDefaultMethod = false, 将service中所有method都生成对应的</span></div><div class="line">       	<span class="comment">//ServiceMethod类，并放入缓存(核心调用为【2.1】loadServiceMethod)</span></div><div class="line">           eagerlyValidateMethods(service);</div><div class="line">       &#125;</div><div class="line">       <span class="keyword">return</span> (T) Proxy.newProxyInstance(service.getClassLoader(), <span class="keyword">new</span> Class&lt;?&gt;[]&#123;service&#125;,</div><div class="line">               <span class="keyword">new</span> InvocationHandler() &#123;</div><div class="line">                   <span class="keyword">private</span> <span class="keyword">final</span> Platform platform = Platform.get();</div><div class="line"></div><div class="line">                   <span class="meta">@Override</span></div><div class="line">                   <span class="function"><span class="keyword">public</span> Object <span class="title">invoke</span><span class="params">(Object proxy, Method method, Object[] args)</span></span></div><div class="line">                           <span class="keyword">throws</span> Throwable &#123;</div><div class="line">                       <span class="keyword">if</span> (method.getDeclaringClass() == Object.class) &#123;</div><div class="line">                           <span class="keyword">return</span> method.invoke(<span class="keyword">this</span>, args);</div><div class="line">                       &#125;</div><div class="line">                       <span class="comment">//Android平台isDefaultMethod = false</span></div><div class="line">                       <span class="keyword">if</span> (platform.isDefaultMethod(method)) &#123;</div><div class="line">                           <span class="keyword">return</span> platform.invokeDefaultMethod(method, service, proxy, args);</div><div class="line">                       &#125;</div><div class="line">                       ServiceMethod&lt;Object, Object&gt; serviceMethod =</div><div class="line">                               (ServiceMethod&lt;Object, Object&gt;) loadServiceMethod(method);</div><div class="line">                       OkHttpCall&lt;Object&gt; okHttpCall = <span class="keyword">new</span> OkHttpCall&lt;&gt;(serviceMethod, args);</div><div class="line">                       <span class="keyword">return</span> serviceMethod.callAdapter.adapt(okHttpCall);</div><div class="line">                   &#125;</div><div class="line">               &#125;);</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>首先校验传入的Class是不是一个接口</li>
+<li>因为默认的validateEagly = false, 所以不执行eagerlyValidateMethods方法，该方法实质上根据接口中的所有方法生成每个方法相应的ServiceMethod，并放入缓存</li>
+<li><strong>创建动态代理(核心步骤)，以后每次调用接口的方法都会调用InvocationHandler.invoke(…)方法</strong></li>
+</ol>
+<h3 id="2-1-Retrofit-loadServiceMethod"><a href="#2-1-Retrofit-loadServiceMethod" class="headerlink" title="2.1 Retrofit.loadServiceMethod"></a>2.1 Retrofit.loadServiceMethod</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">ServiceMethod&lt;?, ?&gt; loadServiceMethod(Method method) &#123;</div><div class="line">    ServiceMethod&lt;?, ?&gt; result = serviceMethodCache.get(method);</div><div class="line">    <span class="keyword">if</span> (result != <span class="keyword">null</span>)</div><div class="line">        <span class="keyword">return</span> result;</div><div class="line"></div><div class="line">    <span class="keyword">synchronized</span> (serviceMethodCache) &#123;</div><div class="line">        result = serviceMethodCache.get(method);</div><div class="line">        <span class="keyword">if</span> (result == <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="comment">//【2.2】</span></div><div class="line">            result = <span class="keyword">new</span> ServiceMethod.Builder&lt;&gt;(<span class="keyword">this</span>, method).build();</div><div class="line">            serviceMethodCache.put(method, result);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> result;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>创建相应的<code>ServiceMethod</code>类，并放入缓存</p>
+<h3 id="2-2-ServiceMethod-Builder"><a href="#2-2-ServiceMethod-Builder" class="headerlink" title="2.2 ServiceMethod.Builder"></a>2.2 ServiceMethod.Builder</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">Builder(Retrofit retrofit, Method method) &#123;</div><div class="line">    <span class="keyword">this</span>.retrofit = retrofit;</div><div class="line">    <span class="keyword">this</span>.method = method;</div><div class="line">    <span class="keyword">this</span>.methodAnnotations = method.getAnnotations();</div><div class="line">    <span class="keyword">this</span>.parameterTypes = method.getGenericParameterTypes();</div><div class="line">    <span class="keyword">this</span>.parameterAnnotationsArray = method.getParameterAnnotations();</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> ServiceMethod <span class="title">build</span><span class="params">()</span> </span>&#123;</div><div class="line">      <span class="comment">//获取CallAdapter, 【2.2.1】</span></div><div class="line">     callAdapter = createCallAdapter();</div><div class="line">     <span class="comment">//获取Call&lt;T&gt;中T的具体类型</span></div><div class="line">     responseType = callAdapter.responseType();</div><div class="line">     <span class="comment">//确保T并不是retrofit2.Response或者okhttp3.Response</span></div><div class="line">     <span class="keyword">if</span> (responseType == Response.class||responseType == okhttp3.Response.class) &#123;</div><div class="line">		...</div><div class="line">     &#125;</div><div class="line">     <span class="comment">//如果没有设置Converter,默认的Converter是BuiltInConverter, 通过</span></div><div class="line">     <span class="comment">//BuiltInConvert.responseBodyConverter返回Convert, </span></div><div class="line">     <span class="comment">//如果Annotation中Streaming, 则返回StreamingResponseBodyConverter， </span></div><div class="line">     <span class="comment">//否则返回BufferingResponseBodyConverter </span></div><div class="line">     <span class="comment">//【2.2.2】</span></div><div class="line">     responseConverter = createResponseConverter();</div><div class="line">     <span class="comment">//处理方法的注释, 【2.2.3】</span></div><div class="line">     <span class="keyword">for</span> (Annotation annotation : methodAnnotations) &#123;</div><div class="line">          parseMethodAnnotation(annotation);</div><div class="line">     &#125;</div><div class="line">     <span class="keyword">if</span> (httpMethod == <span class="keyword">null</span>) &#123;</div><div class="line">           <span class="keyword">throw</span> methodError(...);</div><div class="line">     &#125;</div><div class="line"></div><div class="line">    <span class="comment">//对于GET，HEAD等没有body的请求，不允许出现@FormEncodedUrl或@MultiPart等注释</span></div><div class="line">     <span class="keyword">if</span> (!hasBody) &#123;</div><div class="line">         <span class="keyword">if</span> (isMultipart) &#123;</div><div class="line">                <span class="keyword">throw</span> methodError(..);</div><div class="line">         &#125;</div><div class="line">         <span class="keyword">if</span> (isFormEncoded) &#123;</div><div class="line">               <span class="keyword">throw</span> methodError(...);</div><div class="line">         &#125;</div><div class="line">      &#125;</div><div class="line"></div><div class="line">     <span class="comment">//处理参数的注解, 【2.2.4】</span></div><div class="line">     <span class="keyword">int</span> parameterCount = parameterAnnotationsArray.length;</div><div class="line">     parameterHandlers = <span class="keyword">new</span> ParameterHandler&lt;?&gt;[parameterCount];</div><div class="line">     <span class="keyword">for</span> (<span class="keyword">int</span> p = <span class="number">0</span>; p &lt; parameterCount; p++) &#123;</div><div class="line">           Type parameterType = parameterTypes[p];</div><div class="line">            <span class="keyword">if</span> (Utils.hasUnresolvableType(parameterType)) &#123;</div><div class="line">                 <span class="keyword">throw</span> parameterError(...);</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            Annotation[] parameterAnnotations = parameterAnnotationsArray[p];</div><div class="line">            <span class="keyword">if</span> (parameterAnnotations == <span class="keyword">null</span>) &#123;</div><div class="line">                  <span class="keyword">throw</span> parameterError(...);</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            parameterHandlers[p] = parseParameter(p, parameterType, parameterAnnotations);</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       <span class="keyword">if</span> (relativeUrl == <span class="keyword">null</span> &amp;&amp; !gotUrl) &#123;</div><div class="line">              <span class="keyword">throw</span> methodError(...);</div><div class="line">       &#125;</div><div class="line">       <span class="comment">//GET, DELETE等方法不可以有@Body</span></div><div class="line">       <span class="keyword">if</span> (!isFormEncoded &amp;&amp; !isMultipart &amp;&amp; !hasBody &amp;&amp; gotBody) &#123;</div><div class="line">             <span class="keyword">throw</span> methodError(...);</div><div class="line">       &#125;</div><div class="line">       <span class="comment">//有@FormUrlEncoded注释则参数中至少有一个@Field注释</span></div><div class="line">       <span class="keyword">if</span> (isFormEncoded &amp;&amp; !gotField) &#123;</div><div class="line">             <span class="keyword">throw</span> methodError(...);</div><div class="line">       &#125;</div><div class="line">       <span class="comment">//有@Multipart注释，参数中至少有一个@Part注释</span></div><div class="line">       <span class="keyword">if</span> (isMultipart &amp;&amp; !gotPart) &#123;</div><div class="line">             <span class="keyword">throw</span> methodError(...);</div><div class="line">       &#125;</div><div class="line">       <span class="keyword">return</span> <span class="keyword">new</span> ServiceMethod&lt;&gt;(<span class="keyword">this</span>);</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>获取CallAdapter</li>
+<li>获取Call<t>中T的具体类型，并确保T并不是retrofit2.Reponse或okhttp3.Response</t></li>
+<li>获取Converter</li>
+<li>处理方法注释</li>
+<li>注释参数注释</li>
+</ol>
+<h4 id="2-2-1-ServiceMethod-createCallAdapter"><a href="#2-2-1-ServiceMethod-createCallAdapter" class="headerlink" title="2.2.1 ServiceMethod.createCallAdapter"></a>2.2.1 ServiceMethod.createCallAdapter</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> CallAdapter&lt;T, R&gt; <span class="title">createCallAdapter</span><span class="params">()</span> </span>&#123;</div><div class="line">      Type returnType = method.getGenericReturnType();</div><div class="line">       <span class="comment">//返回值不能是TypeVariable和WildcardType</span></div><div class="line">       <span class="keyword">if</span> (Utils.hasUnresolvableType(returnType)) &#123;</div><div class="line">             <span class="keyword">throw</span> methodError(...);</div><div class="line">       &#125;</div><div class="line">       <span class="comment">//确保返回值不能是void</span></div><div class="line">       <span class="keyword">if</span> (returnType == <span class="keyword">void</span>.class) &#123;</div><div class="line">            <span class="keyword">throw</span> methodError(...);</div><div class="line">      &#125;</div><div class="line">      Annotation[] annotations = method.getAnnotations();</div><div class="line">      <span class="keyword">try</span> &#123;</div><div class="line">             <span class="keyword">return</span> (CallAdapter&lt;T, R&gt;) retrofit.callAdapter(returnType, annotations);</div><div class="line">      &#125; <span class="keyword">catch</span> (RuntimeException e) &#123; </div><div class="line">             <span class="keyword">throw</span> methodError(...);</div><div class="line">      &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h5 id="2-2-1-1-Retrofit-callAdapter"><a href="#2-2-1-1-Retrofit-callAdapter" class="headerlink" title="2.2.1.1 Retrofit.callAdapter"></a>2.2.1.1 Retrofit.callAdapter</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">public</span> CallAdapter&lt;?, ?&gt; callAdapter(Type returnType, Annotation[] annotations) &#123;</div><div class="line">    <span class="keyword">return</span> nextCallAdapter(<span class="keyword">null</span>, returnType, annotations);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="keyword">public</span> CallAdapter&lt;?, ?&gt; nextCallAdapter(CallAdapter.Factory skipPast, Type returnType,</div><div class="line">                                         Annotation[] annotations) &#123;</div><div class="line">    checkNotNull(returnType, <span class="string">"returnType == null"</span>);</div><div class="line">    checkNotNull(annotations, <span class="string">"annotations == null"</span>);</div><div class="line"></div><div class="line">    <span class="keyword">int</span> start = adapterFactories.indexOf(skipPast) + <span class="number">1</span>;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = start, count = adapterFactories.size(); i &lt; count; i++) &#123;</div><div class="line">    	<span class="comment">//如果没有显示的设置，Android平台的默认只有一个CallAdapter.Factory -&gt; ExecutorCallAdapterFactory</span></div><div class="line">        CallAdapter&lt;?, ?&gt; adapter = adapterFactories.get(i).get(returnType, annotations, <span class="keyword">this</span>);</div><div class="line">        <span class="keyword">if</span> (adapter != <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">return</span> adapter;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    ...        </div><div class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(...);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h5 id="2-2-1-2-ExecutorCallAdapterFactory-get"><a href="#2-2-1-2-ExecutorCallAdapterFactory-get" class="headerlink" title="2.2.1.2 ExecutorCallAdapterFactory.get()"></a>2.2.1.2 ExecutorCallAdapterFactory.get()</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="keyword">public</span> CallAdapter&lt;?, ?&gt; get(Type returnType, Annotation[] annotations, Retrofit retrofit) &#123;</div><div class="line">    <span class="comment">//确保返回值类型是Call</span></div><div class="line">    <span class="keyword">if</span> (getRawType(returnType) != Call.class) &#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//返回Call&lt;T&gt;的具体所指的类型</span></div><div class="line">    <span class="keyword">final</span> Type responseType = Utils.getCallResponseType(returnType);</div><div class="line">    <span class="keyword">return</span> <span class="keyword">new</span> CallAdapter&lt;Object, Call&lt;?&gt;&gt;() &#123;</div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> Type <span class="title">responseType</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">return</span> responseType;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> Call&lt;Object&gt; <span class="title">adapt</span><span class="params">(Call&lt;Object&gt; call)</span> </span>&#123;</div><div class="line">            <span class="keyword">return</span> <span class="keyword">new</span> ExecutorCallbackCall&lt;&gt;(callbackExecutor, call);</div><div class="line">        &#125;</div><div class="line">    &#125;;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="2-2-2-ServiceMethod-createResponseConverter"><a href="#2-2-2-ServiceMethod-createResponseConverter" class="headerlink" title="2.2.2 ServiceMethod.createResponseConverter()"></a>2.2.2 ServiceMethod.createResponseConverter()</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="function"><span class="keyword">private</span> Converter&lt;ResponseBody, T&gt; <span class="title">createResponseConverter</span><span class="params">()</span> </span>&#123;</div><div class="line">           Annotation[] annotations = method.getAnnotations();</div><div class="line">           <span class="keyword">try</span> &#123;</div><div class="line">               <span class="keyword">return</span> retrofit.responseBodyConverter(responseType, annotations);</div><div class="line">           &#125; <span class="keyword">catch</span> (RuntimeException e) &#123; </div><div class="line">                <span class="keyword">throw</span> methodError(...);</div><div class="line">           &#125;</div><div class="line">       &#125;</div></pre></td></tr></table></figure>
+<h5 id="2-2-2-1-Retrofit-responseBodyConverter"><a href="#2-2-2-1-Retrofit-responseBodyConverter" class="headerlink" title="2.2.2.1 Retrofit.responseBodyConverter"></a>2.2.2.1 Retrofit.responseBodyConverter</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">public</span> &lt;T&gt; <span class="function">Converter&lt;ResponseBody, T&gt; <span class="title">responseBodyConverter</span><span class="params">(Type type, Annotation[] annotations)</span> </span>&#123;</div><div class="line">       <span class="keyword">return</span> nextResponseBodyConverter(<span class="keyword">null</span>, type, annotations);</div><div class="line">   &#125;</div><div class="line">   </div><div class="line">   <span class="keyword">public</span> &lt;T&gt; <span class="function">Converter&lt;ResponseBody, T&gt; <span class="title">nextResponseBodyConverter</span><span class="params">(Converter.Factory skipPast,Type type, Annotation[] annotations)</span> </span>&#123;</div><div class="line">   </div><div class="line">       checkNotNull(type, <span class="string">"type == null"</span>);</div><div class="line">       checkNotNull(annotations, <span class="string">"annotations == null"</span>);</div><div class="line"></div><div class="line">       <span class="keyword">int</span> start = converterFactories.indexOf(skipPast) + <span class="number">1</span>;</div><div class="line">       <span class="keyword">for</span> (<span class="keyword">int</span> i = start, count = converterFactories.size(); i &lt; count; i++) &#123;</div><div class="line">       	<span class="comment">//如果没有显示设置， convertFactories里面只有BuiltInConverters</span></div><div class="line">           Converter&lt;ResponseBody, ?&gt; converter =</div><div class="line">                   converterFactories.get(i).responseBodyConverter(type, annotations, <span class="keyword">this</span>);</div><div class="line">           <span class="keyword">if</span> (converter != <span class="keyword">null</span>) &#123;</div><div class="line">               <span class="keyword">return</span> (Converter&lt;ResponseBody, T&gt;) converter;</div><div class="line">           &#125;</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       ...</div><div class="line">       <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(...);</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<h5 id="2-2-2-2-BuiltInConverters-responseBodyConverter"><a href="#2-2-2-2-BuiltInConverters-responseBodyConverter" class="headerlink" title="2.2.2.2 BuiltInConverters.responseBodyConverter"></a>2.2.2.2 BuiltInConverters.responseBodyConverter</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="meta">@Override</span></div><div class="line">   <span class="keyword">public</span> Converter&lt;ResponseBody, ?&gt; responseBodyConverter(Type type, Annotation[] annotations,</div><div class="line">                                                           Retrofit retrofit) &#123;</div><div class="line">       <span class="keyword">if</span> (type == ResponseBody.class) &#123;</div><div class="line">           <span class="keyword">return</span> Utils.isAnnotationPresent(annotations, Streaming.class)</div><div class="line">                   ? StreamingResponseBodyConverter.INSTANCE</div><div class="line">                   : BufferingResponseBodyConverter.INSTANCE;</div><div class="line">       &#125;</div><div class="line">       <span class="keyword">if</span> (type == Void.class) &#123;</div><div class="line">           <span class="keyword">return</span> VoidResponseBodyConverter.INSTANCE;</div><div class="line">       &#125;</div><div class="line">       <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<h4 id="2-2-3-ServiceMethod-parseMethodAnnotation"><a href="#2-2-3-ServiceMethod-parseMethodAnnotation" class="headerlink" title="2.2.3 ServiceMethod.parseMethodAnnotation"></a>2.2.3 ServiceMethod.parseMethodAnnotation</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">parseMethodAnnotation</span><span class="params">(Annotation annotation)</span> </span>&#123;</div><div class="line">           <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> DELETE) &#123;</div><div class="line">               parseHttpMethodAndPath(<span class="string">"DELETE"</span>, ((DELETE) annotation).value(), <span class="keyword">false</span>);</div><div class="line">           &#125;</div><div class="line">           <span class="keyword">else</span> <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> GET) &#123;</div><div class="line">               parseHttpMethodAndPath(<span class="string">"GET"</span>, ((GET) annotation).value(), <span class="keyword">false</span>);</div><div class="line">           &#125;</div><div class="line">           <span class="keyword">else</span> <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> HEAD) &#123;</div><div class="line">               parseHttpMethodAndPath(<span class="string">"HEAD"</span>, ((HEAD) annotation).value(), <span class="keyword">false</span>);</div><div class="line">               <span class="keyword">if</span> (!Void.class.equals(responseType)) &#123;</div><div class="line">                   <span class="keyword">throw</span> methodError(<span class="string">"HEAD method must use Void as response type."</span>);</div><div class="line">               &#125;</div><div class="line">           &#125;</div><div class="line">           <span class="keyword">else</span> <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> PATCH) &#123;</div><div class="line">               parseHttpMethodAndPath(<span class="string">"PATCH"</span>, ((PATCH) annotation).value(), <span class="keyword">true</span>);</div><div class="line">           &#125;</div><div class="line">           <span class="keyword">else</span> <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> POST) &#123;</div><div class="line">               parseHttpMethodAndPath(<span class="string">"POST"</span>, ((POST) annotation).value(), <span class="keyword">true</span>);</div><div class="line">           &#125;</div><div class="line">           <span class="keyword">else</span> <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> PUT) &#123;</div><div class="line">               parseHttpMethodAndPath(<span class="string">"PUT"</span>, ((PUT) annotation).value(), <span class="keyword">true</span>);</div><div class="line">           &#125;</div><div class="line">           <span class="keyword">else</span> <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> OPTIONS) &#123;</div><div class="line">               parseHttpMethodAndPath(<span class="string">"OPTIONS"</span>, ((OPTIONS) annotation).value(), <span class="keyword">false</span>);</div><div class="line">           &#125;</div><div class="line">           <span class="keyword">else</span> <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> HTTP) &#123;</div><div class="line">               HTTP http = (HTTP) annotation;</div><div class="line">               parseHttpMethodAndPath(http.method(), http.path(), http.hasBody());</div><div class="line">           &#125;</div><div class="line">           <span class="keyword">else</span> <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> retrofit2.http.Headers) &#123;</div><div class="line">               String[] headersToParse = ((retrofit2.http.Headers) annotation).value();</div><div class="line">               <span class="keyword">if</span> (headersToParse.length == <span class="number">0</span>) &#123;</div><div class="line">                   <span class="keyword">throw</span> methodError(<span class="string">"@Headers annotation is empty."</span>);</div><div class="line">               &#125;</div><div class="line">               headers = parseHeaders(headersToParse);</div><div class="line">           &#125;</div><div class="line">           <span class="keyword">else</span> <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> Multipart) &#123;</div><div class="line">               <span class="keyword">if</span> (isFormEncoded) &#123;</div><div class="line">                   <span class="keyword">throw</span> methodError(<span class="string">"Only one encoding annotation is allowed."</span>);</div><div class="line">               &#125;</div><div class="line">               isMultipart = <span class="keyword">true</span>;</div><div class="line">           &#125;</div><div class="line">           <span class="keyword">else</span> <span class="keyword">if</span> (annotation <span class="keyword">instanceof</span> FormUrlEncoded) &#123;</div><div class="line">               <span class="keyword">if</span> (isMultipart) &#123;</div><div class="line">                   <span class="keyword">throw</span> methodError(<span class="string">"Only one encoding annotation is allowed."</span>);</div><div class="line">               &#125;</div><div class="line">               isFormEncoded = <span class="keyword">true</span>;</div><div class="line">           &#125;</div><div class="line">       &#125;</div></pre></td></tr></table></figure>
+<p><code>parseMethodAnnotation</code>方法主要就是用过<code>parseHttpMethodAndPath</code>方法设置<code>ServiceMethhod</code>的请求方法，相对Url,  是否有body等选项</p>
+<h4 id="2-2-4-ServiceMethod-parseParameter"><a href="#2-2-4-ServiceMethod-parseParameter" class="headerlink" title="2.2.4 ServiceMethod.parseParameter"></a>2.2.4 ServiceMethod.parseParameter</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">private</span> ParameterHandler&lt;?&gt; parseParameter(<span class="keyword">int</span> p, Type parameterType, Annotation[] annotations) &#123;</div><div class="line">     ParameterHandler&lt;?&gt; result = <span class="keyword">null</span>;</div><div class="line">     <span class="keyword">for</span> (Annotation annotation : annotations) &#123;</div><div class="line">          <span class="comment">//核心调用</span></div><div class="line">         ParameterHandler&lt;?&gt; annotationAction = parseParameterAnnotation(</div><div class="line">                        p, parameterType, annotations, annotation);</div><div class="line">         <span class="keyword">if</span> (annotationAction == <span class="keyword">null</span>) &#123;</div><div class="line">              <span class="keyword">continue</span>;</div><div class="line">          &#125;</div><div class="line">         <span class="keyword">if</span> (result != <span class="keyword">null</span>) &#123;</div><div class="line">              <span class="keyword">throw</span> parameterError(...);</div><div class="line">         &#125;</div><div class="line">         result = annotationAction;</div><div class="line">     &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (result == <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">throw</span> parameterError(p, <span class="string">"No Retrofit annotation found."</span>);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> result;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>该方法中的核心调用<code>parseParameterAnnotation</code>,这个方法的主要作用是根据参数的注解进行不同的处理，参数的注解可以是以下几种:</p>
+<ul>
+<li>@Url</li>
+<li>@Path</li>
+<li>@Query</li>
+<li>@QueryName</li>
+<li>@QueryMap</li>
+<li>@Header</li>
+<li>@HeaderMap</li>
+<li>@Field</li>
+<li>@FieldMap</li>
+<li>@Part</li>
+<li>@PartMap</li>
+<li>@Body</li>
+</ul>
+<h3 id="2-3-ServiceMethod-callAdapter-adapter"><a href="#2-3-ServiceMethod-callAdapter-adapter" class="headerlink" title="2.3 ServiceMethod.callAdapter.adapter"></a>2.3 ServiceMethod.callAdapter.adapter</h3><p>ServiceMethod.callAdapter是通过<code>ExcecutorAdapterFactory.get()</code>创建的一个匿名<code>CallAdapter</code>, 其实现为:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="keyword">new</span> CallAdapter&lt;Object, Call&lt;?&gt;&gt;() &#123;</div><div class="line">           <span class="meta">@Override</span></div><div class="line">           <span class="function"><span class="keyword">public</span> Type <span class="title">responseType</span><span class="params">()</span> </span>&#123;</div><div class="line">               <span class="keyword">return</span> responseType;</div><div class="line">           &#125;</div><div class="line"></div><div class="line">           <span class="meta">@Override</span></div><div class="line">           <span class="function"><span class="keyword">public</span> Call&lt;Object&gt; <span class="title">adapt</span><span class="params">(Call&lt;Object&gt; call)</span> </span>&#123;</div><div class="line">               <span class="keyword">return</span> <span class="keyword">new</span> ExecutorCallbackCall&lt;&gt;(callbackExecutor, call);</div><div class="line">           &#125;</div><div class="line">       &#125;;</div><div class="line">       </div><div class="line">   <span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">ExecutorCallbackCall</span>&lt;<span class="title">T</span>&gt; <span class="keyword">implements</span> <span class="title">Call</span>&lt;<span class="title">T</span>&gt; </span>&#123;</div><div class="line">   	<span class="keyword">final</span> Executor callbackExecutor;</div><div class="line">       <span class="keyword">final</span> Call&lt;T&gt; delegate;</div><div class="line">   	....</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<p>由此可以看出，最终真正返回的是<code>ExecutorCallbackCall</code>, 其中<code>delagate</code>是<code>OkHttpCall</code></p>
+<h2 id="3-ExecutorCallbackCall-enqueue"><a href="#3-ExecutorCallbackCall-enqueue" class="headerlink" title="3. ExecutorCallbackCall.enqueue"></a>3. ExecutorCallbackCall.enqueue</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">enqueue</span><span class="params">(<span class="keyword">final</span> Callback&lt;T&gt; callback)</span> </span>&#123;</div><div class="line">   	<span class="keyword">if</span> (callback == <span class="keyword">null</span>) <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException(<span class="string">"callback == null"</span>);</div><div class="line">	<span class="comment">//实际是调用OkHttpCall.enqueue</span></div><div class="line">       delegate.enqueue(<span class="keyword">new</span> Callback&lt;T&gt;() &#123;</div><div class="line">            <span class="meta">@Override</span></div><div class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onResponse</span><span class="params">(Call&lt;T&gt; call, <span class="keyword">final</span> Response&lt;T&gt; response)</span> </span>&#123;</div><div class="line">                   callbackExecutor.execute(<span class="keyword">new</span> Runnable() &#123;</div><div class="line">                       <span class="meta">@Override</span></div><div class="line">                       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">                           <span class="keyword">if</span> (delegate.isCanceled()) &#123;</div><div class="line">                               callback.onFailure(ExecutorCallbackCall.<span class="keyword">this</span>, <span class="keyword">new</span> IOException(<span class="string">"Canceled"</span>));</div><div class="line">                           &#125; <span class="keyword">else</span> &#123;</div><div class="line">                               callback.onResponse(ExecutorCallbackCall.<span class="keyword">this</span>, response);</div><div class="line">                           &#125;</div><div class="line">                       &#125;</div><div class="line">                   &#125;);</div><div class="line">               &#125;</div><div class="line"></div><div class="line">            <span class="meta">@Override</span></div><div class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onFailure</span><span class="params">(Call&lt;T&gt; call, <span class="keyword">final</span> Throwable t)</span> </span>&#123;</div><div class="line">                   callbackExecutor.execute(<span class="keyword">new</span> Runnable() &#123;</div><div class="line">                       <span class="meta">@Override</span></div><div class="line">                       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</div><div class="line">                           callback.onFailure(ExecutorCallbackCall.<span class="keyword">this</span>, t);</div><div class="line">                       &#125;</div><div class="line">                   &#125;);</div><div class="line">               &#125;</div><div class="line">      &#125;);</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<p>可以看到实际调用的是<code>OkHttpCall.enqueue</code></p>
+<h3 id="3-1-OkHttpCall-enqueue"><a href="#3-1-OkHttpCall-enqueue" class="headerlink" title="3.1 OkHttpCall.enqueue"></a>3.1 OkHttpCall.enqueue</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">enqueue</span><span class="params">(<span class="keyword">final</span> Callback&lt;T&gt; callback)</span> </span>&#123;</div><div class="line">       <span class="keyword">if</span> (callback == <span class="keyword">null</span>) <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException(<span class="string">"callback == null"</span>);</div><div class="line"></div><div class="line">       okhttp3.Call call;</div><div class="line">       Throwable failure;</div><div class="line"></div><div class="line">       <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</div><div class="line">           <span class="keyword">if</span> (executed)</div><div class="line">               <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Already executed."</span>);</div><div class="line">           executed = <span class="keyword">true</span>;</div><div class="line"></div><div class="line">           call = rawCall;</div><div class="line">           failure = creationFailure;</div><div class="line">           <span class="keyword">if</span> (call == <span class="keyword">null</span> &amp;&amp; failure == <span class="keyword">null</span>) &#123;</div><div class="line">               <span class="keyword">try</span> &#123;</div><div class="line">               	<span class="comment">//【3.1.1】</span></div><div class="line">                   call = rawCall = createRawCall();</div><div class="line">               &#125; <span class="keyword">catch</span> (Throwable t) &#123;</div><div class="line">                   failure = creationFailure = t;</div><div class="line">               &#125;</div><div class="line">           &#125;</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       <span class="keyword">if</span> (failure != <span class="keyword">null</span>) &#123;</div><div class="line">           callback.onFailure(<span class="keyword">this</span>, failure);</div><div class="line">           <span class="keyword">return</span>;</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       <span class="keyword">if</span> (canceled) &#123;</div><div class="line">           call.cancel();</div><div class="line">       &#125;</div><div class="line">	<span class="comment">//调用okhttp3.Call.enqueue,后续走的就是okhttp请求的流程</span></div><div class="line">       call.enqueue(<span class="keyword">new</span> okhttp3.Callback() &#123;</div><div class="line">           <span class="meta">@Override</span></div><div class="line">           <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onResponse</span><span class="params">(okhttp3.Call call, okhttp3.Response rawResponse)</span></span></div><div class="line">                   <span class="keyword">throws</span> IOException &#123;</div><div class="line">               Response&lt;T&gt; response;</div><div class="line">               <span class="keyword">try</span> &#123;</div><div class="line">                   <span class="comment">//【3.1.2】</span></div><div class="line">                   response = parseResponse(rawResponse);</div><div class="line">               &#125; <span class="keyword">catch</span> (Throwable e) &#123;</div><div class="line">                   callFailure(e);</div><div class="line">                   <span class="keyword">return</span>;</div><div class="line">               &#125;</div><div class="line">               callSuccess(response);</div><div class="line">           &#125;</div><div class="line"></div><div class="line">           <span class="meta">@Override</span></div><div class="line">           <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onFailure</span><span class="params">(okhttp3.Call call, IOException e)</span> </span>&#123;</div><div class="line">               <span class="keyword">try</span> &#123;</div><div class="line">                   callback.onFailure(OkHttpCall.<span class="keyword">this</span>, e);</div><div class="line">               &#125; <span class="keyword">catch</span> (Throwable t) &#123;</div><div class="line">                   t.printStackTrace();</div><div class="line">               &#125;</div><div class="line">           &#125;</div><div class="line"></div><div class="line">           <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">callFailure</span><span class="params">(Throwable e)</span> </span>&#123;</div><div class="line">               <span class="keyword">try</span> &#123;</div><div class="line">                   callback.onFailure(OkHttpCall.<span class="keyword">this</span>, e);</div><div class="line">               &#125; <span class="keyword">catch</span> (Throwable t) &#123;</div><div class="line">                   t.printStackTrace();</div><div class="line">               &#125;</div><div class="line">           &#125;</div><div class="line"></div><div class="line">           <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">callSuccess</span><span class="params">(Response&lt;T&gt; response)</span> </span>&#123;</div><div class="line">               <span class="keyword">try</span> &#123;</div><div class="line">                   callback.onResponse(OkHttpCall.<span class="keyword">this</span>, response);</div><div class="line">               &#125; <span class="keyword">catch</span> (Throwable t) &#123;</div><div class="line">                   t.printStackTrace();</div><div class="line">               &#125;</div><div class="line">           &#125;</div><div class="line">       &#125;);</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<h4 id="3-1-1-OkHttpCall-createNewCall"><a href="#3-1-1-OkHttpCall-createNewCall" class="headerlink" title="3.1.1 OkHttpCall.createNewCall"></a>3.1.1 OkHttpCall.createNewCall</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">private</span> okhttp3.<span class="function">Call <span class="title">createRawCall</span><span class="params">()</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">	<span class="comment">//这里的args就是被动态代理的方法的参数, 【3.1.2.1】</span></div><div class="line">    Request request = serviceMethod.toRequest(args);</div><div class="line">    <span class="comment">//callFactory是OkHttpClient</span></div><div class="line">    okhttp3.Call call = serviceMethod.callFactory.newCall(request);</div><div class="line">    <span class="keyword">if</span> (call == <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException(<span class="string">"Call.Factory returned null."</span>);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> call;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>OkHttpClient</code>同样实现了<code>okhttp3.Call.Factory</code>接口， 而通过步骤【1】和【2.2】的代码可以看出, 这里的<code>callFactory</code>就是<code>OkHttpClient</code>,所以调用的是<code>OkhttpClient.newCall</code>(实际返回一个<code>okhttp3.RealCall</code>)</p>
+<h5 id="3-1-1-1-ServiceMethod-toRequest"><a href="#3-1-1-1-ServiceMethod-toRequest" class="headerlink" title="3.1.1.1 ServiceMethod.toRequest"></a>3.1.1.1 ServiceMethod.toRequest</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="function">Request <span class="title">toRequest</span><span class="params">(Object... args)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">       RequestBuilder requestBuilder = <span class="keyword">new</span> RequestBuilder(httpMethod, baseUrl, relativeUrl, headers,</div><div class="line">               contentType, hasBody, isFormEncoded, isMultipart);</div><div class="line"></div><div class="line">        ParameterHandler&lt;Object&gt;[] handlers = (ParameterHandler&lt;Object&gt;[]) parameterHandlers;</div><div class="line"></div><div class="line">       <span class="keyword">int</span> argumentCount = args != <span class="keyword">null</span> ? args.length : <span class="number">0</span>;</div><div class="line">       <span class="keyword">if</span> (argumentCount != handlers.length) &#123;</div><div class="line">           <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"Argument count ("</span> + argumentCount</div><div class="line">                   + <span class="string">") doesn't match expected count ("</span> + handlers.length + <span class="string">")"</span>);</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       <span class="keyword">for</span> (<span class="keyword">int</span> p = <span class="number">0</span>; p &lt; argumentCount; p++) &#123;</div><div class="line">       	<span class="comment">//不同参数的注释有对应不同的handler, 以Query为例，其handler是Query&lt;T&gt;</span></div><div class="line">           handlers[p].apply(requestBuilder, args[p]);</div><div class="line">       &#125;</div><div class="line"></div><div class="line">       <span class="keyword">return</span> requestBuilder.build();</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<p>这个方法的核心调用在于<code>handlers[p].apply</code>,不同的参数注释，对应这不同的<code>ParameterHandler</code>,以<code>@Query</code>为例，它所对应的<code>ParammeterHandler</code>是<code>Query&lt;T&gt;</code>, <code>Query&lt;T&gt;.apply</code>的作用是将<code>@Query</code>所修饰的参数转为<code>String</code>类型并添加到要请求的url的query string中</p>
+<h4 id="3-1-2-OkHttpCall-parseResponse"><a href="#3-1-2-OkHttpCall-parseResponse" class="headerlink" title="3.1.2 OkHttpCall.parseResponse"></a>3.1.2 OkHttpCall.parseResponse</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line"><span class="function">Response&lt;T&gt; <span class="title">parseResponse</span><span class="params">(okhttp3.Response rawResponse)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        ResponseBody rawBody = rawResponse.body();</div><div class="line"></div><div class="line">        <span class="comment">// Remove the body's source (the only stateful object) so we can pass the response along.</span></div><div class="line">        rawResponse = rawResponse.newBuilder()</div><div class="line">                .body(<span class="keyword">new</span> NoContentResponseBody(rawBody.contentType(), rawBody.contentLength()))</div><div class="line">                .build();</div><div class="line"></div><div class="line">        <span class="keyword">int</span> code = rawResponse.code();</div><div class="line">        <span class="keyword">if</span> (code &lt; <span class="number">200</span> || code &gt;= <span class="number">300</span>) &#123;</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                <span class="comment">// Buffer the entire body to avoid future I/O.</span></div><div class="line">                ResponseBody bufferedBody = Utils.buffer(rawBody);</div><div class="line">                <span class="keyword">return</span> Response.error(bufferedBody, rawResponse);</div><div class="line">            &#125; <span class="keyword">finally</span> &#123;</div><div class="line">                rawBody.close();</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (code == <span class="number">204</span> || code == <span class="number">205</span>) &#123;</div><div class="line">            rawBody.close();</div><div class="line">            <span class="keyword">return</span> Response.success(<span class="keyword">null</span>, rawResponse);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        ExceptionCatchingRequestBody catchingBody = <span class="keyword">new</span> ExceptionCatchingRequestBody(rawBody);</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            T body = serviceMethod.toResponse(catchingBody);</div><div class="line">            <span class="keyword">return</span> Response.success(body, rawResponse);</div><div class="line">        &#125; <span class="keyword">catch</span> (RuntimeException e) &#123;</div><div class="line">            <span class="comment">// If the underlying source threw an exception, propagate that rather than indicating it was</span></div><div class="line">            <span class="comment">// a runtime exception.</span></div><div class="line">            catchingBody.throwIfCaught();</div><div class="line">            <span class="keyword">throw</span> e;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">`</div></pre></td></tr></table></figure>
+<h4 id="3-1-3-ServiceMethod-toResponse"><a href="#3-1-3-ServiceMethod-toResponse" class="headerlink" title="3.1.3 ServiceMethod.toResponse"></a>3.1.3 ServiceMethod.toResponse</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function">R <span class="title">toResponse</span><span class="params">(ResponseBody body)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">    <span class="keyword">return</span> responseConverter.convert(body);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在之前【2.2.2】中可以得知， 如果没有设置Converter，则使用默认的BuiltInConverter来获取对应的response convert, 如果方法中有<code>@Streaming</code>注释，则<code>responseConverter</code>是<code>StreamingResponseBodyConverter</code>, 否则是<code>BufferingResponseBodyConverter</code>, 一般情况下不会有<code>@Streaming</code>注释</p>
+<h4 id="3-1-4-Converter-convert"><a href="#3-1-4-Converter-convert" class="headerlink" title="3.1.4 Converter.convert"></a>3.1.4 Converter.convert</h4><h5 id="3-1-4-1-StreamingResponseBodyConverter"><a href="#3-1-4-1-StreamingResponseBodyConverter" class="headerlink" title="3.1.4.1 StreamingResponseBodyConverter"></a>3.1.4.1 StreamingResponseBodyConverter</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">StreamingResponseBodyConverter</span></span></div><div class="line">        <span class="keyword">implements</span> <span class="title">Converter</span>&lt;<span class="title">ResponseBody</span>, <span class="title">ResponseBody</span>&gt; &#123;</div><div class="line">    <span class="keyword">static</span> <span class="keyword">final</span> StreamingResponseBodyConverter INSTANCE = <span class="keyword">new</span> StreamingResponseBodyConverter();</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> ResponseBody <span class="title">convert</span><span class="params">(ResponseBody value)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        <span class="keyword">return</span> value;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h5 id="3-1-4-2-BufferingResponseBodyConverter"><a href="#3-1-4-2-BufferingResponseBodyConverter" class="headerlink" title="3.1.4.2 BufferingResponseBodyConverter"></a>3.1.4.2 BufferingResponseBodyConverter</h5><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">static</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">BufferingResponseBodyConverter</span></span></div><div class="line">            <span class="keyword">implements</span> <span class="title">Converter</span>&lt;<span class="title">ResponseBody</span>, <span class="title">ResponseBody</span>&gt; &#123;</div><div class="line">        <span class="keyword">static</span> <span class="keyword">final</span> BufferingResponseBodyConverter INSTANCE = <span class="keyword">new</span> BufferingResponseBodyConverter();</div><div class="line"></div><div class="line">	<span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> ResponseBody <span class="title">convert</span><span class="params">(ResponseBody value)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">       <span class="keyword">try</span> &#123;</div><div class="line">            <span class="comment">// Buffer the entire body to avoid future I/O.</span></div><div class="line">            <span class="keyword">return</span> Utils.buffer(value);</div><div class="line">        &#125; <span class="keyword">finally</span> &#123;</div><div class="line">            value.close();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">    </div><div class="line"><span class="comment">//Utils.buffer </span></div><div class="line"><span class="function"><span class="keyword">static</span> ResponseBody <span class="title">buffer</span><span class="params">(<span class="keyword">final</span> ResponseBody body)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">    Buffer buffer = <span class="keyword">new</span> Buffer();</div><div class="line">    body.source().readAll(buffer);</div><div class="line">    <span class="keyword">return</span> ResponseBody.create(body.contentType(), body.contentLength(), buffer);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/images/wechat.jpg" alt="王小宝 WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/images/alipay.jpg" alt="王小宝 Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Retrofit/" rel="tag"># Retrofit</a>
+          
+            <a href="/tags/开源项目学习/" rel="tag"># 开源项目学习</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/24/DiskLruCache学习/" rel="next" title="DiskLruCache学习">
+                <i class="fa fa-chevron-left"></i> DiskLruCache学习
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/24/Retrofit学习-二/" rel="prev" title="Retrofit学习(二)">
+                Retrofit学习(二) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.jpg"
+               alt="王小宝" />
+          <p class="site-author-name" itemprop="name">王小宝</p>
+           
+              <p class="site-description motion-element" itemprop="description">90后迷途小书童</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/wangyun137" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.jianshu.com/u/73df471e39bb" target="_blank" title="简书">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  简书
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一-使用用例"><span class="nav-number">1.</span> <span class="nav-text">一. 使用用例</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二-源码解析"><span class="nav-number">2.</span> <span class="nav-text">二. 源码解析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Retrofit-Build"><span class="nav-number">2.1.</span> <span class="nav-text">1. Retrofit.Build</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Retrofit-create"><span class="nav-number">2.2.</span> <span class="nav-text">2. Retrofit.create</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-Retrofit-loadServiceMethod"><span class="nav-number">2.2.1.</span> <span class="nav-text">2.1 Retrofit.loadServiceMethod</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-ServiceMethod-Builder"><span class="nav-number">2.2.2.</span> <span class="nav-text">2.2 ServiceMethod.Builder</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-1-ServiceMethod-createCallAdapter"><span class="nav-number">2.2.2.1.</span> <span class="nav-text">2.2.1 ServiceMethod.createCallAdapter</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-1-1-Retrofit-callAdapter"><span class="nav-number">2.2.2.1.1.</span> <span class="nav-text">2.2.1.1 Retrofit.callAdapter</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-1-2-ExecutorCallAdapterFactory-get"><span class="nav-number">2.2.2.1.2.</span> <span class="nav-text">2.2.1.2 ExecutorCallAdapterFactory.get()</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-2-ServiceMethod-createResponseConverter"><span class="nav-number">2.2.2.2.</span> <span class="nav-text">2.2.2 ServiceMethod.createResponseConverter()</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-2-1-Retrofit-responseBodyConverter"><span class="nav-number">2.2.2.2.1.</span> <span class="nav-text">2.2.2.1 Retrofit.responseBodyConverter</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#2-2-2-2-BuiltInConverters-responseBodyConverter"><span class="nav-number">2.2.2.2.2.</span> <span class="nav-text">2.2.2.2 BuiltInConverters.responseBodyConverter</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-3-ServiceMethod-parseMethodAnnotation"><span class="nav-number">2.2.2.3.</span> <span class="nav-text">2.2.3 ServiceMethod.parseMethodAnnotation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-4-ServiceMethod-parseParameter"><span class="nav-number">2.2.2.4.</span> <span class="nav-text">2.2.4 ServiceMethod.parseParameter</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-ServiceMethod-callAdapter-adapter"><span class="nav-number">2.2.3.</span> <span class="nav-text">2.3 ServiceMethod.callAdapter.adapter</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-ExecutorCallbackCall-enqueue"><span class="nav-number">2.3.</span> <span class="nav-text">3. ExecutorCallbackCall.enqueue</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-OkHttpCall-enqueue"><span class="nav-number">2.3.1.</span> <span class="nav-text">3.1 OkHttpCall.enqueue</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-1-OkHttpCall-createNewCall"><span class="nav-number">2.3.1.1.</span> <span class="nav-text">3.1.1 OkHttpCall.createNewCall</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#3-1-1-1-ServiceMethod-toRequest"><span class="nav-number">2.3.1.1.1.</span> <span class="nav-text">3.1.1.1 ServiceMethod.toRequest</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-2-OkHttpCall-parseResponse"><span class="nav-number">2.3.1.2.</span> <span class="nav-text">3.1.2 OkHttpCall.parseResponse</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-3-ServiceMethod-toResponse"><span class="nav-number">2.3.1.3.</span> <span class="nav-text">3.1.3 ServiceMethod.toResponse</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-1-4-Converter-convert"><span class="nav-number">2.3.1.4.</span> <span class="nav-text">3.1.4 Converter.convert</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#3-1-4-1-StreamingResponseBodyConverter"><span class="nav-number">2.3.1.4.1.</span> <span class="nav-text">3.1.4.1 StreamingResponseBodyConverter</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#3-1-4-2-BufferingResponseBodyConverter"><span class="nav-number">2.3.1.4.2.</span> <span class="nav-text">3.1.4.2 BufferingResponseBodyConverter</span></a></li></ol></li></ol></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">王小宝</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

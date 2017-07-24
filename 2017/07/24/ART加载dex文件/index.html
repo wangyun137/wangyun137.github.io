@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="ART,源码分析," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="迷途小书童" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="一．Java层调用链1.1 ActivityThread.performLaunchActivity一般应用程序的启动都是由点击Launcher上的图标来启动，而点击图标时所执行的操作是startActivity(Intent intent)，经过一系列复杂的调用链后，最终会初始化Activity实例并回调onCreate，而执行初始化实例并回调onCreate的方法是ActivityThread">
+<meta name="keywords" content="ART,源码分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ART加载dex文件">
+<meta property="og:url" content="https://wangyun137.github.io/2017/07/24/ART加载dex文件/index.html">
+<meta property="og:site_name" content="迷途小书童">
+<meta property="og:description" content="一．Java层调用链1.1 ActivityThread.performLaunchActivity一般应用程序的启动都是由点击Launcher上的图标来启动，而点击图标时所执行的操作是startActivity(Intent intent)，经过一系列复杂的调用链后，最终会初始化Activity实例并回调onCreate，而执行初始化实例并回调onCreate的方法是ActivityThread">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-07-24T06:18:08.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ART加载dex文件">
+<meta name="twitter:description" content="一．Java层调用链1.1 ActivityThread.performLaunchActivity一般应用程序的启动都是由点击Launcher上的图标来启动，而点击图标时所执行的操作是startActivity(Intent intent)，经过一系列复杂的调用链后，最终会初始化Activity实例并回调onCreate，而执行初始化实例并回调onCreate的方法是ActivityThread">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://wangyun137.github.io/2017/07/24/ART加载dex文件/"/>
+
+
+
+
+
+  <title>ART加载dex文件 | 迷途小书童</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">迷途小书童</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">遇见一个人可能只要一秒，喜欢一个人可能需要一天，忘记一个人却需要一辈子</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-/"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://wangyun137.github.io/2017/07/24/ART加载dex文件/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="王小宝">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="迷途小书童">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ART加载dex文件</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-24T13:53:05+08:00">
+                2017-07-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ART/" itemprop="url" rel="index">
+                    <span itemprop="name">ART</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h2 id="一．Java层调用链"><a href="#一．Java层调用链" class="headerlink" title="一．Java层调用链"></a>一．Java层调用链</h2><h3 id="1-1-ActivityThread-performLaunchActivity"><a href="#1-1-ActivityThread-performLaunchActivity" class="headerlink" title="1.1 ActivityThread.performLaunchActivity"></a>1.1 ActivityThread.performLaunchActivity</h3><p>一般应用程序的启动都是由点击Launcher上的图标来启动，而点击图标时所执行的操作是<code>startActivity(Intent intent)</code>，经过一系列复杂的调用链后，最终会初始化Activity实例并回调<code>onCreate</code>，而执行初始化实例并回调<code>onCreate</code>的方法是<code>ActivityThread.performLaunchActivity</code>, 核心代码为：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> Activity <span class="title">performLaunchActivity</span><span class="params">(ActivityClientRecord r, Intent customIntent)</span> </span>&#123;</div><div class="line">  ...</div><div class="line">  Activity activity = <span class="keyword">null</span>;</div><div class="line">  <span class="keyword">try</span> &#123;      </div><div class="line">      <span class="comment">//获取ClassLoader同时加载相应的dex文件</span></div><div class="line">      <span class="comment">//r.packageInfo是LoadApk的实例</span></div><div class="line">      java.lang.ClassLoader cl = r.packageInfo.getClassLoader();</div><div class="line">      <span class="comment">//初始化Activity实例</span></div><div class="line">      activity = mInstrumentation.newActivity(</div><div class="line">                    cl, component.getClassName(), r.intent);</div><div class="line">      StrictMode.incrementExpectedActivityCount(activity.getClass());</div><div class="line">      r.intent.setExtrasClassLoader(cl);</div><div class="line">      r.intent.prepareToEnterProcess();</div><div class="line">      <span class="keyword">if</span> (r.state != <span class="keyword">null</span>) &#123;</div><div class="line">                r.state.setClassLoader(cl);</div><div class="line">            &#125;</div><div class="line">  &#125; <span class="keyword">catch</span> (Exception e) &#123;</div><div class="line">      <span class="keyword">if</span> (!mInstrumentation.onException(activity, e)) &#123;</div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(</div><div class="line">          <span class="string">"Unable to instantiate activity "</span> + component</div><div class="line">          + <span class="string">": "</span> + e.toString(), e);</div><div class="line">      &#125;</div><div class="line">  &#125;</div><div class="line">...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="1-2-LoadApk-getClassLoader"><a href="#1-2-LoadApk-getClassLoader" class="headerlink" title="1.2 LoadApk.getClassLoader"></a>1.2 LoadApk.getClassLoader</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> ClassLoader <span class="title">getClassLoader</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="keyword">synchronized</span> (<span class="keyword">this</span>) &#123;</div><div class="line">        <span class="comment">//如果已经加载过dex文件则直接返回ClassLoader</span></div><div class="line">        <span class="keyword">if</span> (mClassLoader != <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">return</span> mClassLoader;</div><div class="line">        &#125;</div><div class="line">        ...</div><div class="line">        <span class="comment">//如果还没有加载dex，则初始化相应的ClassLoader并加载dex文件</span></div><div class="line">        <span class="comment">//mBaseClassLoader = null，在performLaunchActivity中初始化LoadApk的时候设置</span></div><div class="line">        mClassLoader = ApplicationLoaders.getDefault().getClassLoader(zip, lib,</div><div class="line">                        mBaseClassLoader);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> mClassLoader;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="1-3-ApplicationLoaders-getClassLoader"><a href="#1-3-ApplicationLoaders-getClassLoader" class="headerlink" title="1.3 ApplicationLoaders.getClassLoader"></a>1.3 ApplicationLoaders.getClassLoader</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> ClassLoader <span class="title">getClassLoader</span><span class="params">(String zip, String libPath, ClassLoader parent)</span></span>&#123;</div><div class="line">    <span class="comment">//Class.getSystemClassLoader返回的是一个PathClassLoader</span></div><div class="line">    <span class="comment">//baseParent是BootClassLoader</span></div><div class="line">    ClassLoader baseParent = ClassLoader.getSystemClassLoader().getParent();</div><div class="line"></div><div class="line">    <span class="keyword">synchronized</span> (mLoaders) &#123;</div><div class="line">    <span class="keyword">if</span> (parent == <span class="keyword">null</span>) &#123;</div><div class="line">        parent = baseParent;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (parent == baseParent) &#123;</div><div class="line">        ClassLoader loader = mLoaders.get(zip);</div><div class="line">        <span class="keyword">if</span> (loader != <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">return</span> loader;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, zip);</div><div class="line">        <span class="comment">//创建一个PathClassLoader,并放入缓存，方便以后直接获取</span></div><div class="line">        PathClassLoader pathClassloader =</div><div class="line">                    <span class="keyword">new</span> PathClassLoader(zip, libPath, parent);</div><div class="line">        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);</div><div class="line"></div><div class="line">        mLoaders.put(zip, pathClassloader);</div><div class="line">        <span class="keyword">return</span> pathClassloader;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, zip);</div><div class="line">        PathClassLoader pathClassloader = <span class="keyword">new</span> PathClassLoader(zip, parent);</div><div class="line">        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);</div><div class="line">        <span class="keyword">return</span> pathClassloader;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="1-4-PathClassLoader"><a href="#1-4-PathClassLoader" class="headerlink" title="1.4 PathClassLoader()"></a>1.4 PathClassLoader()</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">PathClassLoader</span><span class="params">(String dexPath, String libraryPath,</span></span></div><div class="line">            ClassLoader parent) &#123;</div><div class="line">    <span class="comment">//PathClassLoader继承自BaseDexClassLoader，所以会调用</span></div><div class="line">    <span class="comment">//BaseDexClassLoader的构造函数</span></div><div class="line">    <span class="keyword">super</span>(dexPath, <span class="keyword">null</span>, libraryPath, parent);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="1-5-BaseDexClassLoader"><a href="#1-5-BaseDexClassLoader" class="headerlink" title="1.5 BaseDexClassLoader()"></a>1.5 BaseDexClassLoader()</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//由PathClassLoader传入的参数可以知道第二个参数optimizedDirectory=null</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">BaseDexClassLoader</span><span class="params">(String dexPath, File optimizedDirectory,</span></span></div><div class="line">            String libraryPath, ClassLoader parent) &#123;</div><div class="line">    <span class="keyword">super</span>(parent);</div><div class="line">    <span class="keyword">this</span>.pathList = <span class="keyword">new</span> DexPathList(<span class="keyword">this</span>, dexPath, libraryPath, optimizedDirectory);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="1-6-DexPathList"><a href="#1-6-DexPathList" class="headerlink" title="1.6 DexPathList()"></a>1.6 DexPathList()</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">DexPathList</span><span class="params">(ClassLoader definingContext, String dexPath,</span></span></div><div class="line">            String libraryPath, File optimizedDirectory) &#123;</div><div class="line"></div><div class="line">    ...</div><div class="line"></div><div class="line">    <span class="keyword">this</span>.definingContext = definingContext;</div><div class="line"></div><div class="line">    ArrayList&lt;IOException&gt; suppressedExceptions = <span class="keyword">new</span> ArrayList&lt;IOException&gt;();</div><div class="line">    <span class="comment">//加载dex文件</span></div><div class="line">    <span class="keyword">this</span>.dexElements = makePathElements(splitDexPath(dexPath), optimizedDirectory,</div><div class="line">                                            suppressedExceptions);</div><div class="line"></div><div class="line">    <span class="keyword">this</span>.nativeLibraryDirectories = splitPaths(libraryPath, <span class="keyword">false</span>);</div><div class="line">    <span class="keyword">this</span>.systemNativeLibraryDirectories =</div><div class="line">                splitPaths(System.getProperty(<span class="string">"java.library.path"</span>), <span class="keyword">true</span>);</div><div class="line">    List&lt;File&gt; allNativeLibraryDirectories = <span class="keyword">new</span> ArrayList&lt;&gt;(nativeLibraryDirectories);</div><div class="line">    allNativeLibraryDirectories.addAll(systemNativeLibraryDirectories);</div><div class="line">    <span class="comment">//加载library文件</span></div><div class="line">    <span class="keyword">this</span>.nativeLibraryPathElements = makePathElements(allNativeLibraryDirectories, <span class="keyword">null</span>,</div><div class="line">                                                          suppressedExceptions);</div><div class="line"></div><div class="line">    ...</div></pre></td></tr></table></figure>
+<h3 id="1-7-DexPathList-makePathElements"><a href="#1-7-DexPathList-makePathElements" class="headerlink" title="1.7 DexPathList.makePathElements()"></a>1.7 DexPathList.makePathElements()</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">private</span> <span class="keyword">static</span> Element[] makePathElements(List&lt;File&gt; files, File optimizedDirectory,</div><div class="line">                                              List&lt;IOException&gt; suppressedExceptions) &#123;</div><div class="line">    List&lt;Element&gt; elements = <span class="keyword">new</span> ArrayList&lt;&gt;();</div><div class="line">    <span class="keyword">for</span> (File file : files) &#123;</div><div class="line">        File zip = <span class="keyword">null</span>;</div><div class="line">        File dir = <span class="keyword">new</span> File(<span class="string">""</span>);</div><div class="line">        DexFile dex = <span class="keyword">null</span>;</div><div class="line">        String path = file.getPath();</div><div class="line">        String name = file.getName();</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (path.contains(zipSeparator)) &#123;</div><div class="line">            String split[] = path.split(zipSeparator, <span class="number">2</span>);</div><div class="line">            zip = <span class="keyword">new</span> File(split[<span class="number">0</span>]);</div><div class="line">            dir = <span class="keyword">new</span> File(split[<span class="number">1</span>]);</div><div class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (file.isDirectory()) &#123;</div><div class="line">            <span class="comment">//如果file是library会执行这一分支</span></div><div class="line">            elements.add(<span class="keyword">new</span> Element(file, <span class="keyword">true</span>, <span class="keyword">null</span>, <span class="keyword">null</span>));</div><div class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (file.isFile()) &#123;</div><div class="line">            <span class="keyword">if</span> (name.endsWith(DEX_SUFFIX)) &#123;</div><div class="line">                <span class="comment">//如果文件以.dex结尾，直接加载</span></div><div class="line">                <span class="keyword">try</span> &#123;</div><div class="line">                    dex = loadDexFile(file, optimizedDirectory);</div><div class="line">                &#125; <span class="keyword">catch</span> (IOException ex) &#123;</div><div class="line">                    System.logE(<span class="string">"Unable to load dex file: "</span> + file, ex);</div><div class="line">                &#125;</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                zip = file;</div><div class="line">                <span class="comment">//加载位于.zip或者.apk文件内的dex文件</span></div><div class="line">                <span class="keyword">try</span> &#123;</div><div class="line">                    dex = loadDexFile(file, optimizedDirectory);</div><div class="line">                &#125; <span class="keyword">catch</span> (IOException suppressed) &#123;</div><div class="line">                    suppressedExceptions.add(suppressed);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            System.logW(<span class="string">"ClassLoader referenced unknown path: "</span> + file);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> ((zip != <span class="keyword">null</span>) || (dex != <span class="keyword">null</span>)) &#123;</div><div class="line">            elements.add(<span class="keyword">new</span> Element(dir, <span class="keyword">false</span>, zip, dex));</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">return</span> elements.toArray(<span class="keyword">new</span> Element[elements.size()]);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="1-8-DexPathList-loadDexFile"><a href="#1-8-DexPathList-loadDexFile" class="headerlink" title="1.8 DexPathList.loadDexFile()"></a>1.8 DexPathList.loadDexFile()</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> DexFile <span class="title">loadDexFile</span><span class="params">(File file, File optimizedDirectory)</span></span></div><div class="line">            <span class="keyword">throws</span> IOException &#123;</div><div class="line">    <span class="keyword">if</span> (optimizedDirectory == <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="comment">//如果是PathClassLoader,则执行这一步</span></div><div class="line">        <span class="keyword">return</span> <span class="keyword">new</span> DexFile(file);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="comment">//首先确保输出后的文件是以.dex结尾</span></div><div class="line">        String optimizedPath = optimizedPathFor(file, optimizedDirectory);</div><div class="line">        <span class="keyword">return</span> DexFile.loadDex(file.getPath(), optimizedPath, <span class="number">0</span>);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="1-8-1-DexFile-String-fileName"><a href="#1-8-1-DexFile-String-fileName" class="headerlink" title="1.8.1 DexFile(String fileName)"></a>1.8.1 DexFile(String fileName)</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">DexFile</span><span class="params">(String fileName)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">    <span class="comment">//mCookie是一个Object类型的对象，用这个对象来保存dex文件也可能是dex文件列表</span></div><div class="line">    <span class="comment">//之后在加载class的时候，会把这个对象传入，从而加载相应的class</span></div><div class="line">    mCookie = openDexFile(fileName, <span class="keyword">null</span>, <span class="number">0</span>);</div><div class="line">    mFileName = fileName;</div><div class="line">    guard.open(<span class="string">"close"</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="1-8-2-DexFile-loadDex"><a href="#1-8-2-DexFile-loadDex" class="headerlink" title="1.8.2 DexFile.loadDex()"></a>1.8.2 DexFile.loadDex()</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">public</span> DexFile <span class="title">loadDex</span><span class="params">(String sourcePathName, String outputPathName,</span></span></div><div class="line">    <span class="keyword">int</span> flags) <span class="keyword">throws</span> IOException &#123;</div><div class="line"></div><div class="line">    <span class="keyword">return</span> <span class="keyword">new</span> DexFile(sourcePathName, outputPathName, flags);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="1-8-3-DexFile"><a href="#1-8-3-DexFile" class="headerlink" title="1.8.3 DexFile()"></a>1.8.3 DexFile()</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="title">DexFile</span><span class="params">(String sourceName, String outputName, <span class="keyword">int</span> flags)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">    <span class="keyword">if</span> (outputName != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">try</span> &#123;</div><div class="line">            String parent = <span class="keyword">new</span> File(outputName).getParent();</div><div class="line">            <span class="comment">//确保输出目录属于当前应用，即输出目录是应用的私有目录/data/data/package_name/xxx</span></div><div class="line">            <span class="keyword">if</span> (Libcore.os.getuid() != Libcore.os.stat(parent).st_uid) &#123;</div><div class="line">                <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"Optimized data directory "</span> + parent</div><div class="line">                            + <span class="string">" is not owned by the current user. Shared storage cannot protect"</span></div><div class="line">                            + <span class="string">" your application from code injection attacks."</span>);</div><div class="line">            &#125;</div><div class="line">        &#125; <span class="keyword">catch</span> (ErrnoException ignored) &#123;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//mCookie是一个Object类型的对象，用这个对象来保存dex文件也可能是dex文件列表</span></div><div class="line">    <span class="comment">//之后在加载class的时候，会把这个对象传入，从而加载相应的class</span></div><div class="line">    mCookie = openDexFile(sourceName, outputName, flags);</div><div class="line">    mFileName = sourceName;</div><div class="line">    guard.open(<span class="string">"close"</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>从以上代码片段中可以看出，最后加载dex文件都是调用<code>DexFile.openDexFile</code>这个方法</p>
+<h3 id="1-9-DexFile-openDexFile"><a href="#1-9-DexFile-openDexFile" class="headerlink" title="1.9. DexFile.openDexFile()"></a>1.9. DexFile.openDexFile()</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> Object <span class="title">openDexFile</span><span class="params">(String sourceName, String outputName, <span class="keyword">int</span> flags)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">    <span class="keyword">return</span> openDexFileNative(<span class="keyword">new</span> File(sourceName).getAbsolutePath(),</div><div class="line">                              (outputName == <span class="keyword">null</span>) ? <span class="keyword">null</span> : <span class="keyword">new</span> File(outputName).getAbsolutePath(),</div><div class="line">                              flags);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>openDexFileNative</code>是一个native方法，之后的调用进入native层</p>
+<h2 id="二．Native调用链"><a href="#二．Native调用链" class="headerlink" title="二．Native调用链"></a>二．Native调用链</h2><h3 id="2-1-DexFile-openDexFileNative"><a href="#2-1-DexFile-openDexFileNative" class="headerlink" title="2.1 DexFile_openDexFileNative()"></a>2.1 DexFile_openDexFileNative()</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">static</span> jobject <span class="title">DexFile_openDexFileNative</span><span class="params">(</span></span></div><div class="line">    JNIEnv* env, jclass, jstring javaSourceName, jstring javaOutputName, jint) &#123;</div><div class="line"></div><div class="line">    ...</div><div class="line">    ClassLinker* linker = Runtime::Current()-&gt;GetClassLinker();</div><div class="line">    <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;<span class="keyword">const</span> DexFile&gt;&gt; dex_files;</div><div class="line">    <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt; error_msgs;</div><div class="line"></div><div class="line">    dex_files = linker-&gt;OpenDexFilesFromOat(sourceName.c_str(), outputName.c_str(), &amp;error_msgs);</div><div class="line"></div><div class="line">    <span class="keyword">if</span> (!dex_files.empty()) &#123;</div><div class="line">        jlongArray <span class="built_in">array</span> = ConvertNativeToJavaArray(env, dex_files);</div><div class="line">        ...　<span class="comment">//错误处理，释放相应资源</span></div><div class="line"></div><div class="line">        <span class="comment">//返回给Java层，由DexFile的mCookie指向</span></div><div class="line">        <span class="keyword">return</span> <span class="built_in">array</span>;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        ... <span class="comment">//抛出异常</span></div><div class="line">        <span class="keyword">return</span> <span class="literal">nullptr</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="2-2-ClassLinker-OpenDexFilesFromOat"><a href="#2-2-ClassLinker-OpenDexFilesFromOat" class="headerlink" title="2.2 ClassLinker::OpenDexFilesFromOat()"></a>2.2 ClassLinker::OpenDexFilesFromOat()</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div></pre></td><td class="code"><pre><div class="line">std::vector&lt;std::unique_ptr&lt;<span class="keyword">const</span> DexFile&gt;&gt; ClassLinker::OpenDexFilesFromOat(</div><div class="line">        <span class="keyword">const</span> <span class="keyword">char</span>* dex_location, <span class="keyword">const</span> <span class="keyword">char</span>* oat_location,</div><div class="line">        std::vector&lt;std::string&gt;* error_msgs) &#123;</div><div class="line">    CHECK(error_msgs != nullptr);</div><div class="line"></div><div class="line">    <span class="comment">// Verify we aren't holding the mutator lock, which could starve GC if we</span></div><div class="line">    <span class="comment">// have to generate or relocate an oat file.</span></div><div class="line">    Locks::mutator_lock_-&gt;AssertNotHeld(Thread::Current());</div><div class="line"></div><div class="line">    <span class="comment">//Runtime::Current()-&gt;IsAotCompiler用来判断Runtime是否用于dex2oat,dex2oat程序</span></div><div class="line">    <span class="comment">//也会创建一个Runtime,专门用来Compile</span></div><div class="line">    <span class="function">OatFileAssistant <span class="title">oat_file_assistant</span><span class="params">(dex_location, oat_location, kRuntimeISA,</span></span></div><div class="line">       !Runtime::Current()-&gt;<span class="title">IsAotCompiler</span><span class="params">()</span>);</div><div class="line"></div><div class="line">    <span class="comment">// Lock the target oat location to avoid races generating and loading the</span></div><div class="line">    <span class="comment">// oat file.</span></div><div class="line">    std::string error_msg;</div><div class="line">    <span class="keyword">if</span> (!oat_file_assistant.Lock(&amp;error_msg)) &#123;</div><div class="line">        ...</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// Check if we already have an up-to-date oat file open.</span></div><div class="line">    <span class="keyword">const</span> OatFile* source_oat_file = nullptr;</div><div class="line">    &#123;</div><div class="line">        <span class="function">ReaderMutexLock <span class="title">mu</span><span class="params">(Thread::Current()</span>, dex_lock_)</span>;</div><div class="line">        <span class="comment">//oat_file_变量属于ClassLinker，用来存放oat文件</span></div><div class="line">        <span class="keyword">for</span> (<span class="keyword">const</span> OatFile* oat_file : oat_files_) &#123;</div><div class="line">            ...</div><div class="line">            <span class="comment">// 判断oat文件是否正确</span></div><div class="line">            <span class="keyword">if</span> (oat_file_assistant.GivenOatFileIsUpToDate(*oat_file)) &#123;</div><div class="line">                source_oat_file = oat_file;</div><div class="line">                <span class="keyword">break</span>;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// If we didn't have an up-to-date oat file open, try to load one from disk.</span></div><div class="line">    <span class="keyword">if</span> (source_oat_file == nullptr) &#123;</div><div class="line">        <span class="comment">// Update the oat file on disk if we can. This may fail, but that's okay.</span></div><div class="line">        <span class="comment">// Best effort is all that matters here.</span></div><div class="line">        <span class="comment">// 根据dex文件产生对应的oat文件</span></div><div class="line">        <span class="keyword">if</span> (!oat_file_assistant.MakeUpToDate(&amp;error_msg)) &#123;</div><div class="line">            ...</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="comment">// Get the oat file on disk.</span></div><div class="line">        std::unique_ptr&lt;OatFile&gt; oat_file = oat_file_assistant.GetBestOatFile();</div><div class="line">        <span class="keyword">if</span> (oat_file.get() != nullptr) &#123;</div><div class="line">            <span class="comment">// Take the file only if it has no collisions, or we must take it because of preopting.</span></div><div class="line">            bool accept_oat_file = !HasCollisions(oat_file.get(), &amp;error_msg);</div><div class="line">            <span class="keyword">if</span> (!accept_oat_file) &#123;</div><div class="line">                ...</div><div class="line">                <span class="comment">// However, if the app was part of /system and preopted, there is no original dex file</span></div><div class="line">                <span class="comment">// available. In that case grudgingly accept the oat file.</span></div><div class="line">                <span class="keyword">if</span> (!DexFile::MaybeDex(dex_location)) &#123;</div><div class="line">                    accept_oat_file = <span class="keyword">true</span>;</div><div class="line">                    ...</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            <span class="keyword">if</span> (accept_oat_file) &#123;</div><div class="line">                source_oat_file = oat_file.release();</div><div class="line">                <span class="comment">//将oat_file添加至oat_file_</span></div><div class="line">                RegisterOatFile(source_oat_file);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    std::vector&lt;std::unique_ptr&lt;<span class="keyword">const</span> DexFile&gt;&gt; dex_files;</div><div class="line"></div><div class="line">    <span class="comment">// Load the dex files from the oat file.</span></div><div class="line">    <span class="keyword">if</span> (source_oat_file != nullptr) &#123;</div><div class="line">        <span class="comment">//通过OatFileAssistant加载dex文件</span></div><div class="line">        dex_files = oat_file_assistant.LoadDexFiles(*source_oat_file, dex_location);</div><div class="line">        <span class="keyword">if</span> (dex_files.empty()) &#123;</div><div class="line">            ...</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// Fall back to running out of the original dex file if we couldn't load any</span></div><div class="line">    <span class="comment">// dex_files from the oat file.</span></div><div class="line">    <span class="keyword">if</span> (dex_files.empty()) &#123;</div><div class="line">        ...</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> dex_files;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="2-3-OatFileAssistant-LoadDexFiles"><a href="#2-3-OatFileAssistant-LoadDexFiles" class="headerlink" title="2.3 OatFileAssistant::LoadDexFiles()"></a>2.3 OatFileAssistant::LoadDexFiles()</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;<span class="keyword">const</span> DexFile&gt;&gt; OatFileAssistant::LoadDexFiles(</div><div class="line">    <span class="keyword">const</span> OatFile&amp; oat_file, <span class="keyword">const</span> <span class="keyword">char</span>* dex_location) &#123;</div><div class="line"></div><div class="line">    <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;<span class="keyword">const</span> DexFile&gt;&gt; dex_files;</div><div class="line"></div><div class="line">    <span class="comment">//先加载主dex文件.</span></div><div class="line">    <span class="comment">//先从OatFile中获取OatDexFile, 在oat文件中每一个OatDexFile记录了相应的</span></div><div class="line">    <span class="comment">//dex文件的文件名，文件偏移地址等关键信息</span></div><div class="line">    <span class="built_in">std</span>::<span class="built_in">string</span> error_msg;</div><div class="line">    <span class="keyword">const</span> OatFile::OatDexFile* oat_dex_file = oat_file.GetOatDexFile(</div><div class="line">        dex_location, <span class="literal">nullptr</span>, <span class="literal">false</span>);</div><div class="line">    <span class="keyword">if</span> (oat_dex_file == <span class="literal">nullptr</span>) &#123;</div><div class="line">        ...</div><div class="line">        <span class="keyword">return</span> <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;<span class="keyword">const</span> DexFile&gt;&gt;();</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//通过OatDexFile加载主dex, [2.4]</span></div><div class="line">    <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;<span class="keyword">const</span> DexFile&gt; dex_file = oat_dex_file-&gt;OpenDexFile(&amp;error_msg);</div><div class="line">    <span class="keyword">if</span> (dex_file.get() == <span class="literal">nullptr</span>) &#123;</div><div class="line">        LOG(WARNING) &lt;&lt; <span class="string">"Failed to open dex file from oat dex file: "</span> &lt;&lt; error_msg;</div><div class="line">        <span class="keyword">return</span> <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;<span class="keyword">const</span> DexFile&gt;&gt;();</div><div class="line">    &#125;</div><div class="line">    dex_files.push_back(<span class="built_in">std</span>::move(dex_file));</div><div class="line"></div><div class="line">    <span class="comment">//加载其余的次级dex文件</span></div><div class="line">    <span class="keyword">for</span> (<span class="keyword">size_t</span> i = <span class="number">1</span>; ; i++) &#123;</div><div class="line">        <span class="comment">//先获取次级dex文件的索引位置</span></div><div class="line">        <span class="built_in">std</span>::<span class="built_in">string</span> secondary_dex_location = DexFile::GetMultiDexLocation(i, dex_location);</div><div class="line">        <span class="comment">//根据索引位置获取对应的OatDexFile结构</span></div><div class="line">        oat_dex_file = oat_file.GetOatDexFile(secondary_dex_location.c_str(), <span class="literal">nullptr</span>, <span class="literal">false</span>);</div><div class="line">        <span class="keyword">if</span> (oat_dex_file == <span class="literal">nullptr</span>) &#123;</div><div class="line">            <span class="comment">// There are no more secondary dex files to load.</span></div><div class="line">            <span class="keyword">break</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//加载次级dex文件</span></div><div class="line">        dex_file = oat_dex_file-&gt;OpenDexFile(&amp;error_msg);</div><div class="line">        <span class="keyword">if</span> (dex_file.get() == <span class="literal">nullptr</span>) &#123;</div><div class="line">            LOG(WARNING) &lt;&lt; <span class="string">"Failed to open dex file from oat dex file: "</span> &lt;&lt; error_msg;</div><div class="line">            <span class="keyword">return</span> <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;<span class="keyword">const</span> DexFile&gt;&gt;();</div><div class="line">        &#125;</div><div class="line">        dex_files.push_back(<span class="built_in">std</span>::move(dex_file));</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> dex_files;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<blockquote>
+<p>每一个dex文件的信息都被封装在一个OatDexFile中<br>OatDexFile数据结构：<br><code>const OatFile* const oat_file_</code>:指向oat文件的指针<br><code>const std::string dex_file_location_</code>：dex文件名<br><code>const std::string_canonical_dex_file_location_</code>：dex文件绝对路径<br><code>const uint32_t dex_file_location_cheksum_</code>:dex文件名的校验和<br><code>const uint8_t* const dex_file_pointer_</code>:指向对应dex文件在oat文件中相对于oatdata的偏移地址<br><code>const uint32_t* const oat_class_offsets_pointer_</code>:指向属于该dex文件的OatClass相对于oatdata的偏移地址</p>
+</blockquote>
+<h3 id="2-4-OatDexFile-OpenDexFile"><a href="#2-4-OatDexFile-OpenDexFile" class="headerlink" title="2.4 OatDexFile::OpenDexFile()"></a>2.4 OatDexFile::OpenDexFile()</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;<span class="keyword">const</span> DexFile&gt; OatFile::OatDexFile::OpenDexFile(<span class="built_in">std</span>::<span class="built_in">string</span>* error_msg) <span class="keyword">const</span> &#123;</div><div class="line">    <span class="keyword">return</span> DexFile::Open(dex_file_pointer_, FileSize(), dex_file_location_,</div><div class="line">                       dex_file_location_checksum_, <span class="keyword">this</span>, error_msg);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="2-5-DexFile-Open"><a href="#2-5-DexFile-Open" class="headerlink" title="2.5 DexFile::Open()"></a>2.5 DexFile::Open()</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">static</span> <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;<span class="keyword">const</span> DexFile&gt; Open(<span class="keyword">const</span> <span class="keyword">uint8_t</span>* base, <span class="keyword">size_t</span> size,</div><div class="line">                                          <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; location,</div><div class="line">                                          <span class="keyword">uint32_t</span> location_checksum,</div><div class="line">                                          <span class="keyword">const</span> OatDexFile* oat_dex_file,</div><div class="line">                                          <span class="built_in">std</span>::<span class="built_in">string</span>* error_msg) &#123;</div><div class="line">    <span class="keyword">return</span> OpenMemory(base, size, location, location_checksum, <span class="literal">nullptr</span>, oat_dex_file, error_msg);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="2-6-DexFile-OpenMemory"><a href="#2-6-DexFile-OpenMemory" class="headerlink" title="2.6 DexFile::OpenMemory()"></a>2.6 DexFile::OpenMemory()</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;<span class="keyword">const</span> DexFile&gt; DexFile::OpenMemory(<span class="keyword">const</span> <span class="keyword">uint8_t</span>* base,</div><div class="line">                                                   <span class="keyword">size_t</span> size,</div><div class="line">                                                   <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; location,</div><div class="line">                                                   <span class="keyword">uint32_t</span> location_checksum,</div><div class="line">                                                   MemMap* mem_map,<span class="comment">//nullptr</span></div><div class="line">                                                   <span class="keyword">const</span> OatDexFile* oat_dex_file,</div><div class="line">                                                   <span class="built_in">std</span>::<span class="built_in">string</span>* error_msg) &#123;</div><div class="line">    <span class="comment">//确保以４字节对齐</span></div><div class="line">    CHECK_ALIGNED(base, <span class="number">4</span>);  <span class="comment">// various dex file structures must be word aligned</span></div><div class="line">    <span class="comment">//初始化一个DexFile对象</span></div><div class="line">    <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;DexFile&gt; dex_file(</div><div class="line">        <span class="keyword">new</span> DexFile(base, size, location, location_checksum, mem_map, oat_dex_file));</div><div class="line">    <span class="comment">//检查dex的magic和version是否正确</span></div><div class="line">    <span class="keyword">if</span> (!dex_file-&gt;Init(error_msg)) &#123;</div><div class="line">        dex_file.reset();</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;<span class="keyword">const</span> DexFile&gt;(dex_file.release());</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="2-7-DexFile"><a href="#2-7-DexFile" class="headerlink" title="2.7 DexFile()"></a>2.7 DexFile()</h3><figure class="highlight c++"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">DexFile::DexFile(<span class="keyword">const</span> <span class="keyword">uint8_t</span>* base, <span class="keyword">size_t</span> size,</div><div class="line">                 <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; location,</div><div class="line">                 <span class="keyword">uint32_t</span> location_checksum,</div><div class="line">                 MemMap* mem_map,</div><div class="line">                 <span class="keyword">const</span> OatDexFile* oat_dex_file)</div><div class="line">      : begin_(base),</div><div class="line">        size_(size),</div><div class="line">        location_(location),</div><div class="line">        location_checksum_(location_checksum),</div><div class="line">        mem_map_(mem_map),<span class="comment">//nullptr</span></div><div class="line">        header_(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">const</span> Header*&gt;(base)),</div><div class="line">        string_ids_(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">const</span> StringId*&gt;(base + header_-&gt;string_ids_off_)),</div><div class="line">        type_ids_(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">const</span> TypeId*&gt;(base + header_-&gt;type_ids_off_)),</div><div class="line">        field_ids_(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">const</span> FieldId*&gt;(base + header_-&gt;field_ids_off_)),</div><div class="line">        method_ids_(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">const</span> MethodId*&gt;(base + header_-&gt;method_ids_off_)),</div><div class="line">        proto_ids_(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">const</span> ProtoId*&gt;(base + header_-&gt;proto_ids_off_)),</div><div class="line">        class_defs_(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">const</span> ClassDef*&gt;(base + header_-&gt;class_defs_off_)),</div><div class="line">        find_class_def_misses_(<span class="number">0</span>),</div><div class="line">        class_def_index_(<span class="literal">nullptr</span>),</div><div class="line">        oat_dex_file_(oat_dex_file) &#123;</div><div class="line">      CHECK(begin_ != <span class="literal">nullptr</span>) &lt;&lt; GetLocation();</div><div class="line">      CHECK_GT(size_, <span class="number">0U</span>) &lt;&lt; GetLocation();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<blockquote>
+<p>DexFile数据结构<br><code>const uint8_t* const begin_</code>;dex文件的起始地址<br><code>const size_t size_</code>: dex文件的大小，以字节为单位<br><code>const std::string location_</code>:dex文件的文件名<br><code>const uint32_t location_checksum_</code>:dex文件名的校验和<br><code>std::unique_ptr&lt;MemMap&gt; mem_map_</code>:<br><code>const Header* const header_</code>:指向dex文件的头部<br><code>const StringId* const string_ids_</code>:指向dex文件StringId列表<br><code>const TypeId* const type_ids</code>:指向dex文件TypeId列表<br><code>const FieldId* const field_ids_</code>:指向dex文件FieldId列表<br><code>const MethodId* const method_ids_</code>:指向dex文件MethodId列表<br><code>const ProtoId* const proto_ids</code>_:指向dex文件ProtoID列表<br><code>const ClassDef* const class_defs_</code>:指向dex文件ClassDef列表</p>
+</blockquote>
+<h2 id="三．总结"><a href="#三．总结" class="headerlink" title="三．总结"></a>三．总结</h2><p>应用程序启动时，系统会创建属于该应用进程的PathClassLoader,创建PathClassLoader的过程就是加载dex文件的过程．<br>ART内部支持加载多个dex文件，这是因为ART采用AOT方式，在应用安装的时候会将apk文件的所有dex文件统一编译到一个oat文件中．<br>其实加载过程就是根据oat文件在Java层和Native层生成相应的数据结构，从而方便之后加载类和方法</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/images/wechat.jpg" alt="王小宝 WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/images/alipay.jpg" alt="王小宝 Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ART/" rel="tag"># ART</a>
+          
+            <a href="/tags/源码分析/" rel="tag"># 源码分析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/24/ART加载类/" rel="prev" title="ART加载类">
+                ART加载类 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.jpg"
+               alt="王小宝" />
+          <p class="site-author-name" itemprop="name">王小宝</p>
+           
+              <p class="site-description motion-element" itemprop="description">90后迷途小书童</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/wangyun137" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.jianshu.com/u/73df471e39bb" target="_blank" title="简书">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  简书
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一．Java层调用链"><span class="nav-number">1.</span> <span class="nav-text">一．Java层调用链</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-ActivityThread-performLaunchActivity"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 ActivityThread.performLaunchActivity</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-2-LoadApk-getClassLoader"><span class="nav-number">1.2.</span> <span class="nav-text">1.2 LoadApk.getClassLoader</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-3-ApplicationLoaders-getClassLoader"><span class="nav-number">1.3.</span> <span class="nav-text">1.3 ApplicationLoaders.getClassLoader</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-4-PathClassLoader"><span class="nav-number">1.4.</span> <span class="nav-text">1.4 PathClassLoader()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-5-BaseDexClassLoader"><span class="nav-number">1.5.</span> <span class="nav-text">1.5 BaseDexClassLoader()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-6-DexPathList"><span class="nav-number">1.6.</span> <span class="nav-text">1.6 DexPathList()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-7-DexPathList-makePathElements"><span class="nav-number">1.7.</span> <span class="nav-text">1.7 DexPathList.makePathElements()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-8-DexPathList-loadDexFile"><span class="nav-number">1.8.</span> <span class="nav-text">1.8 DexPathList.loadDexFile()</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-8-1-DexFile-String-fileName"><span class="nav-number">1.8.1.</span> <span class="nav-text">1.8.1 DexFile(String fileName)</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-8-2-DexFile-loadDex"><span class="nav-number">1.8.2.</span> <span class="nav-text">1.8.2 DexFile.loadDex()</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#1-8-3-DexFile"><span class="nav-number">1.8.3.</span> <span class="nav-text">1.8.3 DexFile()</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#1-9-DexFile-openDexFile"><span class="nav-number">1.9.</span> <span class="nav-text">1.9. DexFile.openDexFile()</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二．Native调用链"><span class="nav-number">2.</span> <span class="nav-text">二．Native调用链</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-DexFile-openDexFileNative"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 DexFile_openDexFileNative()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-ClassLinker-OpenDexFilesFromOat"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 ClassLinker::OpenDexFilesFromOat()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-3-OatFileAssistant-LoadDexFiles"><span class="nav-number">2.3.</span> <span class="nav-text">2.3 OatFileAssistant::LoadDexFiles()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-4-OatDexFile-OpenDexFile"><span class="nav-number">2.4.</span> <span class="nav-text">2.4 OatDexFile::OpenDexFile()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-5-DexFile-Open"><span class="nav-number">2.5.</span> <span class="nav-text">2.5 DexFile::Open()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-6-DexFile-OpenMemory"><span class="nav-number">2.6.</span> <span class="nav-text">2.6 DexFile::OpenMemory()</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-7-DexFile"><span class="nav-number">2.7.</span> <span class="nav-text">2.7 DexFile()</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三．总结"><span class="nav-number">3.</span> <span class="nav-text">三．总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">王小宝</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

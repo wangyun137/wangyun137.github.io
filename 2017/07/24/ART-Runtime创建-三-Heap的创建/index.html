@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="ART,源码分析," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="迷途小书童" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="Heap的创建位于/art/runtime/runtime.cc的Runtime::Init方法中1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465bool Runtime::Init(RuntimeArgu">
+<meta name="keywords" content="ART,源码分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ART Runtime创建(三)--Heap的创建">
+<meta property="og:url" content="https://wangyun137.github.io/2017/07/24/ART-Runtime创建-三-Heap的创建/index.html">
+<meta property="og:site_name" content="迷途小书童">
+<meta property="og:description" content="Heap的创建位于/art/runtime/runtime.cc的Runtime::Init方法中1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465bool Runtime::Init(RuntimeArgu">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-07-24T07:03:18.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ART Runtime创建(三)--Heap的创建">
+<meta name="twitter:description" content="Heap的创建位于/art/runtime/runtime.cc的Runtime::Init方法中1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465bool Runtime::Init(RuntimeArgu">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://wangyun137.github.io/2017/07/24/ART-Runtime创建-三-Heap的创建/"/>
+
+
+
+
+
+  <title>ART Runtime创建(三)--Heap的创建 | 迷途小书童</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">迷途小书童</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">遇见一个人可能只要一秒，喜欢一个人可能需要一天，忘记一个人却需要一辈子</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-/"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://wangyun137.github.io/2017/07/24/ART-Runtime创建-三-Heap的创建/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="王小宝">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="迷途小书童">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ART Runtime创建(三)--Heap的创建</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-24T15:00:13+08:00">
+                2017-07-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/ART/" itemprop="url" rel="index">
+                    <span itemprop="name">ART</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><code>Heap</code>的创建位于<code>/art/runtime/runtime.cc</code>的<code>Runtime::Init</code>方法中<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">bool</span> Runtime::Init(RuntimeArgumentMap&amp;&amp; runtime_options_in) &#123;</div><div class="line">  ...</div><div class="line">  <span class="comment">//-Xgc</span></div><div class="line">  XGcOption xgc_option = runtime_options.GetOrDefault(Opt::GcOption);</div><div class="line">  heap_ = <span class="keyword">new</span> gc::Heap(runtime_options.GetOrDefault(Opt::MemoryInitialSize),<span class="comment">//-Xms:8m</span></div><div class="line">                       <span class="comment">//-XX:HeapGrowthLimit:256m</span></div><div class="line">                       runtime_options.GetOrDefault(Opt::HeapGrowthLimit),</div><div class="line">                       <span class="comment">//-XX:HeapMinFree:512k</span></div><div class="line">                       runtime_options.GetOrDefault(Opt::HeapMinFree),</div><div class="line">                       <span class="comment">//-XX:HeapMaxFree:8m</span></div><div class="line">                       runtime_options.GetOrDefault(Opt::HeapMaxFree),</div><div class="line">                       <span class="comment">//-XX:HeapTargetUtilization:0.75</span></div><div class="line">                       runtime_options.GetOrDefault(Opt::HeapTargetUtilization),</div><div class="line">                       <span class="comment">//-XX:ForegroundHeapGrowthMultiplier</span></div><div class="line">                       runtime_options.GetOrDefault(Opt::ForegroundHeapGrowthMultiplier),</div><div class="line">                       <span class="comment">//-Xmx:512m</span></div><div class="line">                       runtime_options.GetOrDefault(Opt::MemoryMaximumSize),</div><div class="line">                       <span class="comment">//-XX:NonMovingSpaceCapacity</span></div><div class="line">                       runtime_options.GetOrDefault(Opt::NonMovingSpaceCapacity),</div><div class="line">                       <span class="comment">//-Ximage:/system/framework/boot.art</span></div><div class="line">                       runtime_options.GetOrDefault(Opt::Image),</div><div class="line">                       <span class="comment">//imgaeinstructionset,是一个extra_info,用来hook: null</span></div><div class="line">                       runtime_options.GetOrDefault(Opt::ImageInstructionSet),</div><div class="line">                       <span class="comment">//-Xgc:kuseReadBarrier ? gc::kCollectorTypeCC : gc::kCollectorTypeDefault</span></div><div class="line">                       xgc_option.collector_type_,</div><div class="line">                       <span class="comment">//-XX:BackgroundGC</span></div><div class="line">                       runtime_options.GetOrDefault(Opt::BackgroundGc),</div><div class="line">                       <span class="comment">//-XX:LargeObjectSpace</span></div><div class="line">                       runtime_options.GetOrDefault(Opt::LargeObjectSpace),</div><div class="line">                       <span class="comment">//-XX:LargeObjectThreshold</span></div><div class="line">                       runtime_options.GetOrDefault(Opt::LargeObjectThreshold),</div><div class="line">                       <span class="comment">//-XX:ParallelGCThreads:0u</span></div><div class="line">                       runtime_options.GetOrDefault(Opt::ParallelGCThreads),</div><div class="line">                       <span class="comment">//-XX:ConcGCThreads</span></div><div class="line">                       runtime_options.GetOrDefault(Opt::ConcGCThreads),</div><div class="line">                       <span class="comment">//-XX:LowMemoryMode:false</span></div><div class="line">                       runtime_options.Exists(Opt::LowMemoryMode),</div><div class="line">                       <span class="comment">//-XX:LongPauseLogThreshold</span></div><div class="line">                       runtime_options.GetOrDefault(Opt::LongPauseLogThreshold),</div><div class="line">                       <span class="comment">//-XX:LongGCLogThreshold</span></div><div class="line">                       runtime_options.GetOrDefault(Opt::LongGCLogThreshold),</div><div class="line">                       <span class="comment">//-XX:IgnoreMaxFootprint</span></div><div class="line">                       runtime_options.Exists(Opt::IgnoreMaxFootprint),</div><div class="line">                       <span class="comment">//-XX:UseTLAB</span></div><div class="line">                       runtime_options.GetOrDefault(Opt::UseTLAB),</div><div class="line">                       <span class="comment">//default false</span></div><div class="line">                       xgc_option.verify_pre_gc_heap_,</div><div class="line">                       <span class="comment">//default kIsDebugBuild</span></div><div class="line">                       xgc_option.verify_pre_sweeping_heap_, </div><div class="line">                       <span class="comment">//default false</span></div><div class="line">                       xgc_option.verify_post_gc_heap_, </div><div class="line">                       <span class="comment">//default kIsDebugBuild</span></div><div class="line">                       xgc_option.verify_pre_gc_rosalloc_, </div><div class="line">                       <span class="comment">// default false</span></div><div class="line">                       xgc_option.verify_pre_sweeping_rosalloc_,</div><div class="line">                       <span class="comment">//default false</span></div><div class="line">                       xgc_option.verify_post_gc_rosalloc_,</div><div class="line">                       <span class="comment">//default false</span></div><div class="line">                       xgc_option.gcstress_,</div><div class="line">                       <span class="comment">//-XX:EnableHSpaceCompactForOOM</span></div><div class="line">                       runtime_options.GetOrDefault(Opt::EnableHSpaceCompactForOOM),</div><div class="line">                       <span class="comment">//-XX:HspaceCompactForOOMMinIntervalMs</span></div><div class="line">                       runtime_options.GetOrDefault(Opt::HSpaceCompactForOOMMinIntervalsMs));</div><div class="line">  ...</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h2 id="一-相关知识预热"><a href="#一-相关知识预热" class="headerlink" title="一. 相关知识预热"></a>一. 相关知识预热</h2><h3 id="1-1-Garbage-Collection-Type"><a href="#1-1-Garbage-Collection-Type" class="headerlink" title="1.1 Garbage Collection Type"></a>1.1 Garbage Collection Type</h3><p>垃圾回收的算法有多种，如MarkSweep-标记清楚算法,MarkCompact-标记整理算法,Copying-复制算法等等，之前的Dalvik一直使用的是MarkSweep算法，ART则在MarkSweep的基础上添加了对其他垃圾回收算法的支持，具体的算法可以通过<code>-Xgc</code>指定，如果没有特别指定，则使用默认指定的：<br><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// /art/smdline/cmdline_types.h</span></div><div class="line">gc::CollectorType collector_type_ =  kUseReadBarrier ?</div><div class="line">                                           <span class="comment">// If RB is enabled (currently a build-time decision),</span></div><div class="line">                                           <span class="comment">// use CC as the default GC.</span></div><div class="line">                                           gc::kCollectorTypeCC :</div><div class="line">                                           gc::kCollectorTypeDefault;</div></pre></td></tr></table></figure></p>
+<p><code>kUseReadBarrier</code>定义在<code>/art/runtime/globals.h</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> USE_BAKER_READ_BARRIER</span></div><div class="line"><span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">bool</span> kUseBakerReadBarrier = <span class="literal">true</span>;</div><div class="line"><span class="meta">#<span class="meta-keyword">else</span></span></div><div class="line"><span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">bool</span> kUseBakerReadBarrier = <span class="literal">false</span>;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> USE_BROOKS_READ_BARRIER</span></div><div class="line"><span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">bool</span> kUseBrooksReadBarrier = <span class="literal">true</span>;</div><div class="line"><span class="meta">#<span class="meta-keyword">else</span></span></div><div class="line"><span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">bool</span> kUseBrooksReadBarrier = <span class="literal">false</span>;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"></div><div class="line"><span class="meta">#<span class="meta-keyword">ifdef</span> USE_TABLE_LOOKUP_READ_BARRIER</span></div><div class="line"><span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">bool</span> kUseTableLookupReadBarrier = <span class="literal">true</span>;</div><div class="line"><span class="meta">#<span class="meta-keyword">else</span></span></div><div class="line"><span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">bool</span> kUseTableLookupReadBarrier = <span class="literal">false</span>;</div><div class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></div><div class="line"></div><div class="line"><span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">bool</span> kUseBakerOrBrooksReadBarrier = kUseBakerReadBarrier || kUseBrooksReadBarrier;</div><div class="line"><span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">bool</span> kUseReadBarrier =</div><div class="line">    kUseBakerReadBarrier || kUseBrooksReadBarrier || kUseTableLookupReadBarrier;</div></pre></td></tr></table></figure>
+<p><code>kUseReadBarrier</code>根据三个编译宏决定true或false,只要这个三个编译宏中有一个存在，则<code>kUseReadBarrier=true</code></p>
+<p><code>gc::kCollectorTypeCC</code>和<code>gc::kCollectorTypeDefault</code>定义在<code>/art/runtime/gc/collector_type.h</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">enum</span> CollectorType &#123;</div><div class="line">  <span class="comment">// No collector selected.</span></div><div class="line">  kCollectorTypeNone,</div><div class="line">  <span class="comment">//普通Mark-Sweep</span></div><div class="line">  kCollectorTypeMS,</div><div class="line">  <span class="comment">// 并发Mark-Sweep.</span></div><div class="line">  kCollectorTypeCMS,</div><div class="line">  <span class="comment">// Semi-space和Mark-Sweep的混合</span></div><div class="line">  kCollectorTypeSS,</div><div class="line">  <span class="comment">// Generational Semi-space</span></div><div class="line">  kCollectorTypeGSS,</div><div class="line">  <span class="comment">// Mark compact</span></div><div class="line">  kCollectorTypeMC,</div><div class="line">  <span class="comment">// Heap trimming collector, doesn't do any actual collecting.</span></div><div class="line">  kCollectorTypeHeapTrim,</div><div class="line">  <span class="comment">// A (mostly) concurrent copying collector.</span></div><div class="line">  kCollectorTypeCC,</div><div class="line">  <span class="comment">// Instrumentation critical section fake collector.</span></div><div class="line">  kCollectorTypeInstrumentation,</div><div class="line">  <span class="comment">// Fake collector for adding or removing application image spaces.</span></div><div class="line">  kCollectorTypeAddRemoveAppImageSpace,</div><div class="line">  <span class="comment">// A homogeneous space compaction collector used in background transition</span></div><div class="line">  <span class="comment">// when both foreground and background collector are CMS.</span></div><div class="line">  kCollectorTypeHomogeneousSpaceCompact,</div><div class="line">  <span class="comment">// Class linker fake collector.</span></div><div class="line">  kCollectorTypeClassLinker,</div><div class="line">&#125;;</div><div class="line"></div><div class="line"><span class="keyword">static</span> <span class="keyword">constexpr</span> CollectorType kCollectorTypeDefault =</div><div class="line">#<span class="keyword">if</span> ART_DEFAULT_GC_TYPE_IS_CMS</div><div class="line">    kCollectorTypeCMS</div><div class="line">#elif ART_DEFAULT_GC_TYPE_IS_SS</div><div class="line">    kCollectorTypeSS</div><div class="line">#elif ART_DEFAULT_GC_TYPE_IS_GSS</div><div class="line">    kCollectorTypeGSS</div><div class="line">#<span class="keyword">else</span></div><div class="line">    kCollectorTypeCMS</div><div class="line">#error <span class="string">"ART default GC type must be set"</span></div><div class="line">#endif</div></pre></td></tr></table></figure>
+<p>从代码中的定义可以看到，如果<code>kUseReadBarrier＝true</code>，则垃圾回收算法使用<code>Concurrent-Copying</code>,否则默认算法，默认算法根据编译宏选择，没有特别指定的情况下使用<code>Concurrent Mark-Sweep</code></p>
+<h2 id="二-Heap-Heap"><a href="#二-Heap-Heap" class="headerlink" title="二. Heap::Heap()"></a>二. Heap::Heap()</h2><h3 id="2-1-构造函数声明"><a href="#2-1-构造函数声明" class="headerlink" title="2.1 构造函数声明"></a>2.1 构造函数声明</h3><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">Heap(<span class="keyword">size_t</span> initial_size,<span class="comment">//堆的初始大小</span></div><div class="line">      <span class="keyword">size_t</span> growth_limit,<span class="comment">//堆的增长上限</span></div><div class="line">      <span class="keyword">size_t</span> min_free,<span class="comment">//堆的最小空闲值</span></div><div class="line">      <span class="keyword">size_t</span> max_free,<span class="comment">//堆的最大空闲值</span></div><div class="line">      <span class="keyword">double</span> target_utilization,<span class="comment">//堆的目标利用率</span></div><div class="line">      <span class="keyword">double</span> foreground_heap_growth_multiplier,<span class="comment">//前台堆增长因子(乘数)</span></div><div class="line">      <span class="keyword">size_t</span> capacity,<span class="comment">//堆的容量</span></div><div class="line">      <span class="keyword">size_t</span> non_moving_space_capacity,<span class="comment">//存储不可移动对象的space的容量</span></div><div class="line">      <span class="keyword">const</span> <span class="built_in">std</span>::<span class="built_in">string</span>&amp; original_image_file_name,<span class="comment">//image文件路径</span></div><div class="line">      InstructionSet image_instruction_set,<span class="comment">//指令集</span></div><div class="line">      CollectorType foreground_collector_type,<span class="comment">//前台回收器类型</span></div><div class="line">      CollectorType background_collector_type,<span class="comment">//后台回收器类型</span></div><div class="line">      space::LargeObjectSpaceType large_object_space_type,<span class="comment">//存储大对象的space类型</span></div><div class="line">      <span class="keyword">size_t</span> large_object_threshold,<span class="comment">//大对象数量的阈值</span></div><div class="line">      <span class="keyword">size_t</span> parallel_gc_threads,<span class="comment">//GC暂停阶段用于同时执行GC任务的线程数</span></div><div class="line">      <span class="keyword">size_t</span> conc_gc_threads,<span class="comment">//并行GC的线程数</span></div><div class="line">      <span class="keyword">bool</span> low_memory_mode,<span class="comment">//是否是low memory mode</span></div><div class="line">      <span class="keyword">size_t</span> long_pause_threshold,<span class="comment">//GC造成应用程序暂停的时间阀值,超过则输出log</span></div><div class="line">      <span class="keyword">size_t</span> long_gc_threshold,<span class="comment">//GC时间阀值,超过则输出log</span></div><div class="line">      <span class="keyword">bool</span> ignore_max_footprint,<span class="comment">//不对堆的增长进行限制,堆可以增长到它的最大容量</span></div><div class="line">      <span class="keyword">bool</span> use_tlab,<span class="comment">//是否开启TLAB选项</span></div><div class="line">      <span class="keyword">bool</span> verify_pre_gc_heap,<span class="comment">//是否在开始GC前验证堆</span></div><div class="line">      <span class="keyword">bool</span> verify_pre_sweeping_heap,<span class="comment">//是否在GC执行清扫前验证堆</span></div><div class="line">      <span class="keyword">bool</span> verify_post_gc_heap,<span class="comment">//是否在GC完成清扫后验证堆</span></div><div class="line">      <span class="keyword">bool</span> verify_pre_gc_rosalloc,<span class="comment">//是否在开始GC前验证RosAllocSpace</span></div><div class="line">      <span class="keyword">bool</span> verify_pre_sweeping_rosalloc,<span class="comment">//是否在GC执行清扫前验证RosAllocSpace</span></div><div class="line">      <span class="keyword">bool</span> verify_post_gc_rosalloc,<span class="comment">//是否在GC完成清扫后验证RosAllocSpace</span></div><div class="line">      <span class="keyword">bool</span> gc_stress_mode,</div><div class="line">      <span class="keyword">bool</span> use_homogeneous_space_compaction,<span class="comment">//是否使用homogeneous space compaction来避免OOM</span></div><div class="line">      <span class="keyword">uint64_t</span> min_interval_homogeneous_space_compaction_by_oom);<span class="comment">//两次OOM引起homogeneous space compaction时间间隔</span></div></pre></td></tr></table></figure>
+<h3 id="2-2-构造函数实现"><a href="#2-2-构造函数实现" class="headerlink" title="2.2 构造函数实现"></a>2.2 构造函数实现</h3><h4 id="2-2-1-字段初始化"><a href="#2-2-1-字段初始化" class="headerlink" title="2.2.1 字段初始化"></a>2.2.1 字段初始化</h4><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div><div class="line">158</div><div class="line">159</div><div class="line">160</div><div class="line">161</div><div class="line">162</div><div class="line">163</div><div class="line">164</div></pre></td><td class="code"><pre><div class="line">Heap::Heap(...) :</div><div class="line">      <span class="comment">//space::MallocSpace*,存放不可移动对象</span></div><div class="line">      non_moving_space_(<span class="literal">nullptr</span>),</div><div class="line">      <span class="comment">//kAllocatorTypeROSAlloc space</span></div><div class="line">      rosalloc_space_(<span class="literal">nullptr</span>),</div><div class="line">      <span class="comment">//kAllocatorTypeDlMalloc space</span></div><div class="line">      dlmalloc_space_(<span class="literal">nullptr</span>),</div><div class="line">      <span class="comment">//GC操作的主要space,这个space不是dlmalloc_space_就是rosalloc_space_</span></div><div class="line">      main_space_(<span class="literal">nullptr</span>),</div><div class="line">      <span class="comment">//回收器类型</span></div><div class="line">      collector_type_(kCollectorTypeNone),</div><div class="line">      <span class="comment">//前台回收器类型</span></div><div class="line">      foreground_collector_type_(foreground_collector_type),</div><div class="line">      <span class="comment">//后台回收器类型</span></div><div class="line">      background_collector_type_(background_collector_type),</div><div class="line">      <span class="comment">//希望的回收器类型,如果它!=collector_type_, heap trimming daemon会transitions堆</span></div><div class="line">      desired_collector_type_(foreground_collector_type_),</div><div class="line">      <span class="comment">//Mutex*</span></div><div class="line">      pending_task_lock_(<span class="literal">nullptr</span>),</div><div class="line">      <span class="comment">//GC暂停阶段用于同时执行GC任务的线程数</span></div><div class="line">      parallel_gc_threads_(parallel_gc_threads),</div><div class="line">      <span class="comment">//concurrent gc线程数</span></div><div class="line">      conc_gc_threads_(conc_gc_threads),</div><div class="line">      <span class="comment">//是否是低内存模式</span></div><div class="line">      low_memory_mode_(low_memory_mode),</div><div class="line">      <span class="comment">//GC造成应用程序暂停的时间阀值,超过则输出log</span></div><div class="line">      long_pause_log_threshold_(long_pause_log_threshold),</div><div class="line">      <span class="comment">//GC时间阀值,超过则输出log</span></div><div class="line">      long_gc_log_threshold_(long_gc_log_threshold),</div><div class="line">      <span class="comment">//是否对堆的增长不限制</span></div><div class="line">      ignore_max_footprint_(ignore_max_footprint),</div><div class="line">      <span class="comment">//zygote space创建时的锁, Mutex</span></div><div class="line">      zygote_creation_lock_(<span class="string">"zygote creation lock"</span>, kZygoteCreationLock),</div><div class="line">      <span class="comment">//space::ZygoteSpace 在zygote space创建之前不会包含大对象</span></div><div class="line">      zygote_space_(<span class="literal">nullptr</span>),</div><div class="line">      <span class="comment">//大对象数量的阈值</span></div><div class="line">      large_object_threshold_(large_object_threshold),</div><div class="line">      <span class="comment">//跟踪在JNI critical section中有多少个线程</span></div><div class="line">      disable_thread_flip_count_(<span class="number">0</span>),</div><div class="line">      thread_flip_running_(<span class="literal">false</span>),</div><div class="line">      <span class="comment">//正在运行的回收器类型</span></div><div class="line">      collector_type_running_(kCollectorTypeNone),</div><div class="line">      <span class="comment">//最后一次运行的GC类型</span></div><div class="line">      last_gc_type_(collector::kGcTypeNone),</div><div class="line">      <span class="comment">//下一次将要运行的GC类型</span></div><div class="line">      next_gc_type_(collector::kGcTypePartial),</div><div class="line">      <span class="comment">//堆的容量</span></div><div class="line">      capacity_(capacity),</div><div class="line">      <span class="comment">//堆的增长上限</span></div><div class="line">      growth_limit_(growth_limit),</div><div class="line">      <span class="comment">//分配对象的上限数，一旦超过着搁置会引起一次GC</span></div><div class="line">      max_allowed_footprint_(initial_size),</div><div class="line">      <span class="comment">//由registerNativeAllocation请求的一次concurrent GC需要的临界线, size_t</span></div><div class="line">      native_footprint_gc_watermark_(initial_size),</div><div class="line">      <span class="comment">//bool, 是否需要在下一次的native allocation中运行finalizers</span></div><div class="line">      native_need_to_run_finalization_(<span class="literal">false</span>),</div><div class="line">      <span class="comment">//当num_bytes_allocated_超过该值后,concurrent GC会启动</span></div><div class="line">      concurrent_start_bytes_(<span class="built_in">std</span>::numeric_limits&lt;<span class="keyword">size_t</span>&gt;::max()),</div><div class="line">      <span class="comment">//总共释放的bytes自从heap创建以来</span></div><div class="line">      total_bytes_freed_ever_(<span class="number">0</span>),</div><div class="line">      <span class="comment">//总共释放的对象自从heap创建以来</span></div><div class="line">      total_objects_freed_ever_(<span class="number">0</span>),</div><div class="line">      <span class="comment">//当前分配的bytes数量.每次释放和分配以后都会更新</span></div><div class="line">      num_bytes_allocated_(<span class="number">0</span>),</div><div class="line">      <span class="comment">//native分配的bytes数量</span></div><div class="line">      native_bytes_allocated_(<span class="number">0</span>),</div><div class="line">      <span class="comment">//Mutex</span></div><div class="line">      native_histogram_lock_(<span class="string">"Native allocation lock"</span>),</div><div class="line">      <span class="comment">//Histogram&lt;uint64_t&gt;,native分配的统计图</span></div><div class="line">      native_allocation_histogram_(<span class="string">"Native allocation sizes"</span>,</div><div class="line">                                   <span class="number">1U</span>,</div><div class="line">                                   kNativeAllocationHistogramBuckets),</div><div class="line">      <span class="comment">//native释放的统计图</span></div><div class="line">      native_free_histogram_(<span class="string">"Native free sizes"</span>, <span class="number">1U</span>, kNativeAllocationHistogramBuckets),</div><div class="line">      num_bytes_freed_revoke_(<span class="number">0</span>),</div><div class="line">      verify_missing_card_marks_(<span class="literal">false</span>),</div><div class="line">      verify_system_weaks_(<span class="literal">false</span>),</div><div class="line">     <span class="comment">//是否在开始GC前验证堆</span></div><div class="line">      verify_pre_gc_heap_(verify_pre_gc_heap),</div><div class="line">      <span class="comment">//是否在GC执行清扫前验证堆</span></div><div class="line">      verify_pre_sweeping_heap_(verify_pre_sweeping_heap),</div><div class="line">      <span class="comment">//是否在GC完成清扫后验证堆</span></div><div class="line">      verify_post_gc_heap_(verify_post_gc_heap),</div><div class="line">      <span class="comment">//是否验证ModUnionTable</span></div><div class="line">      verify_mod_union_table_(<span class="literal">false</span>),</div><div class="line">      <span class="comment">//是否在开始GC前验证RosAllocSpace</span></div><div class="line">      verify_pre_gc_rosalloc_(verify_pre_gc_rosalloc),</div><div class="line">      <span class="comment">//是否在GC执行清扫前验证RosAllocSpace</span></div><div class="line">      verify_pre_sweeping_rosalloc_(verify_pre_sweeping_rosalloc),</div><div class="line">      <span class="comment">//是否在GC完成清扫后验证RosAllocSpace</span></div><div class="line">      verify_post_gc_rosalloc_(verify_post_gc_rosalloc),</div><div class="line">      <span class="comment">/* For GC a lot mode, we limit the allocations stacks to be kGcAlotInterval allocations. This</span></div><div class="line">       * causes a lot of GC since we do a GC for alloc whenever the stack is full. When heap</div><div class="line">       * verification is enabled, we limit the size of allocation stacks to speed up their</div><div class="line">       * searching.</div><div class="line">       */</div><div class="line">      <span class="comment">//分配栈最大数量</span></div><div class="line">      max_allocation_stack_size_(kGCALotMode ? kGcAlotAllocationStackSize</div><div class="line">          : (kVerifyObjectSupport &gt; kVerifyObjectModeFast) ? kVerifyObjectAllocationStackSize :</div><div class="line">          kDefaultAllocationStackSize),</div><div class="line">      <span class="comment">//当前分配器    </span></div><div class="line">      current_allocator_(kAllocatorTypeDlMalloc),</div><div class="line">      <span class="comment">//当前不可移动对象分配器</span></div><div class="line">      current_non_moving_allocator_(kAllocatorTypeNonMoving),</div><div class="line">      <span class="comment">//阶跃型指针space</span></div><div class="line">      bump_pointer_space_(<span class="literal">nullptr</span>),</div><div class="line">      <span class="comment">//临时space,Semispace回收器会将对象拷贝至这里</span></div><div class="line">      temp_space_(<span class="literal">nullptr</span>),</div><div class="line">      <span class="comment">//RegionSpace 有一系列大小相等的区域组成</span></div><div class="line">      region_space_(<span class="literal">nullptr</span>),</div><div class="line">      <span class="comment">//最小空余内存</span></div><div class="line">      min_free_(min_free),</div><div class="line">      <span class="comment">//最大空余内存</span></div><div class="line">      max_free_(max_free),</div><div class="line">      <span class="comment">//堆目标利用率</span></div><div class="line">      target_utilization_(target_utilization),</div><div class="line">      <span class="comment">//前台堆增长因子</span></div><div class="line">      foreground_heap_growth_multiplier_(foreground_heap_growth_multiplier),</div><div class="line">      <span class="comment">//mutators暂停等待GC的总共时间</span></div><div class="line">      total_wait_time_(<span class="number">0</span>),</div><div class="line">      <span class="comment">//VerifyObjectMode, 目前heap verification的状态</span></div><div class="line">      verify_object_mode_(kVerifyObjectModeDisabled),</div><div class="line">      <span class="comment">//Compacting GC disable count</span></div><div class="line">      disable_moving_gc_count_(<span class="number">0</span>),</div><div class="line">      is_running_on_memory_tool_(Runtime::Current()-&gt;IsRunningOnMemoryTool()),</div><div class="line">      use_tlab_(use_tlab),</div><div class="line">      <span class="comment">//homogeneous space compaction时的新main space</span></div><div class="line">      main_space_backup_(<span class="literal">nullptr</span>),</div><div class="line">      <span class="comment">//两次OOM引起homogeneous space compaction时间间隔</span></div><div class="line">      min_interval_homogeneous_space_compaction_by_oom_(</div><div class="line">          min_interval_homogeneous_space_compaction_by_oom),</div><div class="line">      <span class="comment">//上一次由OOM引起的HomogeneousSpaceCompact的时间</span></div><div class="line">      last_time_homogeneous_space_compaction_by_oom_(NanoTime()),</div><div class="line">      <span class="comment">//CollectorTransitionTask*</span></div><div class="line">      pending_collector_transition_(<span class="literal">nullptr</span>),</div><div class="line">      <span class="comment">//HeapTrimTask*</span></div><div class="line">      pending_heap_trim_(<span class="literal">nullptr</span>),</div><div class="line">      <span class="comment">//是否使用homogeneous space compaction来避免OOM</span></div><div class="line">      use_homogeneous_space_compaction_for_oom_(use_homogeneous_space_compaction_for_oom),</div><div class="line">      <span class="comment">//如果当前的回收工作导致一些线程暂停,则该值为true</span></div><div class="line">      running_collection_is_blocking_(<span class="literal">false</span>),</div><div class="line">      <span class="comment">//blocking gc 数量</span></div><div class="line">      blocking_gc_count_(<span class="number">0U</span>),</div><div class="line">      <span class="comment">//blocking gc总共持续时间</span></div><div class="line">      blocking_gc_time_(<span class="number">0U</span>),</div><div class="line">      <span class="comment">//GC count rate统计图最后已更新时间</span></div><div class="line">      last_update_time_gc_count_rate_histograms_(  <span class="comment">// Round down by the window duration.</span></div><div class="line">          (NanoTime() / kGcCountRateHistogramWindowDuration) * kGcCountRateHistogramWindowDuration),</div><div class="line">      <span class="comment">//在上一个window运行的GC数量</span></div><div class="line">      gc_count_last_window_(<span class="number">0U</span>),</div><div class="line">      <span class="comment">//在上一个window运行的blocking GC数量</span></div><div class="line">      blocking_gc_count_last_window_(<span class="number">0U</span>),</div><div class="line">      <span class="comment">//每一个window的GC调用统计图</span></div><div class="line">      gc_count_rate_histogram_(<span class="string">"gc count rate histogram"</span>, <span class="number">1U</span>, kGcCountRateMaxBucketCount),</div><div class="line">      <span class="comment">//每一个window的blocking GC调用统计图</span></div><div class="line">      blocking_gc_count_rate_histogram_(<span class="string">"blocking gc count rate histogram"</span>, <span class="number">1U</span>,</div><div class="line">                                        kGcCountRateMaxBucketCount),</div><div class="line">      <span class="comment">//是否支持allocation tracking</span></div><div class="line">      alloc_tracking_enabled_(<span class="literal">false</span>),</div><div class="line">      <span class="comment">//Mutex*</span></div><div class="line">      backtrace_lock_(<span class="literal">nullptr</span>),</div><div class="line">      seen_backtrace_count_(<span class="number">0u</span>),</div><div class="line">      unique_backtrace_count_(<span class="number">0u</span>),</div><div class="line">      gc_disabled_for_shutdown_(<span class="literal">false</span>) &#123;</div></pre></td></tr></table></figure>
+<h4 id="2-2-2-具体创建逻辑"><a href="#2-2-2-具体创建逻辑" class="headerlink" title="2.2.2 具体创建逻辑"></a>2.2.2 具体创建逻辑</h4><p>Heap的构造函数的代码较多，不过整体逻辑比较清晰，整体逻辑可以分为以下几块:</p>
+<ol>
+<li><p>判断当前是否在zygote进程,如果不在zygote，将<code>background_collector_type_</code>设为和<code>foreground_collector_type_</code>一样，并检查传入的<code>desired_collector_type_</code>和<code>collector_type_</code>是否一样，如果不一样，则将<code>collector_type_</code>设为<code>desired_collector_type_</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">Runtime* <span class="keyword">const</span> runtime = Runtime::Current();</div><div class="line">  <span class="comment">//判断当前是否是zygote模式,如果不是判断后台回收器类型是否和前台回收器相等,不想等,则设为相等</span></div><div class="line">  <span class="keyword">const</span> <span class="keyword">bool</span> is_zygote = runtime-&gt;IsZygote();</div><div class="line">  <span class="keyword">if</span> (!is_zygote) &#123;</div><div class="line">      <span class="keyword">if</span> (background_collector_type_ != foreground_collector_type_) &#123;</div><div class="line">          ...</div><div class="line">          background_collector_type_ = foreground_collector_type_;</div><div class="line">      &#125;</div><div class="line">  &#125;</div><div class="line">  <span class="comment">//检查collector_type_是否和desired_collector_type_相等,不等的话将collector_type_置为desired_collector_type_</span></div><div class="line">  ChangeCollector(desired_collector_type_);</div></pre></td></tr></table></figure>
+</li>
+<li><p>创建两个HeapBitmap(<code>live_bitmap_</code>:用来记录上次GC之后还存活的对象;<code>mark_bitmap_</code>:用来记录当前GC中还存活的对象)</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">live_bitmap_.reset(<span class="keyword">new</span> accounting::HeapBitmap(<span class="keyword">this</span>));</div><div class="line">mark_bitmap_.reset(<span class="keyword">new</span> accounting::HeapBitmap(<span class="keyword">this</span>));</div></pre></td></tr></table></figure>
+</li>
+<li><p>如果<code>foreground_collector_type_</code>是Concurrent-Copying,设置<code>requested_alloc_space_begin</code>即alloc space的起始地址为(<strong>如果前台回收器是CC则是300MB-non_moving_space_capacity，否则是nullptr</strong>)</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> (foreground_collector_type_ == kCollectorTypeCC) &#123;</div><div class="line">    ...  </div><div class="line">    requested_alloc_space_begin = <span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">uint8_t</span>*&gt;(<span class="number">300</span> * MB) - non_moving_space_capacity;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>根据传入的image文件路径(<code>/system/framework/boot.art</code>)创建ImageSpace,在ImageSpace后面紧跟的是<code>/system/framework/boot.oat</code>,如果创建成功，将<code>requested_alloc_space_begin</code>指向boot.oat地址的末尾；如果创建ImageSpace失败，删除已加载的Space，将<code>requested_alloc_space_begin</code>指回原来的(300MB-non_moving_space_capacity)</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//创建ImageSpace, image_file_name是/system/framework/boot.art</span></div><div class="line"><span class="keyword">if</span> (!image_file_name.empty()) &#123;</div><div class="line">    <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;<span class="built_in">std</span>::<span class="built_in">string</span>&gt; image_file_names;</div><div class="line">    image_file_names.push_back(image_file_name);</div><div class="line">    <span class="built_in">std</span>::<span class="built_in">vector</span>&lt;space::Space*&gt; added_image_spaces;</div><div class="line">    <span class="keyword">uint8_t</span>* <span class="keyword">const</span> original_requested_alloc_space_begin = requested_alloc_space_begin;</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">size_t</span> index = <span class="number">0</span>; index &lt; image_file_names.size(); ++index) &#123;</div><div class="line">        <span class="built_in">std</span>::<span class="built_in">string</span>&amp; image_name = image_file_names[index];<span class="comment">///system/framework/boot.art</span></div><div class="line">        <span class="built_in">std</span>::<span class="built_in">string</span> error_msg;</div><div class="line">        <span class="comment">//创建boot_image_space</span></div><div class="line">        space::ImageSpace* boot_image_space = space::ImageSpace::CreateBootImage(</div><div class="line">                image_name.c_str(),</div><div class="line">                image_instruction_set,</div><div class="line">                index &gt; <span class="number">0</span>,</div><div class="line">                &amp;error_msg);</div><div class="line">        <span class="comment">//创建boot_image_space成功</span></div><div class="line">        <span class="keyword">if</span> (boot_image_space != <span class="literal">nullptr</span>) &#123;</div><div class="line">            <span class="comment">/* 根据boot_image_space是否时连续空间，将boot_image_space添加到对应的Space列表，并在live_bitmap_和mark_bitmap_中添加对应的位图 */</span></div><div class="line">            AddSpace(boot_image_space);</div><div class="line">            added_image_spaces.push_back(boot_image_space);</div><div class="line">            <span class="comment">//Oat文件即boot.oat紧跟在boot_image_space末尾</span></div><div class="line">            <span class="keyword">uint8_t</span>* oat_file_end_addr = boot_image_space-&gt;GetImageHeader().GetOatFileEnd();</div><div class="line">            ...</div><div class="line">            <span class="comment">//将boot.oat的地址按页大小(pageSize)对齐</span></div><div class="line">            requested_alloc_space_begin = AlignUp(oat_file_end_addr, kPageSize);</div><div class="line">            boot_image_spaces_.push_back(boot_image_space);</div><div class="line"></div><div class="line">            <span class="keyword">if</span> (index == <span class="number">0</span>) &#123;</div><div class="line">              <span class="comment">//如果是第一块Space,检查是否还有其他的oat文件需要加载</span></div><div class="line">              <span class="keyword">const</span> OatFile* boot_oat_file = boot_image_space-&gt;GetOatFile();</div><div class="line">              <span class="keyword">if</span> (boot_oat_file == <span class="literal">nullptr</span>) &#123;</div><div class="line">                <span class="keyword">continue</span>;</div><div class="line">              &#125;</div><div class="line">              <span class="comment">//如果还有其他的oat文件，根据OatHeader获取boot_classpath,再根据boot_classpath生成</span></div><div class="line">              <span class="comment">//oat文件完整路径，将完整路径添加进image文件列表，从而可以在下次循环中加载</span></div><div class="line">              <span class="keyword">const</span> OatHeader&amp; boot_oat_header = boot_oat_file-&gt;GetOatHeader();</div><div class="line">              <span class="keyword">const</span> <span class="keyword">char</span>* boot_classpath =</div><div class="line">                  boot_oat_header.GetStoreValueByKey(OatHeader::kBootClassPathKey);</div><div class="line">              <span class="keyword">if</span> (boot_classpath == <span class="literal">nullptr</span>) &#123;</div><div class="line">                <span class="keyword">continue</span>;</div><div class="line">              &#125;</div><div class="line">              space::ImageSpace::CreateMultiImageLocations(image_file_name,</div><div class="line">                                                                 boot_classpath,</div><div class="line">                                                                 &amp;image_file_names);</div><div class="line">            &#125;</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="comment">//创建ImageSpace失败, 删除已加载的Space</span></div><div class="line">            <span class="keyword">for</span> (space::Space* loaded_space : added_image_spaces) &#123;</div><div class="line">              RemoveSpace(loaded_space);</div><div class="line">              <span class="keyword">delete</span> loaded_space;</div><div class="line">            &#125;</div><div class="line">            boot_image_spaces_.clear();</div><div class="line">            requested_alloc_space_begin = original_requested_alloc_space_begin;</div><div class="line">            <span class="keyword">break</span>;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>判断是否支持Homogeneous-Space-Compact.当<code>background_collector_type_</code>是Homogeneous-Space-Compact或者<code>foreground_collector_type_</code>不是<code>GSS(Generational Semi-Space)</code>和<code>CC(Concurrent-Copying)</code>时，支持Homogeneous-Space-Compact</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> (foreground_collector_type_ == kCollectorTypeGSS ||</div><div class="line">            foreground_collector_type_ == kCollectorTypeCC) &#123;</div><div class="line">      use_homogeneous_space_compaction_for_oom_ = <span class="literal">false</span>;</div><div class="line">&#125;</div><div class="line"><span class="comment">//如果后台回收器是homogeneous space compact或者前台回收器不是GSS和CC时，支持homogeneous space compact</span></div><div class="line"><span class="keyword">bool</span> support_homogeneous_space_compaction =</div><div class="line">      background_collector_type_ == gc::kCollectorTypeHomogeneousSpaceCompact ||</div><div class="line">      use_homogeneous_space_compaction_for_oom_;</div></pre></td></tr></table></figure>
+</li>
+<li><p>判断是否给Non-Moving Space独立的地址.只要以下满足四个条件中的一项就会给Non-Moving Space独立地址(处于Zygote;支持Homogeneous-Space-Compact(<code>foreground_collector_type_</code>不是<code>GSS</code>或者不是<code>CC</code>);<code>foreground_collector_type_</code>可以移动对象;<code>background_collector_type_</code>可以移动对象), 之后再排除<code>foreground_collector_type_</code>是GSS的情况，即前台回收器是GSS时，不给Non-Moving Space独立地址</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//如果当前处于Zygote模式或者支持homogeneous space compact或者前台回收器是可以移动对象的或者后台回收器也可以移动对象时</span></div><div class="line"><span class="comment">//给non_moving_space一个独立的地址</span></div><div class="line"><span class="keyword">bool</span> separate_non_moving_space = is_zygote ||</div><div class="line">          support_homogeneous_space_compaction || IsMovingGc(foreground_collector_type_) ||</div><div class="line">          IsMovingGc(background_collector_type_);</div><div class="line"><span class="comment">//再次检查前台进程是否是GSS,如果是，则不给non_moving_space_一个独立的地址</span></div><div class="line"><span class="keyword">if</span> (foreground_collector_type_ == kCollectorTypeGSS) &#123;</div><div class="line">    separate_non_moving_space = <span class="literal">false</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<blockquote>
+<p>只要传入的type是SS,GSS,CC,MC,Homogeneous-Space-Compact其中一个时,<code>IsMovingGc</code>返回的都是true</p>
+<ol>
+<li>创建两个内存映射<code>MemMap</code><figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;MemMap&gt; main_mem_map_1;</div><div class="line"><span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;MemMap&gt; main_mem_map_2;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+</blockquote>
+<ol>
+<li><p>如果之前创建ImageSpace失败同时<code>foreground_collector_type_</code>是<code>MarkSweep</code>而且此时的Runtime由dex2oat创建即处于dex2oat进程中时，将<code>requested_alloc_space_begin</code>指向<code>kAllocSpaceBeginForDeterministicAoT</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 如果前台回收器是MS(MarkSweep)且requested_alloc_space_begin</span></div><div class="line"><span class="comment">// 是null(即之前ImageSpace创建失败)同时当前是dex2oat程序</span></div><div class="line"><span class="comment">// 将requested_alloc_space_begin设为kAllocSpaceBeginForDeterministicAoT</span></div><div class="line"><span class="keyword">if</span> (foreground_collector_type_ == kCollectorTypeMS &amp;&amp;</div><div class="line">            requested_alloc_space_begin == <span class="literal">nullptr</span> &amp;&amp;</div><div class="line">            Runtime::Current()-&gt;IsAotCompiler()) &#123;</div><div class="line">    requested_alloc_space_begin = <span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">uint8_t</span>*&gt;(kAllocSpaceBeginForDeterministicAoT);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>初始化<code>request_begin</code>.如果Non-Moving Space有独立地址，根据当前是否是zygote确定Non-Moving Space的名字,之后创建一块匿名内存映射，由<code>non_moving_space_mem_map</code>指向，<code>non_moving_space_mem_map</code>紧跟在<code>requested_alloc_space_begin</code>后面，如果ImageSpace创建成功，就是紧跟在<strong>ImageSpace+boot.oat</strong>后面，否则紧跟在<code>kAllocSpaceBeginForDeterministicAoT</code>后面,最后设置<code>request_begin</code>为300MB,即其他Space的起始地址为<strong>300MB</strong></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">uint8_t</span>* request_begin = requested_alloc_space_begin;</div><div class="line"><span class="keyword">if</span> (request_begin != <span class="literal">nullptr</span> &amp;&amp; separate_non_moving_space) &#123;</div><div class="line">    request_begin += non_moving_space_capacity;</div><div class="line">&#125;</div><div class="line"><span class="built_in">std</span>::<span class="built_in">string</span> error_str;</div><div class="line"><span class="built_in">std</span>::<span class="built_in">unique_ptr</span>&lt;MemMap&gt; non_moving_space_mem_map;</div><div class="line"><span class="comment">//如果确定给non moving space一块独立的地址</span></div><div class="line"><span class="keyword">if</span> (separate_non_moving_space) &#123;</div><div class="line">    <span class="function">ScopedTrace <span class="title">trace2</span><span class="params">(<span class="string">"Create separate non moving space"</span>)</span></span>;</div><div class="line">    <span class="comment">// 如果当前正在Zygote当中，将non moving space设为zygote space</span></div><div class="line">    <span class="keyword">const</span> <span class="keyword">char</span>* space_name = is_zygote ? kZygoteSpaceName: kNonMovingSpaceName;</div><div class="line">    <span class="comment">//创建匿名内存映射</span></div><div class="line">    <span class="comment">//non moving sapce紧跟在requested_alloc_space_begin后面(即如果ImageSpace创建成功，紧跟在ImageSpace + boo.oat后面)</span></div><div class="line">    non_moving_space_mem_map.reset(</div><div class="line">            MemMap::MapAnonymous(space_name, requested_alloc_space_begin,</div><div class="line">                                non_moving_space_capacity, PROT_READ | PROT_WRITE, <span class="literal">true</span>, <span class="literal">false</span>,</div><div class="line">                                &amp;error_str));</div><div class="line">    ...</div><div class="line">    <span class="comment">// 如果要给non moving space一个独立的地址, 将其他Space的起始地址设为300MB,由request_begin指向</span></div><div class="line">    request_begin = <span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">uint8_t</span>*&gt;(<span class="number">300</span> * MB);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>如果<code>foreground_collector_type_</code>不是<code>CC</code>,初始化之前创造的<code>main_mem_map_1</code>,这块内存的作用是作为<code>MarkSweep</code>的<strong>Main Space</strong>或者<code>Compact GC</code>的<strong>From-Bump-Space</strong>.当Non-Moving Space有独立地址且当前不处于Zygote时，紧跟在300MB后面创建匿名内存映射;否则紧跟在<strong>ImageSpace+boot.oat</strong>后面创建匿名内存映射</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//如果前台回收器不是CC，创建第一块匿名共享内存,由main_mem_map_1指向，这块内存的作用是作为Compact GC的From Bump Space或者</span></div><div class="line"><span class="comment">//MarkSweep的Main Space</span></div><div class="line"><span class="keyword">if</span> (foreground_collector_type_ != kCollectorTypeCC) &#123;</div><div class="line">      <span class="function">ScopedTrace <span class="title">trace2</span><span class="params">(<span class="string">"Create main mem map"</span>)</span></span>;</div><div class="line">      <span class="keyword">if</span> (separate_non_moving_space || !is_zygote) &#123;</div><div class="line">          <span class="comment">//如果non moving space有独立地址或者当前不是zygote，则main_mem_map_1紧跟在  request_begin后面，即300MB后面</span></div><div class="line">          <span class="comment">//名字是main space</span></div><div class="line">          main_mem_map_1.reset(MapAnonymousPreferredAddress(kMemMapSpaceName[<span class="number">0</span>],</div><div class="line">                                                            request_begin,</div><div class="line">                                                            capacity_,</div><div class="line">                                                            &amp;error_str));</div><div class="line">      &#125; <span class="keyword">else</span> &#123;</div><div class="line">          <span class="comment">//如果non-moving space有独立地址且当前处于zygote或者non-moving space没有独立地址，</span></div><div class="line">          <span class="comment">//则main space必须紧跟在ImageSpace后面,这样zygote space就会临近ImageSpace</span></div><div class="line">          main_mem_map_1.reset(MemMap::MapAnonymous(kMemMapSpaceName[<span class="number">0</span>], request_begin, capacity_,</div><div class="line">                                                    PROT_READ | PROT_WRITE, <span class="literal">true</span>, <span class="literal">false</span>,</div><div class="line">                                                    &amp;error_str));</div><div class="line">      &#125;</div><div class="line">      ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>如果支持Homogeneous-Space-Compact或者<code>background_collector_type_</code>和<code>foreground_collector_type_</code>其中一个是<code>SS</code>时，创建第二块匿名内存映射<code>main_mem_map_2</code></p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//如果支持homogeneous space compact或者后台回收器和前台回收器中有一个为为SS(Semi Space)时，创建第二块匿名共享内存</span></div><div class="line"><span class="comment">//由main_mem_map_2指向</span></div><div class="line"><span class="keyword">if</span> (support_homogeneous_space_compaction ||</div><div class="line">        background_collector_type_ == kCollectorTypeSS ||</div><div class="line">        foreground_collector_type_ == kCollectorTypeSS) &#123;</div><div class="line">      <span class="function">ScopedTrace <span class="title">trace2</span><span class="params">(<span class="string">"Create main mem map 2"</span>)</span></span>;</div><div class="line">      main_mem_map_2.reset(MapAnonymousPreferredAddress(kMemMapSpaceName[<span class="number">1</span>], main_mem_map_1-&gt;End(),</div><div class="line">                                                            capacity_, &amp;error_str));</div><div class="line">      ...</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>如果Non-Moving Space有独立地址，则之前已经创建了匿名内存映射<code>non_moving_space_mem_map</code>，现在将这块内存封装成<code>DlMallocSpace</code>,由<code>non-moving_space</code>指向，并将这块Space添加至Space列表中</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//如果non moving space有独立的地址时，将non_moving_space_mem_map封装成Non-Moving Space(space::MallocSpace)</span></div><div class="line"><span class="keyword">if</span> (separate_non_moving_space) &#123;</div><div class="line">      <span class="function">ScopedTrace <span class="title">trace2</span><span class="params">(<span class="string">"Add non moving space"</span>)</span></span>;</div><div class="line">      <span class="comment">//Non-Moving Space必须是dlmalloc，因为目前并不支持多个rosalloc spaces</span></div><div class="line">      <span class="keyword">const</span> <span class="keyword">size_t</span> size = non_moving_space_mem_map-&gt;Size();</div><div class="line">      non_moving_space_ = space::DlMallocSpace::CreateFromMemMap(</div><div class="line">            non_moving_space_mem_map.release(), <span class="string">"zygote / non moving space"</span>, kDefaultStartingSize,</div><div class="line">            initial_size, size, size, <span class="literal">false</span>);</div><div class="line">      <span class="comment">//设置Non-Moving Space大小限制</span></div><div class="line">      non_moving_space_-&gt;SetFootprintLimit(non_moving_space_-&gt;Capacity());</div><div class="line">      ...</div><div class="line">      <span class="comment">//将non_moving_space_添加至space列表中</span></div><div class="line">      AddSpace(non_moving_space_);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>根据条件处理之前创建的另外两块匿名内存映射<code>main_mem_map_1</code>和<code>main_mem_map_2</code>.因为在之前的逻辑中，当<code>foreground_collector_type_</code>是CC时，并没有创建<code>main_mem_map_1</code>匿名内存映射，所以如果<code>foreground_collector_type_</code>恰好是CC时，紧跟<code>request_begin</code>(如果Non-Moving Space有独立地址，则是300MB,否则是ImageSpace+boot.oat)创建一个<code>RegionSpace</code>，由<code>region_space_</code>指向; 如果<code>foreground_collector_type_</code>不是CC时，也要分两种情况：(1)<code>foreground_collector_type_</code>是<code>SS,MC,Homogeneous-Space-Compact</code>中的一个;(2)<code>foreground_collector_type_</code>是<code>MarkSweep, Compact MarkSweep</code>或者<code>GSS</code>. 对于第一种情况来说，将<code>main_mem_map_1</code>封装成<code>BumpPointerSpace1</code>并添加至space列表，由<code>bump_pointer_space_</code>指向，将<code>main_mem_map_2</code>封装成另一块<code>BumpPointerSpace2</code>同样添加至space列表,由<code>temp_space_</code>指向;对于第二种情况，首先将<code>main_mem_map_1</code>封装成<code>MainSpace</code>同时添加至space列表，之后如果Non-Moving Space没有独立地址，则将<code>non_moving_space_</code>指向MainSpace,即MainSpace和Non-Moving Space共用同一块内存，接着判断如果foreground_collector<em>type</em>是GSS时，调用<code>BumpPointerSpace::Craete</code>直接创建<code>BumpPointerSpace1</code>(<code>bump_pointer_space_</code>)和<code>BumpPointerSpace2</code>(<code>temp_space_</code>)并依次添加至space列表;如果<code>foreground_collector_type_</code>不是<code>GSS</code>时，即<code>MarkSweep</code>或<code>Compact MarkSweep</code>,且<code>main_mem_map_2</code>不为空时(如果支持HomogeneousSpaceCompact),将<code>main_mem_map_2</code>封装成<code>Backup Space</code>,并添加至space列表</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> (foreground_collector_type_ == kCollectorTypeCC) &#123;</div><div class="line">      <span class="comment">// 如果前台回收器是CC(Concurrent Copying),创建RegionSpace,并将RegionSpace添加至space列表</span></div><div class="line">      region_space_ = space::RegionSpace::Create(<span class="string">"Region space"</span>, capacity_ * <span class="number">2</span>, request_begin);</div><div class="line">      AddSpace(region_space_);</div><div class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (IsMovingGc(foreground_collector_type_) &amp;&amp;</div><div class="line">          foreground_collector_type_ != kCollectorTypeGSS) &#123;</div><div class="line">      <span class="comment">//如果前台回收器是除了GSS(Generational Semi-Space)以外的Compact GC,将main_mem_map_1封装成BumpPointerSpace</span></div><div class="line">      <span class="comment">//并将bump_pointer_space_添加至space列表</span></div><div class="line">      <span class="comment">// <span class="doctag">TODO:</span> Place bump-pointer spaces somewhere to minimize size of card table.</span></div><div class="line">      bump_pointer_space_ = space::BumpPointerSpace::CreateFromMemMap(<span class="string">"Bump pointer space 1"</span>,</div><div class="line">                                                                            main_mem_map_1.release());</div><div class="line">      ...</div><div class="line">      AddSpace(bump_pointer_space_);</div><div class="line">      <span class="comment">//将main_mem_map_2封装成第二块BumpPointerSpace，由temp_space_指向，同时将temp_space_添加至space列表</span></div><div class="line">      temp_space_ = space::BumpPointerSpace::CreateFromMemMap(<span class="string">"Bump pointer space 2"</span>,</div><div class="line">                                                                    main_mem_map_2.release());</div><div class="line">      ...</div><div class="line">      AddSpace(temp_space_);</div><div class="line">      ...</div><div class="line">&#125; <span class="keyword">else</span> &#123;</div><div class="line">      <span class="comment">//如果前台回收器不是Compact GC即MarkSweep或者是GSS,则在main_mem_map_1创建Main Space,并将Main Space添加至space列表</span></div><div class="line">      CreateMainMallocSpace(main_mem_map_1.release(), initial_size, growth_limit_, capacity_);</div><div class="line">      ...</div><div class="line">      AddSpace(main_space_);</div><div class="line">      <span class="keyword">if</span> (!separate_non_moving_space) &#123;</div><div class="line">          <span class="comment">//如果Non-Moving Space没有独立地址，则将non_moving_space_指向main_space_,即Non-Moving Space和Main Space是同一块Space</span></div><div class="line">          non_moving_space_ = main_space_;</div><div class="line">          ...</div><div class="line">      &#125;</div><div class="line">      <span class="keyword">if</span> (foreground_collector_type_ == kCollectorTypeGSS) &#123;</div><div class="line">          ....</div><div class="line">          <span class="comment">//如果前台回收器是GSS, 并创建BumpPointerSpace，由bump_pointer_space_指向</span></div><div class="line">          <span class="comment">//同时将bump_pointer_space_添加至space列表</span></div><div class="line">          main_mem_map_2.release();</div><div class="line">          bump_pointer_space_ = space::BumpPointerSpace::Create(<span class="string">"Bump pointer space 1"</span>,</div><div class="line">                                                              kGSSBumpPointerSpaceCapacity, <span class="literal">nullptr</span>);</div><div class="line">          ...</div><div class="line">          AddSpace(bump_pointer_space_);</div><div class="line">          <span class="comment">//创建第二块BumpPointerSpace,由temp_space_指向,并将temp_space_添加至space列表</span></div><div class="line">          temp_space_ = space::BumpPointerSpace::Create(<span class="string">"Bump pointer space 2"</span>,</div><div class="line">                                                            kGSSBumpPointerSpaceCapacity, <span class="literal">nullptr</span>);</div><div class="line">          ...</div><div class="line">          AddSpace(temp_space_);</div><div class="line">      &#125;  <span class="keyword">else</span> <span class="keyword">if</span> (main_mem_map_2.get() != <span class="literal">nullptr</span>) &#123;</div><div class="line">          <span class="comment">//此时前台回收器根据排除法只剩MarkSweep了，将main_mem_map_2封装成Backup Space,由main_space_backup_指向</span></div><div class="line">          <span class="comment">//同时将main_space_backup_添加至space列表,如果kUseRosAlloc为true,main_space_backup_为RosAllocSpace，否则为DlMallocSpace</span></div><div class="line">          <span class="keyword">const</span> <span class="keyword">char</span>* name = kUseRosAlloc ? kRosAllocSpaceName[<span class="number">1</span>] : kDlMallocSpaceName[<span class="number">1</span>];</div><div class="line">          main_space_backup_.reset(CreateMallocSpaceFromMemMap(main_mem_map_2.release(), initial_size,</div><div class="line">                                                                   growth_limit_, capacity_, name, <span class="literal">true</span>));</div><div class="line">          ...</div><div class="line">          AddSpace(main_space_backup_.get());</div><div class="line">        &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>创建大对象存储空间.</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// 创建LargeObjectSpace(大对象存储空间)</span></div><div class="line"><span class="keyword">if</span> (large_object_space_type == space::LargeObjectSpaceType::kFreeList) &#123;</div><div class="line">      <span class="comment">//如果LargeObjectSpace类型是FreeList，创建FreeList类型的LargeObjectSpace</span></div><div class="line">      large_object_space_ = space::FreeListSpace::Create(<span class="string">"free list large object space"</span>, <span class="literal">nullptr</span>,</div><div class="line">                                                               capacity_);</div><div class="line">      ...</div><div class="line">&#125; <span class="keyword">else</span> <span class="keyword">if</span> (large_object_space_type == space::LargeObjectSpaceType::kMap) &#123;</div><div class="line">      <span class="comment">//创建相互独立的内存快组成的LargeObjectSpace</span></div><div class="line">      large_object_space_ = space::LargeObjectMapSpace::Create(<span class="string">"mem map large object space"</span>);</div><div class="line">      ...</div><div class="line">&#125; <span class="keyword">else</span> &#123;</div><div class="line">      large_object_threshold_ = <span class="built_in">std</span>::numeric_limits&lt;<span class="keyword">size_t</span>&gt;::max();</div><div class="line">      large_object_space_ = <span class="literal">nullptr</span>;</div><div class="line">&#125;</div><div class="line"><span class="comment">//如果LargeObjectSpace不为空，则添加至Space列表</span></div><div class="line"><span class="keyword">if</span> (large_object_space_ != <span class="literal">nullptr</span>) &#123;</div><div class="line">      AddSpace(large_object_space_);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>如果<code>foreground_collector_type_</code>是MarkSweep或Compact MarkSweep且创建了<code>Backup Space</code>时，由于Backup Space占用的额外的空间会降低GC速度,所以移除Backup Space;之后创建<code>CardTable</code>(Card Table是为了记录在垃圾收集过程中对象的引用情况的), <code>ModUnionTable</code>(来记录ImageSpace对ZygoteSpace引用情况的ModUnionTable), <code>RememberSet</code>(用来记录Non-moving Space对其他Space引用情况的RememberedSet, <code>GSS</code>时不会创建，<code>CC, SS, MC, HomogeneousSpaceCompact</code>时根据<code>collector::SemiSpace::kUseRememberedSet == true</code>判断, <code>MS,CMS</code>时根据Non-Moving Space有没有独立地址加<code>collector::SemiSpace::kUseRememberedSet == true</code>判断)</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//获取连续空间的起始地址和结束地址</span></div><div class="line"><span class="keyword">uint8_t</span>* heap_begin = continuous_spaces_.front()-&gt;Begin();</div><div class="line"><span class="keyword">uint8_t</span>* heap_end = continuous_spaces_.back()-&gt;Limit();</div><div class="line"><span class="keyword">size_t</span> heap_capacity = heap_end - heap_begin;</div><div class="line"><span class="comment">//移除main_space_backup_,此时foreground_collector_type_是MarkSweep</span></div><div class="line"><span class="comment">//因为Backup Space的额外的未使用的空间降低了GC速度</span></div><div class="line"><span class="keyword">if</span> (main_space_backup_.get() != <span class="literal">nullptr</span>) &#123;</div><div class="line">       RemoveSpace(main_space_backup_.get());</div><div class="line">&#125;</div><div class="line">...</div><div class="line"><span class="comment">// 创建card table,因为不知道在low_4gb模式下,app image会在何处定位，</span></div><div class="line"><span class="comment">// 所以card table将会从64KB开始覆盖整个4GB的低地址，64KB以前的地址预留给kernel</span></div><div class="line"><span class="keyword">static</span> <span class="keyword">constexpr</span> <span class="keyword">size_t</span> kMinHeapAddress = <span class="number">4</span> * KB;</div><div class="line">card_table_.reset(accounting::CardTable::Create(<span class="keyword">reinterpret_cast</span>&lt;<span class="keyword">uint8_t</span>*&gt;(kMinHeapAddress), <span class="number">4</span> * GB - kMinHeapAddress));</div><div class="line">....</div><div class="line"><span class="comment">//如果前台回收器是CC(Concurrent Copying)同时kUseTableLookupReadBarrier=true,创建ReadBarrierTable</span></div><div class="line"><span class="keyword">if</span> (foreground_collector_type_ == kCollectorTypeCC &amp;&amp; kUseTableLookupReadBarrier) &#123;</div><div class="line">      rb_table_.reset(<span class="keyword">new</span> accounting::ReadBarrierTable());</div><div class="line">    ...</div><div class="line">&#125;</div><div class="line"><span class="keyword">if</span> (HasBootImageSpace()) &#123;</div><div class="line">    <span class="comment">// 如果有ImageSpace,则创建用来记录ImageSpace对ZygoteSpace引用情况的ModUnionTable</span></div><div class="line">    <span class="keyword">for</span> (space::ImageSpace* image_space : GetBootImageSpaces()) &#123;</div><div class="line">        accounting::ModUnionTable* mod_union_table = <span class="keyword">new</span>     accounting::ModUnionTableToZygoteAllocspace(</div><div class="line">              <span class="string">"Image mod-union table"</span>, <span class="keyword">this</span>, image_space);</div><div class="line">          ...</div><div class="line">        AddModUnionTable(mod_union_table);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"><span class="comment">//如果Non-moving Space有独立地址而且kUseRememberedSet=true,</span></div><div class="line"><span class="comment">//创建用来记录Non-moving Space对其他Space引用情况的RememberedSet</span></div><div class="line"><span class="keyword">if</span> (collector::SemiSpace::kUseRememberedSet &amp;&amp; non_moving_space_ != main_space_) &#123;</div><div class="line">        accounting::RememberedSet* non_moving_space_rem_set =</div><div class="line">            <span class="keyword">new</span> accounting::RememberedSet(<span class="string">"Non-moving space remembered set"</span>, <span class="keyword">this</span>, non_moving_space_);</div><div class="line">        ...</div><div class="line">        AddRememberedSet(non_moving_space_rem_set);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>创建<code>Mark-Stack</code>,<code>Allocation-Stack</code>,<code>Live-Stack</code>;创建之后GC需要用到的的锁;创建<code>TaskProcessor</code>,<code>ReferenceProcessor</code>;如果前后台回收器有一个是CMS,则创建一组包含三个支持并发的<code>Collector:MarkSweep, PartialMarkSweep, StickyMarkSweep</code>回收器; 如果前后台回收器有一个是MS,则创建一组包含三个不支持并发的<code>Collector:MarkSweep, PartialMarkSweep, StickyMarkSweep</code>回收器;之后再根据条件创建<code>Semi-Space Collector</code>(<code>SS</code>或<code>GSS</code>时创建),<code>Concurrent-Copying Collector</code>(<code>CC</code>时创建),<code>Mark Compact Collector</code>(<code>MS,CMS</code>shichu)</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// <span class="doctag">TODO:</span> Count objects in the image space here?</span></div><div class="line">num_bytes_allocated_.StoreRelaxed(<span class="number">0</span>);</div><div class="line"><span class="comment">// 创建Mark-Stack, Allocation-Stack, Live-Stack</span></div><div class="line">mark_stack_.reset(accounting::ObjectStack::Create(<span class="string">"mark stack"</span>, kDefaultMarkStackSize, kDefaultMarkStackSize));</div><div class="line"><span class="keyword">const</span> <span class="keyword">size_t</span> alloc_stack_capacity = max_allocation_stack_size_ + kAllocationStackReserveSize;</div><div class="line">allocation_stack_.reset(accounting::ObjectStack::Create(<span class="string">"allocation stack"</span>, max_allocation_stack_size_, alloc_stack_capacity));</div><div class="line">live_stack_.reset(accounting::ObjectStack::Create(<span class="string">"live stack"</span>, max_allocation_stack_size_, alloc_stack_capacity));</div><div class="line"><span class="comment">// 创建gc_complete_lock_,thread_flip_lock_</span></div><div class="line">gc_complete_lock_ = <span class="keyword">new</span> Mutex(<span class="string">"GC complete lock"</span>);</div><div class="line">gc_complete_cond_.reset(<span class="keyword">new</span> ConditionVariable(<span class="string">"GC complete condition variable"</span>,*gc_complete_lock_));</div><div class="line">thread_flip_lock_ = <span class="keyword">new</span> Mutex(<span class="string">"GC thread flip lock"</span>);</div><div class="line">thread_flip_cond_.reset(<span class="keyword">new</span> ConditionVariable(<span class="string">"GC thread flip condition variable"</span>,*thread_flip_lock_));</div><div class="line"><span class="comment">//创建TaskProcessor, ReferenceProcessor, pending_task_lock_</span></div><div class="line">task_processor_.reset(<span class="keyword">new</span> TaskProcessor());</div><div class="line">reference_processor_.reset(<span class="keyword">new</span> ReferenceProcessor());</div><div class="line">pending_task_lock_ = <span class="keyword">new</span> Mutex(<span class="string">"Pending task lock"</span>);</div><div class="line"><span class="keyword">if</span> (ignore_max_footprint_) &#123;</div><div class="line">      <span class="comment">//如果不限制堆的增长，则将堆的最大限制数设为最大</span></div><div class="line">      SetIdealFootprint(<span class="built_in">std</span>::numeric_limits&lt;<span class="keyword">size_t</span>&gt;::max());</div><div class="line">      <span class="comment">//将concurrent gc的启动值也设为最大，即只有堆达到最大时，才开启concurrent gc</span></div><div class="line">      concurrent_start_bytes_ = <span class="built_in">std</span>::numeric_limits&lt;<span class="keyword">size_t</span>&gt;::max();</div><div class="line">&#125;</div><div class="line">...</div><div class="line"><span class="comment">// 如果前后台回收器有一个是CMS,则创建一组包含三个支持并发的Collector:MarkSweep, PartialMarkSweep, StickyMarkSweep回收器</span></div><div class="line"><span class="comment">// 如果前后台回收器有一个是MS,则创建一组包含三个不支持并发的Collector:MarkSweep, PartialMarkSweep, StickyMarkSweep回收器</span></div><div class="line"><span class="keyword">for</span> (<span class="keyword">size_t</span> i = <span class="number">0</span>; i &lt; <span class="number">2</span>; ++i) &#123;</div><div class="line">      <span class="keyword">const</span> <span class="keyword">bool</span> concurrent = i != <span class="number">0</span>;</div><div class="line">      <span class="keyword">if</span> ((MayUseCollector(kCollectorTypeCMS) &amp;&amp; concurrent) ||</div><div class="line">                (MayUseCollector(kCollectorTypeMS) &amp;&amp; !concurrent)) &#123;</div><div class="line">          garbage_collectors_.push_back(<span class="keyword">new</span> collector::MarkSweep(<span class="keyword">this</span>, concurrent));</div><div class="line">          garbage_collectors_.push_back(<span class="keyword">new</span> collector::PartialMarkSweep(<span class="keyword">this</span>, concurrent));</div><div class="line">          garbage_collectors_.push_back(<span class="keyword">new</span> collector::StickyMarkSweep(<span class="keyword">this</span>, concurrent));</div><div class="line">      &#125;</div><div class="line">&#125;</div><div class="line"><span class="keyword">if</span> (kMovingCollector) &#123;<span class="comment">//kMovingCollector=true</span></div><div class="line">      <span class="keyword">if</span> (MayUseCollector(kCollectorTypeSS) || MayUseCollector(kCollectorTypeGSS) ||</div><div class="line">                  MayUseCollector(kCollectorTypeHomogeneousSpaceCompact) ||</div><div class="line">                  use_homogeneous_space_compaction_for_oom_) &#123;</div><div class="line">        <span class="comment">//如果前后台回收器中某一个是SS,GSS,HomogeneousSpaceCompact三者其中一个或者</span></div><div class="line">        <span class="comment">//使用homogeneous space compaction来避免OOM时，再创键一个Semi-Space Collector</span></div><div class="line">        <span class="keyword">const</span> <span class="keyword">bool</span> generational = foreground_collector_type_ == kCollectorTypeGSS;</div><div class="line">        semi_space_collector_ = <span class="keyword">new</span> collector::SemiSpace(<span class="keyword">this</span>, generational,</div><div class="line">                                                               generational ? <span class="string">"generational"</span> : <span class="string">""</span>);</div><div class="line">        garbage_collectors_.push_back(semi_space_collector_);</div><div class="line">      &#125;</div><div class="line">      <span class="keyword">if</span> (MayUseCollector(kCollectorTypeCC)) &#123;</div><div class="line">        <span class="comment">//如果前后台回收器中某一个是CC,再创建一个ConcurrentCopying Collector</span></div><div class="line">        concurrent_copying_collector_ = <span class="keyword">new</span> collector::ConcurrentCopying(<span class="keyword">this</span>);</div><div class="line">        garbage_collectors_.push_back(concurrent_copying_collector_);</div><div class="line">      &#125;</div><div class="line">      <span class="keyword">if</span> (MayUseCollector(kCollectorTypeMC)) &#123;</div><div class="line">        <span class="comment">//如果前后台回收器中某一个是MarkCompact,再创建一个MarkCompact Collector</span></div><div class="line">        mark_compact_collector_ = <span class="keyword">new</span> collector::MarkCompact(<span class="keyword">this</span>);</div><div class="line">        garbage_collectors_.push_back(mark_compact_collector_);</div><div class="line">      &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>如果有ImageSpace同时Non-Moving Space不为空同时满足三个条件(处于zygote，Non-Moving Space有独立地址，前台回收器是GSS)中的一个时，检查ImageSpace和Non-Moving Space之间没有内存空隙</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> (!GetBootImageSpaces().empty() &amp;&amp; non_moving_space_ != <span class="literal">nullptr</span> &amp;&amp;</div><div class="line">            (is_zygote || separate_non_moving_space || foreground_collector_type_ == kCollectorTypeGSS)) &#123;</div><div class="line">      <span class="comment">//如果有ImageSpace同时Non-Moving Space不为空同时满足三个条件</span></div><div class="line">      <span class="comment">//(处于zygote，Non-Moving Space有独立地址，前台回收器是GSS)中的一个时,</span></div><div class="line">      <span class="comment">//检查ImageSpace和Non-Moving Space只见没有内存空隙</span></div><div class="line">      space::ImageSpace* first_space = <span class="literal">nullptr</span>;</div><div class="line">      <span class="keyword">for</span> (space::ImageSpace* space : boot_image_spaces_) &#123;</div><div class="line">        <span class="keyword">if</span> (first_space == <span class="literal">nullptr</span> || space-&gt;Begin() &lt; first_space-&gt;Begin()) &#123;</div><div class="line">          first_space = space;</div><div class="line">        &#125;</div><div class="line">      &#125;</div><div class="line">      <span class="keyword">bool</span> no_gap = MemMap::CheckNoGaps(first_space-&gt;GetMemMap(), non_moving_space_-&gt;GetMemMap());</div><div class="line">      <span class="keyword">if</span> (!no_gap) &#123;</div><div class="line">        PrintFileToLog(<span class="string">"/proc/self/maps"</span>, LogSeverity::ERROR);</div><div class="line">        MemMap::DumpMaps(LOG(ERROR), <span class="literal">true</span>);</div><div class="line">        ...</div><div class="line">      &#125;</div><div class="line">  &#125;</div><div class="line">instrumentation::Instrumentation* <span class="keyword">const</span> instrumentation = runtime-&gt;GetInstrumentation();</div><div class="line"><span class="keyword">if</span> (gc_stress_mode_) &#123;</div><div class="line">      backtrace_lock_ = <span class="keyword">new</span> Mutex(<span class="string">"GC complete lock"</span>);</div><div class="line">&#125;</div><div class="line"><span class="keyword">if</span> (is_running_on_memory_tool_ || gc_stress_mode_) &#123;</div><div class="line">      instrumentation-&gt;InstrumentQuickAllocEntryPoints();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h2 id="三-总结"><a href="#三-总结" class="headerlink" title="三. 总结"></a>三. 总结</h2><h3 id="3-1-前台回收器是ConcurrentCopying"><a href="#3-1-前台回收器是ConcurrentCopying" class="headerlink" title="3.1 前台回收器是ConcurrentCopying"></a>3.1 前台回收器是ConcurrentCopying</h3><p>从代码逻辑看，如果<code>foreground_collector_type_=kCollectorTypeCC</code>时Heap的创建流程要跟其他回收器类型的创建流程不太相同：</p>
+<ol>
+<li><code>requested_alloc_space_begin = 300MB - non_moving_space_capacity</code></li>
+<li>创建ImageSpace(只要image文件不为空，都会创建)，如果创建成功，<code>requested_alloc_space_begin=ImageSpace+boo.oat</code><blockquote>
+<p>这一点所有回收器类型都一样，不同的是，如果创建失败，<code>requested_alloc_space_begin = 300MB - non_moving_space_capacity</code>, 其他回收器类型则是<code>requested_alloc_space_begin = nullptr</code></p>
+</blockquote>
+</li>
+<li>如果<code>background_collector_type_ != kCollectorTypeHomogeneousSpaceCompact</code>,则不支持<code>Homogeneous-Space-Compact</code></li>
+<li>由于是<code>CC</code>回收器，所以<strong>必然会给Non-Moving Space独立的地址</strong></li>
+<li><p>由于是<code>CC</code>回收器，所以即使ImageSpace创建失败，<code>requested_alloc_space_begin</code>也不会为<code>nullptr</code>,又因为Non-Moving Space有独立的地址，所以最后<code>request_begin=requested_alloc_space_begin + non_moving_space_capacity</code></p>
+<blockquote>
+<p>如果ImageSpace创建成功，<code>request_begin=ImageSpace+boot.oat+non_moving_space_capacity</code>;如果创建失败，<code>request_begin = 300MB-non_moving_space_capacity+non_moving_space_capacity</code>-&gt;<code>request_begin=300MB</code></p>
+</blockquote>
+</li>
+<li><p>紧跟着<code>requested_alloc_space_begin</code>创建用于Non-Moving Space的匿名内存映射<code>non_moving_space_mem_map</code>, 将<code>request_begin</code>固定在300MB的地址(<code>request_begin=reinterpret_cast&lt;uint8_t*&gt;(300*MB)</code>)；之后将匿名内存映射封装成Non-Moving Space，如果在Zygote中，就叫<code>ZygoteSpace</code>,否则叫<code>Non-Moving Space</code></p>
+</li>
+<li>由于是<code>CC</code>回收器,所以不会创建两块匿名内存<code>main_mem_map_1,main_mem_map_2</code>,而是紧跟着在<code>request_begin</code>后(即300MB,因为之前已经将<code>request_begin</code>固定在这个地址)直接创建<code>RegionSpace</code></li>
+<li>创建<code>LargeObjectSpace</code></li>
+<li>如果<code>kUseTableLookupReadBarrier=true</code>，创建<code>ReadBarrierTable</code></li>
+<li>创建<code>CardTable</code>,<code>ModUnionTable</code>(如果ImageSpace创建成功),如果<code>collector::SemiSpace::kUseRememberedSet == true</code>创建<code>RememberedSet</code>;创建<code>allocation_stack_,mark_stack_,live_stack_</code>;创建锁;创建<code>TaskProcessor,ReferenceProcessor</code></li>
+<li>由于是<code>CC</code>回收器,创建<code>collector::ConcurrentCopying</code>并添加至<code>garbage_collectors_</code></li>
+<li>如果ImageSpace创建成功，且Non-Moving Space不为空，检查ImageSpace和Non-Moving Space之间有没有内存间隙<blockquote>
+<p>因为是<code>CC</code>,所以Non-Moving Space必然有独立地址，所以只需要判断ImageSpace创建成功和Non-Moving Space不为空</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="3-2-前台回收器是GSS"><a href="#3-2-前台回收器是GSS" class="headerlink" title="3.2 前台回收器是GSS"></a>3.2 前台回收器是GSS</h3><p>GSS(Generational Semi-Space)是另一个较为特殊的回收器类型</p>
+<ol>
+<li><code>requested_alloc_space_begin=nullptr</code></li>
+<li>创建ImageSpace，如果成功，<code>requested_alloc_space_begin=ImageSpace+boot.oat</code>,如果创建失败,<code>requested_alloc_space_begin=nullptr</code></li>
+<li>如果<code>background_collector_type_ != kCollectorTypeHomogeneousSpaceCompact</code>，则肯定不支持Homogeneous-Space-Compact</li>
+<li>由于是<code>GSS</code>回收器,所以不会给Non-Moving Space独立的地址(<strong>这一点很重要,即不会创建Non-Moving Space的匿名内存映射</strong>)</li>
+<li>如果ImageSpace创建失败，则<code>request_begin=requested_alloc_space_begin=nullptr</code>;如果创建成功,则<code>request_begin=reuqest_alloc_space_begin=ImageSpace+boo.oat</code></li>
+<li>由于是<code>GSS</code>回收器,那么Non-Moving Space不会有独立地址，如果此时处于Zygote中，则紧跟ImageSpace+boo.oat创建匿名内存映射<code>main_mem_map_1</code>(<strong>因为Non-Moving Space没有独立地址，所以不会将request_begin固定在300MB,又因为如果ImageSpace创建成功此时request_begin=ImageSpace+boot.oat</strong>)</li>
+<li>如果<code>background_collector_type_ == kCollectorTypeHomogeneousSpaceCompact</code>，则会紧跟着<code>main_mem_map_1</code>再创建第二块匿名内存映射<code>main_mem_map_2</code>,否则不会创建<code>main_mem_map_2</code></li>
+<li>将<code>main_mem_map_1</code>封装成<code>Main Space</code>,由于是<code>GSS</code>回收器，所以将<code>non_moving_space_</code>也指向<code>Main Space</code></li>
+<li>由于是<code>GSS</code>回收器,调用<code>space::BumpPointerSpace::Create</code>直接创建<code>BumpPointerSpace1</code>和<code>BumpPointerSpace2</code></li>
+<li>创建<code>LargeObjectSpace</code></li>
+<li>创建<code>CardTable</code>,<code>ModUnionTable</code>(如果ImageSpace创建成功),由于是<code>GSS</code>回收器，所以<code>non_moving_space_ == main_space_</code>,所以不会创建<code>RememberedSet</code>;创建<code>allocation_stack_,mark_stack_,live_stack_</code>;创建锁;创建<code>TaskProcessor,ReferenceProcessor</code></li>
+<li>由于是<code>GSS</code>,所以创建<code>collector::SemiSpace</code>,其中<code>generational_ = true</code></li>
+<li>如果ImageSpace创建成功，且<code>MainSpace</code>不为空，检查ImageSpace和Non-Moving Space之间有没有内存间隙<blockquote>
+<p>因为是<code>GSS</code>,所以<code>non_moving_space_</code>指向<code>MainSpace</code>,所以只需要判断ImageSpace创建成功和Non-Moving Space不为空</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="3-3-Moving-GC-Semi-Space-MarkCompact-HomogeneousSpaceCompact"><a href="#3-3-Moving-GC-Semi-Space-MarkCompact-HomogeneousSpaceCompact" class="headerlink" title="3.3 Moving GC(Semi-Space, MarkCompact, HomogeneousSpaceCompact)"></a>3.3 Moving GC(Semi-Space, MarkCompact, HomogeneousSpaceCompact)</h3><ol>
+<li><code>requested_alloc_space_begin=nullptr</code></li>
+<li>创建ImageSpace，如果成功，<code>requested_alloc_space_begin=ImageSpace+boot.oat</code>,如果创建失败,<code>requested_alloc_space_begin=nullptr</code></li>
+<li>由于不是<code>GSS</code>和<code>CC</code>，所以只要传入的<code>use_homogeneous_space_compaction==true</code>或者<code>background_collector_type_ == kCollectorTypeHomogeneousSpaceCompact</code>时会支持Homogeneous-Space-Compact</li>
+<li>Non-Moving<strong>必然有独立的地址</strong></li>
+<li>如果ImageSpace创建成功，<code>request_begin = requested_alloc_space_begin + non_moving_space_capacity</code>,否则<code>request_begin=nullptr</code></li>
+<li>创建Non-Moving Space使用的匿名内存映射<code>non_moving_space_mem_map</code>,将<code>request_begin</code>固定在300MB的地址(<code>request_begin=reinterpret_cast&lt;uint8_t*&gt;(300*MB)</code>)</li>
+<li>紧跟<code>request_begin</code>创建匿名内存映射<code>main_mem_map_1</code></li>
+<li>如果支持Homogeneous-Space-Compact或者前后台回收器有一个是<code>Semi-Space</code>,则紧跟<code>main_mem_map_1</code>创建第二块匿名内存映射<code>main_mem_map_2</code></li>
+<li>将<code>non_moving_space_mem_map</code>封装成<code>Non-Moving Space</code>,由<code>non_moving_space_</code>指向</li>
+<li>将<code>main_mem_map_1</code>封装成<code>BumpPointerSpace1</code>，将<code>main_mem_map_2</code>封装成<code>BumpPointerSpace2</code></li>
+<li>创建<code>LargeObjectSpace</code></li>
+<li>创建<code>CardTable</code>,<code>ModUnionTable</code>(如果ImageSpace创建成功),如果<code>collector::SemiSpace::kUseRememberedSet == true</code>创建<code>RememberedSet</code>;创建<code>allocation_stack_,mark_stack_,live_stack_</code>;创建锁;创建<code>TaskProcessor,ReferenceProcessor</code></li>
+<li>如果前后台回收器中有一个是<code>SS</code>或<code>Homogeneous-Space-Compact</code>，创建<code>collector::SemiSpace</code>;如果前后台回收器有一个是<code>MarkCompact</code>,则创建<code>collector::MarkCompact</code></li>
+<li>如果ImageSpace创建成功，且Non-Moving Space不为空，检查ImageSpace和Non-Moving Space之间有没有内存间隙<blockquote>
+<p>因为Non-Moving必然有独立的地址,所以只需要判断ImageSpace创建成功和Non-Moving Space不为空</p>
+</blockquote>
+</li>
+</ol>
+<h3 id="3-4-前台回收器MarkSweep或Concurrent-MarkSweep"><a href="#3-4-前台回收器MarkSweep或Concurrent-MarkSweep" class="headerlink" title="3.4 前台回收器MarkSweep或Concurrent MarkSweep"></a>3.4 前台回收器MarkSweep或Concurrent MarkSweep</h3><ol>
+<li><code>requested_alloc_space_begin=nullptr</code></li>
+<li>创建ImageSpace，如果成功，<code>requested_alloc_space_begin=ImageSpace+boot.oat</code>,如果创建失败,<code>requested_alloc_space_begin=nullptr</code></li>
+<li>由于不是<code>GSS</code>和<code>CC</code>，所以只要传入的<code>use_homogeneous_space_compaction=true</code>或者<code>background_collector_type_ == kCollectorTypeHomogeneousSpaceCompact</code>时会支持Homogeneous-Space-Compact</li>
+<li>只要当前处于Zygote当中，则Non-Moving Space必然有独立地址，否则得看是否支持Homogeneous-Space-Compact,支持的话，就有独立地址，不支持就没有</li>
+<li>如果ImageSpace创建失败且<code>foreground_collector_type_=kCollectorTypeMS</code>同时当前处于dex2oat,<code>requested_alloc_space_begin=kAllocSpaceBeginForDeterministicAoT</code></li>
+<li>如果ImageSpace创建成功且如果Non-Moving Space有独立地址的话，创建Non-Moving Space要用到的匿名内存映射<code>non_moving_space_mem_map</code>,将<code>request_begin</code>固定在300MB的地址(<code>request_begin=reinterpret_cast&lt;uint8_t*&gt;(300*MB)</code>)</li>
+<li>如果Non-Moving Space有独立地址或者当前不在Zygote中,紧跟着<code>request_begin</code>(300MB)创建匿名内存映射<code>main_mem_map_1</code>;如果Non-Moving Space没有独立地址同时处于Zygote中，则紧跟着ImageSpace_boot.oat创建匿名内存映射<code>main_mem_map_1</code></li>
+<li>如果支持Homogeneous-Space-Compact,紧跟着<code>main_mem_map_1</code>创建第二块匿名内存映射<code>main_mem_map_2</code>,否则不创建<code>main_mem_map_2</code></li>
+<li>如果Non-Moving Space有独立地址，将<code>non_moving_space_mem_map</code>封装成<code>Non-Moving Space</code></li>
+<li>将<code>main_mem_map_1</code>封装成<code>Main Space</code>,如果Non-Moving Space没有独立地址，则将<code>non_moving_space_</code>也指向<code>MainSpace</code></li>
+<li>如果之前创建了<code>main_mem_map_2</code>,则将<code>main_mem_map_2</code>封装成<code>Main Backup Space</code></li>
+<li>创建<code>LargeObjectSpace</code></li>
+<li>移除<code>Main Backup Space</code></li>
+<li>创建<code>CardTable</code>,<code>ModUnionTable</code>(如果ImageSpace创建成功),如果Non-Moving Space有独立地址，创建<code>RememberedSet</code>，否则不创建；创建<code>allocation_stack_,mark_stack_,live_stack_</code>;创建锁;创建<code>TaskProcessor,ReferenceProcessor</code></li>
+<li>创建一组回收器，里面有三个回收器分别是<code>MarkSweep, PartialMarkSweep, StickyMarkSweep</code>,如果是<code>Concurrent Mark Compact</code>，则这一组回收器是支持并行GC的；如果是<code>MarkSweep</code>,则这一组不支持并行GC</li>
+<li>如果ImageSpace创建成功且Non-Moving Space不为空同时满足：处于Zygote或者Non-Moving Space有独立地址时，检查ImageSpace和Non-Moving Space之间有没有内存间隙<blockquote>
+<p>因为Non-Moving Space有没有独立地址不确定，需要视条件而定</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="四-参考资料"><a href="#四-参考资料" class="headerlink" title="四. 参考资料"></a>四. 参考资料</h2><ol>
+<li><a href="http://blog.csdn.net/luoshengyang/article/details/42072975" target="_blank" rel="external">ART运行时垃圾收集机制简要介绍和学习计划</a></li>
+<li><a href="https://source.android.com/devices/tech/dalvik/gc-debug.html" target="_blank" rel="external">Debugging ART Garbage Collection</a></li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/images/wechat.jpg" alt="王小宝 WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/images/alipay.jpg" alt="王小宝 Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/ART/" rel="tag"># ART</a>
+          
+            <a href="/tags/源码分析/" rel="tag"># 源码分析</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/24/ART-Runtime-创建-二-启动参数/" rel="next" title="ART Runtime 创建(二)--启动参数">
+                <i class="fa fa-chevron-left"></i> ART Runtime 创建(二)--启动参数
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/24/开源项目学习之Volley-一/" rel="prev" title="开源项目学习之Volley(一)">
+                开源项目学习之Volley(一) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.jpg"
+               alt="王小宝" />
+          <p class="site-author-name" itemprop="name">王小宝</p>
+           
+              <p class="site-description motion-element" itemprop="description">90后迷途小书童</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/wangyun137" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.jianshu.com/u/73df471e39bb" target="_blank" title="简书">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  简书
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#一-相关知识预热"><span class="nav-number">1.</span> <span class="nav-text">一. 相关知识预热</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-1-Garbage-Collection-Type"><span class="nav-number">1.1.</span> <span class="nav-text">1.1 Garbage Collection Type</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二-Heap-Heap"><span class="nav-number">2.</span> <span class="nav-text">二. Heap::Heap()</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-构造函数声明"><span class="nav-number">2.1.</span> <span class="nav-text">2.1 构造函数声明</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-2-构造函数实现"><span class="nav-number">2.2.</span> <span class="nav-text">2.2 构造函数实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-1-字段初始化"><span class="nav-number">2.2.1.</span> <span class="nav-text">2.2.1 字段初始化</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-2-2-具体创建逻辑"><span class="nav-number">2.2.2.</span> <span class="nav-text">2.2.2 具体创建逻辑</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三-总结"><span class="nav-number">3.</span> <span class="nav-text">三. 总结</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#3-1-前台回收器是ConcurrentCopying"><span class="nav-number">3.1.</span> <span class="nav-text">3.1 前台回收器是ConcurrentCopying</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-2-前台回收器是GSS"><span class="nav-number">3.2.</span> <span class="nav-text">3.2 前台回收器是GSS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-3-Moving-GC-Semi-Space-MarkCompact-HomogeneousSpaceCompact"><span class="nav-number">3.3.</span> <span class="nav-text">3.3 Moving GC(Semi-Space, MarkCompact, HomogeneousSpaceCompact)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-4-前台回收器MarkSweep或Concurrent-MarkSweep"><span class="nav-number">3.4.</span> <span class="nav-text">3.4 前台回收器MarkSweep或Concurrent MarkSweep</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四-参考资料"><span class="nav-number">4.</span> <span class="nav-text">四. 参考资料</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">王小宝</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

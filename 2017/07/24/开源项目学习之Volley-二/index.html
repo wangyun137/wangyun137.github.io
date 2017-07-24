@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="开源项目学习,Volley," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="迷途小书童" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="Volley不仅可以进行普通的网络请求，还提供了一个简单的图片加载框架，下面这段代码展示了最普遍的使用Volley加载图片的方法 12345678910111213141516RequestQueue queue = Volley.newRequestQueue(context);ImageLoader loader = new ImageLoader(queue, new ImageCache(">
+<meta name="keywords" content="开源项目学习,Volley">
+<meta property="og:type" content="article">
+<meta property="og:title" content="开源项目学习之Volley(二)">
+<meta property="og:url" content="https://wangyun137.github.io/2017/07/24/开源项目学习之Volley-二/index.html">
+<meta property="og:site_name" content="迷途小书童">
+<meta property="og:description" content="Volley不仅可以进行普通的网络请求，还提供了一个简单的图片加载框架，下面这段代码展示了最普遍的使用Volley加载图片的方法 12345678910111213141516RequestQueue queue = Volley.newRequestQueue(context);ImageLoader loader = new ImageLoader(queue, new ImageCache(">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-07-24T07:14:22.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="开源项目学习之Volley(二)">
+<meta name="twitter:description" content="Volley不仅可以进行普通的网络请求，还提供了一个简单的图片加载框架，下面这段代码展示了最普遍的使用Volley加载图片的方法 12345678910111213141516RequestQueue queue = Volley.newRequestQueue(context);ImageLoader loader = new ImageLoader(queue, new ImageCache(">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://wangyun137.github.io/2017/07/24/开源项目学习之Volley-二/"/>
+
+
+
+
+
+  <title>开源项目学习之Volley(二) | 迷途小书童</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">迷途小书童</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">遇见一个人可能只要一秒，喜欢一个人可能需要一天，忘记一个人却需要一辈子</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-/"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://wangyun137.github.io/2017/07/24/开源项目学习之Volley-二/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="王小宝">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="迷途小书童">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">开源项目学习之Volley(二)</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-24T15:07:19+08:00">
+                2017-07-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Volley/" itemprop="url" rel="index">
+                    <span itemprop="name">Volley</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>Volley不仅可以进行普通的网络请求，还提供了一个简单的图片加载框架，下面这段代码展示了最普遍的使用Volley加载图片的方法</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">RequestQueue queue = Volley.newRequestQueue(context);</div><div class="line">ImageLoader loader = <span class="keyword">new</span> ImageLoader(queue, <span class="keyword">new</span> ImageCache() &#123;</div><div class="line">	<span class="meta">@Override</span></div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">putBitmap</span><span class="params">(String url, Bitmap bitmap)</span> </span>&#123;</div><div class="line">	</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	<span class="meta">@Override</span></div><div class="line">	<span class="function"><span class="keyword">public</span> Bitmap <span class="title">getBitmap</span><span class="params">(String url)</span> </span>&#123;</div><div class="line">	</div><div class="line">	&#125;</div><div class="line">&#125;);</div><div class="line"></div><div class="line">ImageListener listener = ImageLoader.getImageListener(imageView, R.drwable.ic_default_icon, R.drawable.ic_error_icon);</div><div class="line"></div><div class="line">loader.get(<span class="string">"xxx.jpeg"</span>, listener, <span class="number">200</span>, <span class="number">200</span>);</div></pre></td></tr></table></figure>
+<p>除了这种用法外，另一种比较常用的是<code>NetworkImageView</code>，它的用法更为简单是:</p>
+<ol>
+<li>在布局文件中声明一个<code>NetworkImageView</code>控件</li>
+<li>获取控件实例</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">networkImageView.setDefaultImageResId(R.drawable.ic_default_icon);  </div><div class="line">networkImageView.setErrorImageResId(R.drawable.ic_error_icon);  </div><div class="line">networkImageView.setImageUrl(&quot;xxx.png&quot;,  </div><div class="line">                imageLoader);</div></pre></td></tr></table></figure>
+<p><code>NetworkImageView</code>内部的实现其实仍然是使用了<code>ImageLoader</code>，所以我们主要看一下<code>ImageLoader</code>相关的代码</p>
+<h2 id="代码分析"><a href="#代码分析" class="headerlink" title="代码分析"></a>代码分析</h2><h2 id="1-ImageLoader-getImageListener"><a href="#1-ImageLoader-getImageListener" class="headerlink" title="1. ImageLoader.getImageListener"></a>1. ImageLoader.getImageListener</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> ImageListener <span class="title">getImageListener</span><span class="params">(<span class="keyword">final</span> ImageView view,</span></span></div><div class="line">           <span class="keyword">final</span> <span class="keyword">int</span> defaultImageResId, <span class="keyword">final</span> <span class="keyword">int</span> errorImageResId) &#123;</div><div class="line"></div><div class="line">       <span class="keyword">return</span> <span class="keyword">new</span> ImageListener() &#123;</div><div class="line">           <span class="meta">@Override</span></div><div class="line">           <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onErrorResponse</span><span class="params">(VolleyError error)</span> </span>&#123;</div><div class="line">               <span class="keyword">if</span> (errorImageResId != <span class="number">0</span>) &#123;</div><div class="line">                   view.setImageResource(errorImageResId);</div><div class="line">               &#125;</div><div class="line">           &#125;</div><div class="line"></div><div class="line">           <span class="meta">@Override</span></div><div class="line">           <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onResponse</span><span class="params">(ImageContainer response, <span class="keyword">boolean</span> isImmediate)</span> </span>&#123;</div><div class="line">               <span class="keyword">if</span> (response.getBitmap() != <span class="keyword">null</span>) &#123;</div><div class="line">                   view.setImageBitmap(response.getBitmap());</div><div class="line">               &#125; <span class="keyword">else</span> <span class="keyword">if</span> (defaultImageResId != <span class="number">0</span>) &#123;</div><div class="line">                   view.setImageResource(defaultImageResId);</div><div class="line">               &#125;</div><div class="line">           &#125;</div><div class="line">       &#125;;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<ul>
+<li><code>defaultImageResId</code>是占位图，<code>errorImageResId</code>是当出现错误时显示的占位图</li>
+<li>也可以自定义一个<code>ImgeListener</code></li>
+</ul>
+<h2 id="2-ImageLoader-get"><a href="#2-ImageLoader-get" class="headerlink" title="2. ImageLoader.get"></a>2. ImageLoader.get</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> ImageContainer <span class="title">get</span><span class="params">(String requestUrl, <span class="keyword">final</span> ImageListener listener)</span> </span>&#123;</div><div class="line">    <span class="keyword">return</span> get(requestUrl, listener, <span class="number">0</span>, <span class="number">0</span>);</div><div class="line">&#125;</div><div class="line"></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> ImageContainer <span class="title">get</span><span class="params">(String requestUrl, ImageListener imageListener,</span></span></div><div class="line">        <span class="keyword">int</span> maxWidth, <span class="keyword">int</span> maxHeight) &#123;</div><div class="line">    <span class="keyword">return</span> get(requestUrl, imageListener, maxWidth, maxHeight, ScaleType.CENTER_INSIDE);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> ImageContainer <span class="title">get</span><span class="params">(String requestUrl, ImageListener imageListener,</span></span></div><div class="line">        <span class="keyword">int</span> maxWidth, <span class="keyword">int</span> maxHeight, ScaleType scaleType) &#123;</div><div class="line"></div><div class="line">    <span class="comment">//确定是在主线程</span></div><div class="line">    throwIfNotOnMainThread();</div><div class="line">    <span class="comment">//生成缓存key</span></div><div class="line">    <span class="keyword">final</span> String cacheKey = getCacheKey(requestUrl, maxWidth, maxHeight, scaleType);</div><div class="line"></div><div class="line">    <span class="comment">//从缓存中查找Bitmap</span></div><div class="line">    Bitmap cachedBitmap = mCache.getBitmap(cacheKey);</div><div class="line">    <span class="keyword">if</span> (cachedBitmap != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="comment">// 如果从缓存中找到，则直接回调onResponse</span></div><div class="line">        ImageContainer container = <span class="keyword">new</span> ImageContainer(cachedBitmap, requestUrl, <span class="keyword">null</span>, <span class="keyword">null</span>);</div><div class="line">        imageListener.onResponse(container, <span class="keyword">true</span>);</div><div class="line">        <span class="keyword">return</span> container;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">// 生成一个bitmap = null的ImageContainer, 回调onResponse, 这样做的目的是显示占位图</span></div><div class="line">    ImageContainer imageContainer =</div><div class="line">            <span class="keyword">new</span> ImageContainer(<span class="keyword">null</span>, requestUrl, cacheKey, imageListener);</div><div class="line">    imageListener.onResponse(imageContainer, <span class="keyword">true</span>);</div><div class="line"></div><div class="line">    <span class="comment">// 从InFlightRequest中查找是否有正在请求的Request</span></div><div class="line">    BatchedImageRequest request = mInFlightRequests.get(cacheKey);</div><div class="line">    <span class="keyword">if</span> (request != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="comment">// If it is, add this request to the list of listeners.</span></div><div class="line">        request.addContainer(imageContainer);</div><div class="line">        <span class="keyword">return</span> imageContainer;</div><div class="line">    &#125;</div><div class="line"></div><div class="line"></div><div class="line">    <span class="comment">//创建一个新的请求，用于请求图片</span></div><div class="line">    Request&lt;Bitmap&gt; newRequest = makeImageRequest(requestUrl, maxWidth, maxHeight, scaleType,</div><div class="line">            cacheKey);</div><div class="line">    mRequestQueue.add(newRequest);</div><div class="line">    mInFlightRequests.put(cacheKey,</div><div class="line">            <span class="keyword">new</span> BatchedImageRequest(newRequest, imageContainer));</div><div class="line">    <span class="keyword">return</span> imageContainer;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>确定当前是在主线程</li>
+<li>生成缓存key, key的规则是“url + #W${maxWidth} + #H${maxHeight} + #S${scaleType.ordinal}”</li>
+<li>从缓存中查找Bitmap1,如果找到则回调<code>ImageListener.onResponse</code>,并返回</li>
+<li>如果缓存中没有找到，则先生成一个<code>bitmap = null</code>的<code>ImageContainer</code>,然后回调<code>ImageListener.onResponse</code>, 这样做的目的在于可以先让<code>ImageView</code>显示占位图</li>
+<li>从<code>inFlightRequests</code>中查找是否存在key对应的正在请求的Request</li>
+<li>创建一个新的请求，添加到队列</li>
+</ol>
+<h3 id="2-1-ImageLoader-makeImageRequest"><a href="#2-1-ImageLoader-makeImageRequest" class="headerlink" title="2.1 ImageLoader.makeImageRequest"></a>2.1 ImageLoader.makeImageRequest</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> Request&lt;Bitmap&gt; <span class="title">makeImageRequest</span><span class="params">(String requestUrl, <span class="keyword">int</span> maxWidth, <span class="keyword">int</span> maxHeight,ScaleType scaleType, <span class="keyword">final</span> String cacheKey)</span> </span>&#123;</div><div class="line"></div><div class="line">	<span class="keyword">return</span> <span class="keyword">new</span> ImageRequest(requestUrl, <span class="keyword">new</span> Listener&lt;Bitmap&gt;() &#123;</div><div class="line">    	<span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onResponse</span><span class="params">(Bitmap response)</span> </span>&#123;</div><div class="line">            onGetImageSuccess(cacheKey, response);</div><div class="line">        &#125;</div><div class="line">     &#125;, maxWidth, maxHeight, scaleType, Config.RGB_565, <span class="keyword">new</span> ErrorListener() &#123;</div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onErrorResponse</span><span class="params">(VolleyError error)</span> </span>&#123;</div><div class="line">            onGetImageError(cacheKey, error);</div><div class="line">        &#125;</div><div class="line">     &#125;);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可以看到，实际就是构建了一个<code>ImageRequest</code></p>
+<h4 id="2-1-1-ImageRequest"><a href="#2-1-1-ImageRequest" class="headerlink" title="2.1.1 ImageRequest"></a>2.1.1 ImageRequest</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ImageRequest</span> <span class="keyword">extends</span> <span class="title">Request</span>&lt;<span class="title">Bitmap</span>&gt; </span>&#123;</div><div class="line">	...</div><div class="line">	<span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">protected</span> Response&lt;Bitmap&gt; <span class="title">parseNetworkResponse</span><span class="params">(NetworkResponse response)</span> </span>&#123;</div><div class="line">        <span class="keyword">synchronized</span> (sDecodeLock) &#123;</div><div class="line">            <span class="keyword">try</span> &#123;</div><div class="line">                <span class="keyword">return</span> doParse(response);</div><div class="line">            &#125; <span class="keyword">catch</span> (OutOfMemoryError e) &#123;</div><div class="line">                <span class="keyword">return</span> Response.error(<span class="keyword">new</span> ParseError(e));</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    <span class="function"><span class="keyword">private</span> Response&lt;Bitmap&gt; <span class="title">doParse</span><span class="params">(NetworkResponse response)</span> </span>&#123;</div><div class="line">        <span class="keyword">byte</span>[] data = response.data;</div><div class="line">        BitmapFactory.Options decodeOptions = <span class="keyword">new</span> BitmapFactory.Options();</div><div class="line">        Bitmap bitmap = <span class="keyword">null</span>;</div><div class="line">        <span class="keyword">if</span> (mMaxWidth == <span class="number">0</span> &amp;&amp; mMaxHeight == <span class="number">0</span>) &#123;</div><div class="line">            decodeOptions.inPreferredConfig = mDecodeConfig;</div><div class="line">            bitmap = BitmapFactory.decodeByteArray(data, <span class="number">0</span>, data.length, decodeOptions);</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="comment">// If we have to resize this image, first get the natural bounds.</span></div><div class="line">            decodeOptions.inJustDecodeBounds = <span class="keyword">true</span>;</div><div class="line">            BitmapFactory.decodeByteArray(data, <span class="number">0</span>, data.length, decodeOptions);</div><div class="line">            <span class="keyword">int</span> actualWidth = decodeOptions.outWidth;</div><div class="line">            <span class="keyword">int</span> actualHeight = decodeOptions.outHeight;</div><div class="line"></div><div class="line">            <span class="comment">// 计算出合适的width和height</span></div><div class="line">            <span class="keyword">int</span> desiredWidth = getResizedDimension(mMaxWidth, mMaxHeight,</div><div class="line">                    actualWidth, actualHeight, mScaleType);</div><div class="line">            <span class="keyword">int</span> desiredHeight = getResizedDimension(mMaxHeight, mMaxWidth,</div><div class="line">                    actualHeight, actualWidth, mScaleType);</div><div class="line">            </div><div class="line">            decodeOptions.inJustDecodeBounds = <span class="keyword">false</span>;</div><div class="line">            <span class="comment">// decodeOptions.inPreferQualityOverSpeed = PREFER_QUALITY_OVER_SPEED;</span></div><div class="line">            <span class="comment">//计算出合适的imSampleSize</span></div><div class="line">            decodeOptions.inSampleSize =</div><div class="line">                findBestSampleSize(actualWidth, actualHeight, desiredWidth, desiredHeight);</div><div class="line">            Bitmap tempBitmap =</div><div class="line">                BitmapFactory.decodeByteArray(data, <span class="number">0</span>, data.length, decodeOptions);</div><div class="line"></div><div class="line">            <span class="comment">// If necessary, scale down to the maximal acceptable size.</span></div><div class="line">            <span class="keyword">if</span> (tempBitmap != <span class="keyword">null</span> &amp;&amp; (tempBitmap.getWidth() &gt; desiredWidth ||</div><div class="line">                    tempBitmap.getHeight() &gt; desiredHeight)) &#123;</div><div class="line">                bitmap = Bitmap.createScaledBitmap(tempBitmap,</div><div class="line">                        desiredWidth, desiredHeight, <span class="keyword">true</span>);</div><div class="line">                tempBitmap.recycle();</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                bitmap = tempBitmap;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (bitmap == <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="keyword">return</span> Response.error(<span class="keyword">new</span> ParseError(response));</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">return</span> Response.success(bitmap, HttpHeaderParser.parseCacheHeaders(response));</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">	</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>从之前的<a href="http://www.jianshu.com/p/2abe464c4b21" target="_blank" rel="external">开源项目学习之Volley(一)</a>可以知道，<code>Request</code>最重要的方法就是<code>performNetworkResponse</code>,<code>ImageRequest</code>的<code>performNetworkResponse</code>直接调用的私有方法<code>doParse</code>, 从<code>doParse</code>的代码中可以看出其逻辑主要就是解析出合适的Bitmap</p>
+<h4 id="2-1-2-ImageLoader-onGetImageSuccess"><a href="#2-1-2-ImageLoader-onGetImageSuccess" class="headerlink" title="2.1.2 ImageLoader.onGetImageSuccess"></a>2.1.2 ImageLoader.onGetImageSuccess</h4><p><code>onGetImageSuccess</code>会再调用<code>batchResponse</code>, 这两个方法的逻辑总结起来就是： <strong>将请求到的Bitmap放入缓存，之后获取到之前传入的<code>ImageListener</code>，回调<code>onResponse</code></strong></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/images/wechat.jpg" alt="王小宝 WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/images/alipay.jpg" alt="王小宝 Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/开源项目学习/" rel="tag"># 开源项目学习</a>
+          
+            <a href="/tags/Volley/" rel="tag"># Volley</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/24/开源项目学习之Volley-一/" rel="next" title="开源项目学习之Volley(一)">
+                <i class="fa fa-chevron-left"></i> 开源项目学习之Volley(一)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/24/DiskLruCache学习/" rel="prev" title="DiskLruCache学习">
+                DiskLruCache学习 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.jpg"
+               alt="王小宝" />
+          <p class="site-author-name" itemprop="name">王小宝</p>
+           
+              <p class="site-description motion-element" itemprop="description">90后迷途小书童</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">12</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">7</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/wangyun137" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.jianshu.com/u/73df471e39bb" target="_blank" title="简书">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  简书
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#代码分析"><span class="nav-number">1.</span> <span class="nav-text">代码分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-ImageLoader-getImageListener"><span class="nav-number">2.</span> <span class="nav-text">1. ImageLoader.getImageListener</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-ImageLoader-get"><span class="nav-number">3.</span> <span class="nav-text">2. ImageLoader.get</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#2-1-ImageLoader-makeImageRequest"><span class="nav-number">3.1.</span> <span class="nav-text">2.1 ImageLoader.makeImageRequest</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-1-ImageRequest"><span class="nav-number">3.1.1.</span> <span class="nav-text">2.1.1 ImageRequest</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-1-2-ImageLoader-onGetImageSuccess"><span class="nav-number">3.1.2.</span> <span class="nav-text">2.1.2 ImageLoader.onGetImageSuccess</span></a></li></ol></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">王小宝</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

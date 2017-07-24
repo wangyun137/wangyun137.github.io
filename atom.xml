@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+  <title>迷途小书童</title>
+  <subtitle>遇见一个人可能只要一秒，喜欢一个人可能需要一天，忘记一个人却需要一辈子</subtitle>
+  <link href="/atom.xml" rel="self"/>
+  
+  <link href="https://wangyun137.github.io/"/>
+  <updated>2017-07-24T07:25:37.000Z</updated>
+  <id>https://wangyun137.github.io/</id>
+  
+  <author>
+    <name>王小宝</name>
+    <email>wangyun0507@gmail.com</email>
+  </author>
+  
+  <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Retrofit学习(二)</title>
+    <link href="https://wangyun137.github.io/2017/07/24/Retrofit%E5%AD%A6%E4%B9%A0-%E4%BA%8C/"/>
+    <id>https://wangyun137.github.io/2017/07/24/Retrofit学习-二/</id>
+    <published>2017-07-24T07:22:11.000Z</published>
+    <updated>2017-07-24T07:25:37.000Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;之前的&lt;a href=&quot;https://wangyun137.github.io/2017/07/24/Retrofit%E5%AD%A6%E4%B9%A0-%E4%B8%80/&quot;&gt;Retrofit学习(一)&lt;/a&gt;了解了一下&lt;code&gt;Retrofit&lt;/code&gt;的最基
+    
+    </summary>
+    
+      <category term="Retrofit" scheme="https://wangyun137.github.io/categories/Retrofit/"/>
+    
+    
+      <category term="Retrofit" scheme="https://wangyun137.github.io/tags/Retrofit/"/>
+    
+      <category term="开源项目学习" scheme="https://wangyun137.github.io/tags/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>Retrofit学习(一)</title>
+    <link href="https://wangyun137.github.io/2017/07/24/Retrofit%E5%AD%A6%E4%B9%A0-%E4%B8%80/"/>
+    <id>https://wangyun137.github.io/2017/07/24/Retrofit学习-一/</id>
+    <published>2017-07-24T07:18:55.000Z</published>
+    <updated>2017-07-24T07:21:00.000Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;一-使用用例&quot;&gt;&lt;a href=&quot;#一-使用用例&quot; class=&quot;headerlink&quot; title=&quot;一. 使用用例&quot;&gt;&lt;/a&gt;一. 使用用例&lt;/h1&gt;&lt;figure class=&quot;highlight java&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gu
+    
+    </summary>
+    
+      <category term="Retrofit" scheme="https://wangyun137.github.io/categories/Retrofit/"/>
+    
+    
+      <category term="Retrofit" scheme="https://wangyun137.github.io/tags/Retrofit/"/>
+    
+      <category term="开源项目学习" scheme="https://wangyun137.github.io/tags/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>DiskLruCache学习</title>
+    <link href="https://wangyun137.github.io/2017/07/24/DiskLruCache%E5%AD%A6%E4%B9%A0/"/>
+    <id>https://wangyun137.github.io/2017/07/24/DiskLruCache学习/</id>
+    <published>2017-07-24T07:15:26.000Z</published>
+    <updated>2017-07-24T07:17:22.000Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;一-用法&quot;&gt;&lt;a href=&quot;#一-用法&quot; class=&quot;headerlink&quot; title=&quot;一. 用法&quot;&gt;&lt;/a&gt;一. 用法&lt;/h1&gt;&lt;p&gt;&lt;code&gt;DiskLruCache&lt;/code&gt;是Google官方推荐的磁盘缓存方案，很多优秀的App都在使用这一方案
+    
+    </summary>
+    
+      <category term="DiskLruCache" scheme="https://wangyun137.github.io/categories/DiskLruCache/"/>
+    
+    
+      <category term="DiskLruCache" scheme="https://wangyun137.github.io/tags/DiskLruCache/"/>
+    
+      <category term="开源项目分析" scheme="https://wangyun137.github.io/tags/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>开源项目学习之Volley(二)</title>
+    <link href="https://wangyun137.github.io/2017/07/24/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE%E5%AD%A6%E4%B9%A0%E4%B9%8BVolley-%E4%BA%8C/"/>
+    <id>https://wangyun137.github.io/2017/07/24/开源项目学习之Volley-二/</id>
+    <published>2017-07-24T07:07:19.000Z</published>
+    <updated>2017-07-24T07:14:22.000Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;Volley不仅可以进行普通的网络请求，还提供了一个简单的图片加载框架，下面这段代码展示了最普遍的使用Volley加载图片的方法&lt;/p&gt;
+&lt;figure class=&quot;highlight java&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;d
+    
+    </summary>
+    
+      <category term="Volley" scheme="https://wangyun137.github.io/categories/Volley/"/>
+    
+    
+      <category term="开源项目学习" scheme="https://wangyun137.github.io/tags/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE%E5%AD%A6%E4%B9%A0/"/>
+    
+      <category term="Volley" scheme="https://wangyun137.github.io/tags/Volley/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>开源项目学习之Volley(一)</title>
+    <link href="https://wangyun137.github.io/2017/07/24/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE%E5%AD%A6%E4%B9%A0%E4%B9%8BVolley-%E4%B8%80/"/>
+    <id>https://wangyun137.github.io/2017/07/24/开源项目学习之Volley-一/</id>
+    <published>2017-07-24T07:04:37.000Z</published>
+    <updated>2017-07-24T07:06:18.000Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;一-重要的类&quot;&gt;&lt;a href=&quot;#一-重要的类&quot; class=&quot;headerlink&quot; title=&quot;一. 重要的类&quot;&gt;&lt;/a&gt;一. 重要的类&lt;/h2&gt;&lt;h3 id=&quot;1-1-RequestQueue&quot;&gt;&lt;a href=&quot;#1-1-RequestQueue&quot; c
+    
+    </summary>
+    
+      <category term="Volley" scheme="https://wangyun137.github.io/categories/Volley/"/>
+    
+    
+      <category term="开源项目学习" scheme="https://wangyun137.github.io/tags/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE%E5%AD%A6%E4%B9%A0/"/>
+    
+      <category term="Volley" scheme="https://wangyun137.github.io/tags/Volley/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>ART Runtime创建(三)--Heap的创建</title>
+    <link href="https://wangyun137.github.io/2017/07/24/ART-Runtime%E5%88%9B%E5%BB%BA-%E4%B8%89-Heap%E7%9A%84%E5%88%9B%E5%BB%BA/"/>
+    <id>https://wangyun137.github.io/2017/07/24/ART-Runtime创建-三-Heap的创建/</id>
+    <published>2017-07-24T07:00:13.000Z</published>
+    <updated>2017-07-24T07:03:18.000Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;code&gt;Heap&lt;/code&gt;的创建位于&lt;code&gt;/art/runtime/runtime.cc&lt;/code&gt;的&lt;code&gt;Runtime::Init&lt;/code&gt;方法中&lt;br&gt;&lt;figure class=&quot;highlight cpp&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td 
+    
+    </summary>
+    
+      <category term="ART" scheme="https://wangyun137.github.io/categories/ART/"/>
+    
+    
+      <category term="ART" scheme="https://wangyun137.github.io/tags/ART/"/>
+    
+      <category term="源码分析" scheme="https://wangyun137.github.io/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>ART Runtime 创建(二)--启动参数</title>
+    <link href="https://wangyun137.github.io/2017/07/24/ART-Runtime-%E5%88%9B%E5%BB%BA-%E4%BA%8C-%E5%90%AF%E5%8A%A8%E5%8F%82%E6%95%B0/"/>
+    <id>https://wangyun137.github.io/2017/07/24/ART-Runtime-创建-二-启动参数/</id>
+    <published>2017-07-24T06:53:34.000Z</published>
+    <updated>2017-07-24T06:59:05.000Z</updated>
+    
+    <summary type="html">
+    
+      &lt;blockquote&gt;
+&lt;p&gt;Android 7.0 aosp_shamu-userdebug&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;h2 id=&quot;一-启动时获取的参数&quot;&gt;&lt;a href=&quot;#一-启动时获取的参数&quot; class=&quot;headerlink&quot; title=&quot;一. 启动
+    
+    </summary>
+    
+      <category term="ART" scheme="https://wangyun137.github.io/categories/ART/"/>
+    
+    
+      <category term="ART" scheme="https://wangyun137.github.io/tags/ART/"/>
+    
+      <category term="源码分析" scheme="https://wangyun137.github.io/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>ART Runtime创建(一)--整体流程</title>
+    <link href="https://wangyun137.github.io/2017/07/24/ART-Runtime%E5%88%9B%E5%BB%BA-%E4%B8%80-%E6%95%B4%E4%BD%93%E6%B5%81%E7%A8%8B/"/>
+    <id>https://wangyun137.github.io/2017/07/24/ART-Runtime创建-一-整体流程/</id>
+    <published>2017-07-24T06:44:11.000Z</published>
+    <updated>2017-07-24T06:52:24.000Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h1 id=&quot;一-Zygote启动过程中的创建虚拟机过程&quot;&gt;&lt;a href=&quot;#一-Zygote启动过程中的创建虚拟机过程&quot; class=&quot;headerlink&quot; title=&quot;一. Zygote启动过程中的创建虚拟机过程&quot;&gt;&lt;/a&gt;一. Zygote启动过程中的创建虚拟机过程
+    
+    </summary>
+    
+      <category term="ART" scheme="https://wangyun137.github.io/categories/ART/"/>
+    
+    
+      <category term="ART" scheme="https://wangyun137.github.io/tags/ART/"/>
+    
+      <category term="源码分析" scheme="https://wangyun137.github.io/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>ART的反射调用(二)--创建对象实例</title>
+    <link href="https://wangyun137.github.io/2017/07/24/ART%E7%9A%84%E5%8F%8D%E5%B0%84%E8%B0%83%E7%94%A8-%E4%BA%8C-%E5%88%9B%E5%BB%BA%E5%AF%B9%E8%B1%A1%E5%AE%9E%E4%BE%8B/"/>
+    <id>https://wangyun137.github.io/2017/07/24/ART的反射调用-二-创建对象实例/</id>
+    <published>2017-07-24T06:38:58.000Z</published>
+    <updated>2017-07-24T06:59:50.000Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;通过反射创建实例的用法是：&lt;br&gt;&lt;figure class=&quot;highlight java&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div
+    
+    </summary>
+    
+      <category term="ART" scheme="https://wangyun137.github.io/categories/ART/"/>
+    
+    
+      <category term="ART" scheme="https://wangyun137.github.io/tags/ART/"/>
+    
+      <category term="源码分析" scheme="https://wangyun137.github.io/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>ART的反射调用(一)-获取Class对象</title>
+    <link href="https://wangyun137.github.io/2017/07/24/ART%E7%9A%84%E5%8F%8D%E5%B0%84%E8%B0%83%E7%94%A8-%E4%B8%80-%E8%8E%B7%E5%8F%96Class%E5%AF%B9%E8%B1%A1/"/>
+    <id>https://wangyun137.github.io/2017/07/24/ART的反射调用-一-获取Class对象/</id>
+    <published>2017-07-24T06:24:25.000Z</published>
+    <updated>2017-07-24T06:31:42.000Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;典型的反射调用形式为：&lt;br&gt;&lt;figure class=&quot;highlight java&quot;&gt;&lt;table&gt;&lt;tr&gt;&lt;td class=&quot;gutter&quot;&gt;&lt;pre&gt;&lt;div class=&quot;line&quot;&gt;1&lt;/div&gt;&lt;div class=&quot;line&quot;&gt;2&lt;/div&gt;&lt;div c
+    
+    </summary>
+    
+      <category term="ART" scheme="https://wangyun137.github.io/categories/ART/"/>
+    
+    
+      <category term="ART" scheme="https://wangyun137.github.io/tags/ART/"/>
+    
+      <category term="源码分析" scheme="https://wangyun137.github.io/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>ART加载类</title>
+    <link href="https://wangyun137.github.io/2017/07/24/ART%E5%8A%A0%E8%BD%BD%E7%B1%BB/"/>
+    <id>https://wangyun137.github.io/2017/07/24/ART加载类/</id>
+    <published>2017-07-24T06:19:26.000Z</published>
+    <updated>2017-07-24T06:22:48.000Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;一．创建Activity对象&quot;&gt;&lt;a href=&quot;#一．创建Activity对象&quot; class=&quot;headerlink&quot; title=&quot;一．创建Activity对象&quot;&gt;&lt;/a&gt;一．创建Activity对象&lt;/h2&gt;&lt;p&gt;ART在加载完dex文件后，会通过&lt;code
+    
+    </summary>
+    
+      <category term="ART" scheme="https://wangyun137.github.io/categories/ART/"/>
+    
+    
+      <category term="ART" scheme="https://wangyun137.github.io/tags/ART/"/>
+    
+      <category term="源码分析" scheme="https://wangyun137.github.io/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>ART加载dex文件</title>
+    <link href="https://wangyun137.github.io/2017/07/24/ART%E5%8A%A0%E8%BD%BDdex%E6%96%87%E4%BB%B6/"/>
+    <id>https://wangyun137.github.io/2017/07/24/ART加载dex文件/</id>
+    <published>2017-07-24T05:53:05.000Z</published>
+    <updated>2017-07-24T06:18:08.000Z</updated>
+    
+    <summary type="html">
+    
+      &lt;h2 id=&quot;一．Java层调用链&quot;&gt;&lt;a href=&quot;#一．Java层调用链&quot; class=&quot;headerlink&quot; title=&quot;一．Java层调用链&quot;&gt;&lt;/a&gt;一．Java层调用链&lt;/h2&gt;&lt;h3 id=&quot;1-1-ActivityThread-performLaunchA
+    
+    </summary>
+    
+      <category term="ART" scheme="https://wangyun137.github.io/categories/ART/"/>
+    
+    
+      <category term="ART" scheme="https://wangyun137.github.io/tags/ART/"/>
+    
+      <category term="源码分析" scheme="https://wangyun137.github.io/tags/%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+</feed>
