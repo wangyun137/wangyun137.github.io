@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://wangyun137.github.io/"/>
-  <updated>2017-07-24T07:25:37.000Z</updated>
+  <updated>2017-07-24T07:42:41.000Z</updated>
   <id>https://wangyun137.github.io/</id>
   
   <author>
@@ -14,6 +14,28 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>Retrofit学习(三)</title>
+    <link href="https://wangyun137.github.io/2017/07/24/Retrofit%E5%AD%A6%E4%B9%A0-%E4%B8%89/"/>
+    <id>https://wangyun137.github.io/2017/07/24/Retrofit学习-三/</id>
+    <published>2017-07-24T07:41:55.000Z</published>
+    <updated>2017-07-24T07:42:41.000Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;目前比较流行的使用Retrofit的方法是&lt;code&gt;Retrofit + RxJava + Gson&lt;/code&gt;, 之前的&lt;a href=&quot;http://www.jianshu.com/p/e2a9871036b9&quot; target=&quot;_blank&quot; rel=&quot;exter
+    
+    </summary>
+    
+      <category term="Retrofit" scheme="https://wangyun137.github.io/categories/Retrofit/"/>
+    
+    
+      <category term="Retrofit" scheme="https://wangyun137.github.io/tags/Retrofit/"/>
+    
+      <category term="开源项目学习" scheme="https://wangyun137.github.io/tags/%E5%BC%80%E6%BA%90%E9%A1%B9%E7%9B%AE%E5%AD%A6%E4%B9%A0/"/>
+    
+  </entry>
   
   <entry>
     <title>Retrofit学习(二)</title>
