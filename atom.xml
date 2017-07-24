@@ -5,7 +5,7 @@
   <link href="/atom.xml" rel="self"/>
   
   <link href="https://wangyun137.github.io/"/>
-  <updated>2017-07-24T07:42:41.000Z</updated>
+  <updated>2017-07-24T07:55:57.000Z</updated>
   <id>https://wangyun137.github.io/</id>
   
   <author>
@@ -14,6 +14,150 @@
   </author>
   
   <generator uri="http://hexo.io/">Hexo</generator>
+  
+  <entry>
+    <title>ArrayMap源码分析</title>
+    <link href="https://wangyun137.github.io/2017/07/24/ArrayMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    <id>https://wangyun137.github.io/2017/07/24/ArrayMap源码分析/</id>
+    <published>2017-07-24T07:54:42.000Z</published>
+    <updated>2017-07-24T07:55:57.000Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;code&gt;ArrayMap&lt;/code&gt;是Android提供的一种替换&lt;code&gt;HashMap&lt;/code&gt;的数据结构，官方对它的介绍说ArrayMap是一种更有效率的Map结构，其原理是内部维护了两个数组，一个数组用来保存每一个key值得hash值，另一个数组用来保存
+    
+    </summary>
+    
+      <category term="Java集合类源码分析" scheme="https://wangyun137.github.io/categories/Java%E9%9B%86%E5%90%88%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="ArrayMap" scheme="https://wangyun137.github.io/tags/ArrayMap/"/>
+    
+      <category term="Java集合类源码分析" scheme="https://wangyun137.github.io/tags/Java%E9%9B%86%E5%90%88%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>SparseArray源码分析</title>
+    <link href="https://wangyun137.github.io/2017/07/24/SparseArray%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    <id>https://wangyun137.github.io/2017/07/24/SparseArray源码分析/</id>
+    <published>2017-07-24T07:53:18.000Z</published>
+    <updated>2017-07-24T07:54:21.000Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;code&gt;SparseArray&lt;/code&gt;是Android官方推荐的一种高效率的&lt;code&gt;Map&lt;/code&gt;类工具，如果key值是int值，最好使用&lt;code&gt;SparseArray&lt;/code&gt;而不是&lt;code&gt;HashMap&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;&lt;co
+    
+    </summary>
+    
+      <category term="Java集合类源码分析" scheme="https://wangyun137.github.io/categories/Java%E9%9B%86%E5%90%88%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="Java集合类源码分析" scheme="https://wangyun137.github.io/tags/Java%E9%9B%86%E5%90%88%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+      <category term="SparseArray" scheme="https://wangyun137.github.io/tags/SparseArray/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>HashSet源码分析</title>
+    <link href="https://wangyun137.github.io/2017/07/24/HashSet%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    <id>https://wangyun137.github.io/2017/07/24/HashSet源码分析/</id>
+    <published>2017-07-24T07:51:52.000Z</published>
+    <updated>2017-07-24T07:53:02.000Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;&lt;code&gt;Set&lt;/code&gt;集合的最主要特性就是没有重复元素，&lt;code&gt;HashSet&lt;/code&gt;是Set的一个字类，其内部基于HashMap实现&lt;/p&gt;
+&lt;h1 id=&quot;1-成员变量&quot;&gt;&lt;a href=&quot;#1-成员变量&quot; class=&quot;headerlink&quot; ti
+    
+    </summary>
+    
+      <category term="Java集合类源码分析" scheme="https://wangyun137.github.io/categories/Java%E9%9B%86%E5%90%88%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="Java集合类源码分析" scheme="https://wangyun137.github.io/tags/Java%E9%9B%86%E5%90%88%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+      <category term="HashSet" scheme="https://wangyun137.github.io/tags/HashSet/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>HashTable源码分析</title>
+    <link href="https://wangyun137.github.io/2017/07/24/HashTable%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    <id>https://wangyun137.github.io/2017/07/24/HashTable源码分析/</id>
+    <published>2017-07-24T07:49:35.000Z</published>
+    <updated>2017-07-24T07:50:56.000Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;HashTable跟HashMap在功能上来基本类似，其解决hash冲突的方法也是基于&lt;strong&gt;链地址法&lt;/strong&gt;， 唯一的不同点在HashTable的方法是同步的，多线程操作时，在外部无需使用同步机制&lt;/p&gt;
+&lt;h1 id=&quot;源码解读&quot;&gt;&lt;a href=&quot;#
+    
+    </summary>
+    
+      <category term="Java集合类源码分析" scheme="https://wangyun137.github.io/categories/Java%E9%9B%86%E5%90%88%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="Java集合类源码分析" scheme="https://wangyun137.github.io/tags/Java%E9%9B%86%E5%90%88%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+      <category term="HashTable" scheme="https://wangyun137.github.io/tags/HashTable/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>LinkedHashMap源码分析</title>
+    <link href="https://wangyun137.github.io/2017/07/24/LinkedHashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    <id>https://wangyun137.github.io/2017/07/24/LinkedHashMap源码分析/</id>
+    <published>2017-07-24T07:48:11.000Z</published>
+    <updated>2017-07-24T07:49:12.000Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;LinkedHashMap具有以下特性&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;LinkedHashMap继承自HashMap, 它可以保证迭代的顺序跟插入的顺序是一致的&lt;/li&gt;
+&lt;li&gt;不是同步的，如果多个线程同时访问，需要从外部保持同步&lt;/li&gt;
+&lt;li&gt;LinkedHashMap
+    
+    </summary>
+    
+      <category term="Java集合类源码分析" scheme="https://wangyun137.github.io/categories/Java%E9%9B%86%E5%90%88%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="Java集合类源码分析" scheme="https://wangyun137.github.io/tags/Java%E9%9B%86%E5%90%88%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+      <category term="LinkedHashMap" scheme="https://wangyun137.github.io/tags/LinkedHashMap/"/>
+    
+  </entry>
+  
+  <entry>
+    <title>HashMap源码分析</title>
+    <link href="https://wangyun137.github.io/2017/07/24/HashMap%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    <id>https://wangyun137.github.io/2017/07/24/HashMap源码分析/</id>
+    <published>2017-07-24T07:44:46.000Z</published>
+    <updated>2017-07-24T07:46:39.000Z</updated>
+    
+    <summary type="html">
+    
+      &lt;p&gt;HashMap具有以下特点：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;Hashmap是基于Map的非同步实现，如果多线程修改，必须在外部保持同步&lt;/li&gt;
+&lt;li&gt;允许使用null值和null键&lt;/li&gt;
+&lt;li&gt;不保证映射顺序&lt;/li&gt;
+&lt;li&gt;Hashmap实际上是一个链表散列的数据
+    
+    </summary>
+    
+      <category term="Java集合类源码分析" scheme="https://wangyun137.github.io/categories/Java%E9%9B%86%E5%90%88%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+    
+      <category term="Java集合类源码分析" scheme="https://wangyun137.github.io/tags/Java%E9%9B%86%E5%90%88%E7%B1%BB%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90/"/>
+    
+      <category term="HashMap" scheme="https://wangyun137.github.io/tags/HashMap/"/>
+    
+  </entry>
   
   <entry>
     <title>Retrofit学习(三)</title>

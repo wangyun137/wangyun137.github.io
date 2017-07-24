@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next pisces use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.1" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Java集合类源码分析,SparseArray," />
+
+
+
+
+
+  <link rel="alternate" href="/atom.xml" title="迷途小书童" type="application/atom+xml" />
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.1" />
+
+
+
+
+
+
+<meta name="description" content="SparseArray是Android官方推荐的一种高效率的Map类工具，如果key值是int值，最好使用SparseArray而不是HashMap SparseArray内部是使用基本类型int型数组来存放key值，这就意味着其内部省去了hash操作，只要比较int值是否相同即可判断是否是同一个对象，而HashMap虽然也可以用int类型来当key值，但是首先就会有一个自动装箱的过程，将int类">
+<meta name="keywords" content="Java集合类源码分析,SparseArray">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SparseArray源码分析">
+<meta property="og:url" content="https://wangyun137.github.io/2017/07/24/SparseArray源码分析/index.html">
+<meta property="og:site_name" content="迷途小书童">
+<meta property="og:description" content="SparseArray是Android官方推荐的一种高效率的Map类工具，如果key值是int值，最好使用SparseArray而不是HashMap SparseArray内部是使用基本类型int型数组来存放key值，这就意味着其内部省去了hash操作，只要比较int值是否相同即可判断是否是同一个对象，而HashMap虽然也可以用int类型来当key值，但是首先就会有一个自动装箱的过程，将int类">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:updated_time" content="2017-07-24T07:54:21.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SparseArray源码分析">
+<meta name="twitter:description" content="SparseArray是Android官方推荐的一种高效率的Map类工具，如果key值是int值，最好使用SparseArray而不是HashMap SparseArray内部是使用基本类型int型数组来存放key值，这就意味着其内部省去了hash操作，只要比较int值是否相同即可判断是否是同一个对象，而HashMap虽然也可以用int类型来当key值，但是首先就会有一个自动装箱的过程，将int类">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"post","offset":12,"offset_float":0,"b2t":false,"scrollpercent":false,"onmobile":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://wangyun137.github.io/2017/07/24/SparseArray源码分析/"/>
+
+
+
+
+
+  <title>SparseArray源码分析 | 迷途小书童</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">迷途小书童</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle">遇见一个人可能只要一秒，喜欢一个人可能需要一天，忘记一个人却需要一辈子</p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-/"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-commonweal">
+          <a href="/404.html" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-heartbeat"></i> <br />
+            
+            公益404
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="https://wangyun137.github.io/2017/07/24/SparseArray源码分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="王小宝">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="/img/avatar.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="迷途小书童">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">SparseArray源码分析</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-07-24T15:53:18+08:00">
+                2017-07-24
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Java集合类源码分析/" itemprop="url" rel="index">
+                    <span itemprop="name">Java集合类源码分析</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><code>SparseArray</code>是Android官方推荐的一种高效率的<code>Map</code>类工具，如果key值是int值，最好使用<code>SparseArray</code>而不是<code>HashMap</code></p>
+<p><code>SparseArray</code>内部是使用基本类型<code>int</code>型数组来存放key值，这就意味着其内部省去了hash操作，只要比较int值是否相同即可判断是否是同一个对象，而<code>HashMap</code>虽然也可以用int类型来当key值，但是首先就会有一个自动装箱的过程，将<code>int</code>类型装箱成为<code>Integer</code>，先不论内部实现的效率，单就装箱这一点，其效率必然就会降低很多，再加上其内部会有hash等操作，效率上自然比不上SparseArray， 不过虽然<code>SparseArray</code>效率要高，但是<code>SparseArray</code>只能用于key是int的情形</p>
+<p>下面就来看一下<code>SparseArray</code>的具体实现</p>
+<h1 id="成员变量"><a href="#成员变量" class="headerlink" title="成员变量"></a>成员变量</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SparseArray</span>&lt;<span class="title">E</span>&gt; <span class="keyword">implements</span> <span class="title">Cloneable</span> </span>&#123;</div><div class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> Object DELETED = <span class="keyword">new</span> Object();</div><div class="line">    <span class="keyword">private</span> <span class="keyword">boolean</span> mGarbage = <span class="keyword">false</span>;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">int</span>[] mKeys;</div><div class="line">    <span class="keyword">private</span> Object[] mValues;</div><div class="line">    <span class="keyword">private</span> <span class="keyword">int</span> mSize;</div><div class="line">    </div><div class="line">    ...</div><div class="line">    </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>可以看到<code>SparseArray</code>内部是用两个数组分别存放key和value，其中存放key的数组是int数组，这也省去了装箱操作，提升了效率</li>
+<li><code>DELETED</code>对象，从名字就可以看出其作用，它是占位对象，表示某索引位置的对象已被删除，用<code>DELETED</code>来占位, 方便后续的gc操作</li>
+</ol>
+<h1 id="构造函数"><a href="#构造函数" class="headerlink" title="构造函数"></a>构造函数</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">SparseArray</span><span class="params">()</span> </span>&#123;</div><div class="line">   <span class="keyword">this</span>(<span class="number">10</span>);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">SparseArray</span><span class="params">(<span class="keyword">int</span> initialCapacity)</span> </span>&#123;</div><div class="line">    <span class="keyword">if</span> (initialCapacity == <span class="number">0</span>) &#123;</div><div class="line">    	 <span class="comment">//new int[0]</span></div><div class="line">         mKeys = EmptyArray.INT;</div><div class="line">         <span class="comment">//new Object[0]</span></div><div class="line">         mValues = EmptyArray.OBJECT;</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">         mValues = ArrayUtils.newUnpaddedObjectArray(initialCapacity);</div><div class="line">         mKeys = <span class="keyword">new</span> <span class="keyword">int</span>[mValues.length];</div><div class="line">    &#125;</div><div class="line">     mSize = <span class="number">0</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>构造函数比较简单，主要就是根据初始容量初始化两个数组</p>
+<h1 id="方法"><a href="#方法" class="headerlink" title="方法"></a>方法</h1><h1 id="1-put"><a href="#1-put" class="headerlink" title="1. put"></a>1. put</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">put</span><span class="params">(<span class="keyword">int</span> key, E value)</span> </span>&#123;</div><div class="line">       <span class="comment">//通过二分搜索获取索引， i&gt;=0代表key值已存在， i&lt;0代表key值不存在，i取反下一个元素的插入位置, 【1.1】</span></div><div class="line">       <span class="keyword">int</span> i = ContainerHelpers.binarySearch(mKeys, mSize, key);</div><div class="line"></div><div class="line">       <span class="keyword">if</span> (i &gt;= <span class="number">0</span>) &#123;</div><div class="line">           <span class="comment">//直接放入value</span></div><div class="line">           mValues[i] = value;</div><div class="line">       &#125; <span class="keyword">else</span> &#123;</div><div class="line">           <span class="comment">//取反，获得对应的正数</span></div><div class="line">           i = ~i;</div><div class="line"></div><div class="line">           <span class="keyword">if</span> (i &lt; mSize &amp;&amp; mValues[i] == DELETED) &#123;</div><div class="line">               <span class="comment">//如果索引处的value是DELETED, 直接替换为新的value即可</span></div><div class="line">               mKeys[i] = key;</div><div class="line">               mValues[i] = value;</div><div class="line">               <span class="keyword">return</span>;</div><div class="line">           &#125;</div><div class="line"></div><div class="line">           <span class="keyword">if</span> (mGarbage &amp;&amp; mSize &gt;= mKeys.length) &#123;</div><div class="line">               <span class="comment">//如果容量不足，且有元素被删除, 进行gc操作</span></div><div class="line">               <span class="comment">//此时数组中可能会有不连续的DELETED值存在，这种值是无效的，还占据空间，gc()的意义在于将所有</span></div><div class="line">               <span class="comment">//有效的值按顺序连接在一起，替换所有DELETED值，节省空间, 【1.2】</span></div><div class="line">               gc();</div><div class="line"></div><div class="line">               <span class="comment">//重新取得索引值</span></div><div class="line">               i = ~ContainerHelpers.binarySearch(mKeys, mSize, key);</div><div class="line">           &#125;</div><div class="line"></div><div class="line">           <span class="comment">//如果容量够，直接插入，如果容量不够，先扩容，再插入, 【1.3】</span></div><div class="line">           mKeys = GrowingArrayUtils.insert(mKeys, mSize, i, key);</div><div class="line">           mValues = GrowingArrayUtils.insert(mValues, mSize, i, value);</div><div class="line">           mSize++;</div><div class="line">       &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>首先通过二分搜索获取索引值, 返回的i如果是正数，代表key值已经存在， 如果是负数，代表key值不存在，对i取反后，就是即将要插入的索引位置</li>
+<li>如果key值已经存在，直接覆盖旧的value</li>
+<li>如果不存在，对i取反，获得正数的索引位置，如果索引处的值是被删除过的即<code>values[i] = DELETED</code>，直接替换为新的value后返回; 如果有元素被删除过<code>mGarbage = true</code>，且keys数组容量不足，进行gc操作，如果values数组中有<code>DELETED</code>元素存在，将有效地值前移替换这些废弃的值，从而节省空间, 进行完gc后，重新获取索引值</li>
+<li>进行插入操作，如果容量够，直接插入，如果容量不够，先扩容，再插入</li>
+</ol>
+<blockquote>
+<p>从使用二分搜索法，我们其实就可以知道， <code>SparseArray</code>存放的数据是按照key值得大小有序排列(升序or降序)，查看过<code>ContainerHelpers.binarySearch</code>后就可以知道，是按升序进行排列</p>
+</blockquote>
+<h2 id="1-1-ContainerHelpers-binarySearch"><a href="#1-1-ContainerHelpers-binarySearch" class="headerlink" title="1.1 ContainerHelpers.binarySearch"></a>1.1 ContainerHelpers.binarySearch</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">static</span> <span class="keyword">int</span> <span class="title">binarySearch</span><span class="params">(<span class="keyword">int</span>[] array, <span class="keyword">int</span> size, <span class="keyword">int</span> value)</span> </span>&#123;</div><div class="line">       <span class="keyword">int</span> lo = <span class="number">0</span>;</div><div class="line">       <span class="keyword">int</span> hi = size - <span class="number">1</span>;</div><div class="line"></div><div class="line">       <span class="keyword">while</span> (lo &lt;= hi) &#123;</div><div class="line">           <span class="keyword">final</span> <span class="keyword">int</span> mid = (lo + hi) &gt;&gt;&gt; <span class="number">1</span>;<span class="comment">//无符号右移一位，等价于除以2</span></div><div class="line">           <span class="keyword">final</span> <span class="keyword">int</span> midVal = array[mid];</div><div class="line"></div><div class="line">           <span class="keyword">if</span> (midVal &lt; value) &#123;</div><div class="line">               lo = mid + <span class="number">1</span>;</div><div class="line">           &#125; <span class="keyword">else</span> <span class="keyword">if</span> (midVal &gt; value) &#123;</div><div class="line">               hi = mid - <span class="number">1</span>;</div><div class="line">           &#125; <span class="keyword">else</span> &#123;</div><div class="line">               <span class="keyword">return</span> mid;  <span class="comment">// value found</span></div><div class="line">           &#125;</div><div class="line">       &#125;</div><div class="line">       <span class="keyword">return</span> ~lo;  <span class="comment">// value not present</span></div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<p><code>&gt;&gt;&gt;1</code>无符号右移一位等价于除以2但又比除法操作更高效，如果要查找的值已经存在，则返回相应的索引值，如果不存在，则返回一个负数，这个负数取反后，就是被查找的元素将要被插入的位置</p>
+<h2 id="1-2-gc"><a href="#1-2-gc" class="headerlink" title="1.2 gc"></a>1.2 gc</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">gc</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="keyword">int</span> n = mSize;</div><div class="line">    <span class="keyword">int</span> o = <span class="number">0</span>;</div><div class="line">    <span class="keyword">int</span>[] keys = mKeys;</div><div class="line">    Object[] values = mValues;</div><div class="line"></div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; n; i++) &#123;</div><div class="line">        Object val = values[i];</div><div class="line"></div><div class="line">        <span class="keyword">if</span> (val != DELETED) &#123;</div><div class="line">            <span class="keyword">if</span> (i != o) &#123;</div><div class="line">                keys[o] = keys[i];</div><div class="line">                values[o] = val;</div><div class="line">                values[i] = <span class="keyword">null</span>;</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            o++;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    mGarbage = <span class="keyword">false</span>;</div><div class="line">    mSize = o;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><code>gc</code>函数的主要功能就是遍历<code>values</code>数组，用有效的value前移替换<code>DELETED</code>无效的值，从而使有效的值连续排列在一起，节省空间</p>
+<h2 id="1-3-GrowingArrayUtils-insert"><a href="#1-3-GrowingArrayUtils-insert" class="headerlink" title="1.3 GrowingArrayUtils.insert"></a>1.3 GrowingArrayUtils.insert</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span>[] insert(<span class="keyword">int</span>[] array, <span class="keyword">int</span> currentSize, <span class="keyword">int</span> index, <span class="keyword">int</span> element) &#123;</div><div class="line">       <span class="keyword">assert</span> currentSize &lt;= array.length;</div><div class="line">	<span class="comment">//容量够，直接插入</span></div><div class="line">       <span class="keyword">if</span> (currentSize + <span class="number">1</span> &lt;= array.length) &#123;</div><div class="line">           System.arraycopy(array, index, array, index + <span class="number">1</span>, currentSize - index);</div><div class="line">           array[index] = element;</div><div class="line">           <span class="keyword">return</span> array;</div><div class="line">       &#125;</div><div class="line">	<span class="comment">//容量不够的话，先扩容，如果currentSize &lt;= 4, 扩容成8, 如果 &gt; 4，则扩容至原先容量的2倍</span></div><div class="line">       <span class="keyword">int</span>[] newArray = ArrayUtils.newUnpaddedIntArray(growSize(currentSize));</div><div class="line">       System.arraycopy(array, <span class="number">0</span>, newArray, <span class="number">0</span>, index);</div><div class="line">       newArray[index] = element;</div><div class="line">       System.arraycopy(array, index, newArray, index + <span class="number">1</span>, array.length - index);</div><div class="line">       <span class="keyword">return</span> newArray;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>如果容量够，则直接插入</li>
+<li>容量不够的话，先扩容，扩容的size是由<code>growSize</code>函数决定，其原理是如果当前size小于等于4,则固定扩容后的容量是8,如果大于4,则扩容原先容量的两倍，之后拷贝原有数据至新的数组中，最后再根据索引值插入数据</li>
+</ol>
+<h1 id="2-get"><a href="#2-get" class="headerlink" title="2. get"></a>2. get</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> E <span class="title">get</span><span class="params">(<span class="keyword">int</span> key)</span> </span>&#123;</div><div class="line">       <span class="keyword">return</span> get(key, <span class="keyword">null</span>);</div><div class="line">   &#125;</div><div class="line">   </div><div class="line">   <span class="function"><span class="keyword">public</span> E <span class="title">get</span><span class="params">(<span class="keyword">int</span> key, E valueIfKeyNotFound)</span> </span>&#123;</div><div class="line">       <span class="comment">//根据key获得索引值</span></div><div class="line">       <span class="keyword">int</span> i = ContainerHelpers.binarySearch(mKeys, mSize, key);</div><div class="line"></div><div class="line">       <span class="comment">//i&lt;0代表没找到， value = DELETED代表这个值已作废，也表明没找到</span></div><div class="line">       <span class="keyword">if</span> (i &lt; <span class="number">0</span> || mValues[i] == DELETED) &#123;</div><div class="line">           <span class="keyword">return</span> valueIfKeyNotFound;</div><div class="line">       &#125; <span class="keyword">else</span> &#123;</div><div class="line">           <span class="keyword">return</span> (E) mValues[i];</div><div class="line">       &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<p>可以看到，<code>get</code>操作非常简单，首先获得索引值，之后直接从values数组中获取相应的值，不论是获取索引值还是获取value, 都是直接操作数组，所以效率非常高</p>
+<h1 id="3-delete"><a href="#3-delete" class="headerlink" title="3. delete"></a>3. delete</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">delete</span><span class="params">(<span class="keyword">int</span> key)</span> </span>&#123;</div><div class="line">       <span class="comment">//获取索引值</span></div><div class="line">       <span class="keyword">int</span> i = ContainerHelpers.binarySearch(mKeys, mSize, key);</div><div class="line">       <span class="comment">//将对应索引位置的value设为DELETED</span></div><div class="line">       <span class="keyword">if</span> (i &gt;= <span class="number">0</span>) &#123;</div><div class="line">           <span class="keyword">if</span> (mValues[i] != DELETED) &#123;</div><div class="line">               mValues[i] = DELETED;</div><div class="line">               mGarbage = <span class="keyword">true</span>;</div><div class="line">           &#125;</div><div class="line">       &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<p>和<code>get</code>的操作类似，只不过是获取索引值后，将values数组中对应处的值覆盖为<code>DELETED</code></p>
+<h1 id="性能分析"><a href="#性能分析" class="headerlink" title="性能分析"></a>性能分析</h1><p><code>SparseArray</code>内部使用了二分搜索法，如果在数据量比较小的情况下，其查询效率应该是比较高的，但是随着数据量的增大，二分搜索的效率也会呈现性下降，而<code>HashMap</code>内部在获取对应的索引值时，使用的是先计算hash值再通过<code>hash &amp; (length - 1)</code>的形式获取索引值，当数据量较大时这种方式就比较具有优势，加上HashMap内部对hash算法进行了优化，尽可能的减少了hash碰撞，所以如果数据量很大时，<code>HashMap</code>的查询效率并不会比<code>SparseArray</code>差，甚至可能会优于<code>SparseArray</code>, 但是<code>HashMap</code>如果键值是整型时，不可避免的会进行装箱操作，这一点上<code>SparseArray</code>肯定优于<code>HashMap</code>, 综合来看，在一般的使用场景中，很少会用到非常大的数据量，如果键值是整型数据，应当首选<code>SparseArray</code></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+  <div style="padding: 10px 0; margin: 20px auto; width: 90%; text-align: center;">
+    <div>坚持原创技术分享，您的支持将鼓励我继续创作！</div>
+    <button id="rewardButton" disable="enable" onclick="var qr = document.getElementById('QR'); if (qr.style.display === 'none') {qr.style.display='block';} else {qr.style.display='none'}">
+      <span>赏</span>
+    </button>
+    <div id="QR" style="display: none;">
+      
+        <div id="wechat" style="display: inline-block">
+          <img id="wechat_qr" src="/images/wechat.jpg" alt="王小宝 WeChat Pay"/>
+          <p>微信打赏</p>
+        </div>
+      
+      
+        <div id="alipay" style="display: inline-block">
+          <img id="alipay_qr" src="/images/alipay.jpg" alt="王小宝 Alipay"/>
+          <p>支付宝打赏</p>
+        </div>
+      
+    </div>
+  </div>
+
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java集合类源码分析/" rel="tag"># Java集合类源码分析</a>
+          
+            <a href="/tags/SparseArray/" rel="tag"># SparseArray</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/07/24/HashSet源码分析/" rel="next" title="HashSet源码分析">
+                <i class="fa fa-chevron-left"></i> HashSet源码分析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/07/24/ArrayMap源码分析/" rel="prev" title="ArrayMap源码分析">
+                ArrayMap源码分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="/img/avatar.jpg"
+               alt="王小宝" />
+          <p class="site-author-name" itemprop="name">王小宝</p>
+           
+              <p class="site-description motion-element" itemprop="description">90后迷途小书童</p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives/">
+                <span class="site-state-item-count">19</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">5</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+          <div class="feed-link motion-element">
+            <a href="/atom.xml" rel="alternate">
+              <i class="fa fa-rss"></i>
+              RSS
+            </a>
+          </div>
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/wangyun137" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://www.jianshu.com/u/73df471e39bb" target="_blank" title="简书">
+                  
+                    <i class="fa fa-fw fa-globe"></i>
+                  
+                  简书
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#成员变量"><span class="nav-number">1.</span> <span class="nav-text">成员变量</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#构造函数"><span class="nav-number">2.</span> <span class="nav-text">构造函数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#方法"><span class="nav-number">3.</span> <span class="nav-text">方法</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#1-put"><span class="nav-number">4.</span> <span class="nav-text">1. put</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-1-ContainerHelpers-binarySearch"><span class="nav-number">4.1.</span> <span class="nav-text">1.1 ContainerHelpers.binarySearch</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-2-gc"><span class="nav-number">4.2.</span> <span class="nav-text">1.2 gc</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1-3-GrowingArrayUtils-insert"><span class="nav-number">4.3.</span> <span class="nav-text">1.3 GrowingArrayUtils.insert</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#2-get"><span class="nav-number">5.</span> <span class="nav-text">2. get</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#3-delete"><span class="nav-number">6.</span> <span class="nav-text">3. delete</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#性能分析"><span class="nav-number">7.</span> <span class="nav-text">性能分析</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">王小宝</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+
+        
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.1"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.1.1"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.1.1"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.1"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.1"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
